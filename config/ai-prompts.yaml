@@ -1,0 +1,276 @@
+# AI 配置文件 - 八字命理分析
+# 此文件定义了 AI 分析服务的 prompt 模板和模型参数
+
+# AI 服务提供商配置
+provider: aihubmix
+model: gpt-4o
+temperature: 0.7
+maxTokens: 2000
+
+# 各分析模块的 Prompt 模板
+prompts:
+  # 性格分析模块
+  personality: |
+    你是一位资深的命理分析师，精通中国传统八字命理学。请根据以下八字信息分析此人的性格特点：
+
+    【八字四柱】
+    - 年柱：{{yearPillar.heavenlyStem}}{{yearPillar.earthlyBranch}}（纳音：{{yearPillar.naYin}}，藏干：{{yearPillar.hiddenStems}}）
+    - 月柱：{{monthPillar.heavenlyStem}}{{monthPillar.earthlyBranch}}（纳音：{{monthPillar.naYin}}，藏干：{{monthPillar.hiddenStems}}）
+    - 日柱：{{dayPillar.heavenlyStem}}{{dayPillar.earthlyBranch}}（纳音：{{dayPillar.naYin}}，藏干：{{dayPillar.hiddenStems}}）
+    - 时柱：{{hourPillar.heavenlyStem}}{{hourPillar.earthlyBranch}}（纳音：{{hourPillar.naYin}}，藏干：{{hourPillar.hiddenStems}}）
+
+    【日主信息】
+    - 日主：{{dayMaster}}（{{dayMasterElement}}）
+    - 身强弱：{{dayMasterStrength}}
+    - 日主特征：{{dayMasterCharacteristics}}
+
+    【五行分布】
+    金：{{fiveElements.metal}} | 木：{{fiveElements.wood}} | 水：{{fiveElements.water}} | 火：{{fiveElements.fire}} | 土：{{fiveElements.earth}}
+    最强五行：{{fiveElements.strongest}} | 最弱五行：{{fiveElements.weakest}}
+    喜用神：{{favorableElements}} | 忌神：{{unfavorableElements}}
+
+    【十神关系】
+    {{tenGods}}
+
+    【命理要素】
+    - 生肖：{{shengXiao}}
+    - 胎元：{{taiYuan}}
+    - 命宫：{{mingGong}}
+    - 身宫：{{shenGong}}
+    - 旬空：{{xunKong}}
+
+    【神煞信息】
+    {{shenSha}}
+
+    请从以下方面详细分析此人的性格特点：
+    1. 核心性格特征（基于日主、五行强弱、十神配置）
+    2. 性格优势与长处
+    3. 需要注意和改进的方面
+    4. 与他人相处的特点
+    5. 根据喜用神给出性格调整建议
+
+    请用专业但易懂的语言进行分析，避免过于晦涩的术语。
+
+  # 事业运势模块
+  career: |
+    你是一位资深的命理分析师，精通中国传统八字命理学。请根据以下八字信息分析此人的事业运势：
+
+    【八字四柱】
+    - 年柱：{{yearPillar.heavenlyStem}}{{yearPillar.earthlyBranch}}（纳音：{{yearPillar.naYin}}）
+    - 月柱：{{monthPillar.heavenlyStem}}{{monthPillar.earthlyBranch}}（纳音：{{monthPillar.naYin}}）
+    - 日柱：{{dayPillar.heavenlyStem}}{{dayPillar.earthlyBranch}}（纳音：{{dayPillar.naYin}}）
+    - 时柱：{{hourPillar.heavenlyStem}}{{hourPillar.earthlyBranch}}（纳音：{{hourPillar.naYin}}）
+
+    【日主信息】
+    - 日主：{{dayMaster}}（{{dayMasterElement}}）
+    - 身强弱：{{dayMasterStrength}}
+
+    【五行分布】
+    金：{{fiveElements.metal}} | 木：{{fiveElements.wood}} | 水：{{fiveElements.water}} | 火：{{fiveElements.fire}} | 土：{{fiveElements.earth}}
+    喜用神：{{favorableElements}} | 忌神：{{unfavorableElements}}
+
+    【十神关系】
+    {{tenGods}}
+
+    【大运信息】
+    {{daYunDetailed}}
+
+    【当前流年】
+    {{currentLiuNian}}
+
+    【神煞信息】
+    {{shenSha}}
+
+    请从以下方面详细分析此人的事业运势：
+    1. 适合的职业方向和行业（根据五行喜用）
+    2. 事业发展的优势和机遇
+    3. 事业上需要注意的挑战
+    4. 根据大运流年分析事业发展的关键时期
+    5. 提升事业运的建议
+
+    请用专业但易懂的语言进行分析。
+
+  # 财运分析模块
+  wealth: |
+    你是一位资深的命理分析师，精通中国传统八字命理学。请根据以下八字信息分析此人的财运：
+
+    【八字四柱】
+    - 年柱：{{yearPillar.heavenlyStem}}{{yearPillar.earthlyBranch}}（纳音：{{yearPillar.naYin}}）
+    - 月柱：{{monthPillar.heavenlyStem}}{{monthPillar.earthlyBranch}}（纳音：{{monthPillar.naYin}}）
+    - 日柱：{{dayPillar.heavenlyStem}}{{dayPillar.earthlyBranch}}（纳音：{{dayPillar.naYin}}）
+    - 时柱：{{hourPillar.heavenlyStem}}{{hourPillar.earthlyBranch}}（纳音：{{hourPillar.naYin}}）
+
+    【日主信息】
+    - 日主：{{dayMaster}}（{{dayMasterElement}}）
+    - 身强弱：{{dayMasterStrength}}
+
+    【五行分布】
+    金：{{fiveElements.metal}} | 木：{{fiveElements.wood}} | 水：{{fiveElements.water}} | 火：{{fiveElements.fire}} | 土：{{fiveElements.earth}}
+    喜用神：{{favorableElements}} | 忌神：{{unfavorableElements}}
+
+    【十神关系】
+    {{tenGods}}
+
+    【大运信息】
+    {{daYunDetailed}}
+
+    【当前流年】
+    {{currentLiuNian}}
+
+    【吉神方位】
+    {{directions}}
+
+    请从以下方面详细分析此人的财运：
+    1. 财运整体格局（正财运与偏财运，根据十神中的正财、偏财分析）
+    2. 适合的理财方式和投资方向（根据五行喜用）
+    3. 财运上需要注意的风险
+    4. 根据大运流年分析财运起伏的关键时期
+    5. 提升财运的建议（包括方位、颜色等）
+
+    请用专业但易懂的语言进行分析。
+
+  # 感情运势模块
+  relationship: |
+    你是一位资深的命理分析师，精通中国传统八字命理学。请根据以下八字信息分析此人的感情运势：
+
+    【八字四柱】
+    - 年柱：{{yearPillar.heavenlyStem}}{{yearPillar.earthlyBranch}}（纳音：{{yearPillar.naYin}}）
+    - 月柱：{{monthPillar.heavenlyStem}}{{monthPillar.earthlyBranch}}（纳音：{{monthPillar.naYin}}）
+    - 日柱：{{dayPillar.heavenlyStem}}{{dayPillar.earthlyBranch}}（纳音：{{dayPillar.naYin}}）
+    - 时柱：{{hourPillar.heavenlyStem}}{{hourPillar.earthlyBranch}}（纳音：{{hourPillar.naYin}}）
+
+    【日主信息】
+    - 日主：{{dayMaster}}（{{dayMasterElement}}）
+    - 身强弱：{{dayMasterStrength}}
+    - 性别：{{gender}}
+
+    【五行分布】
+    金：{{fiveElements.metal}} | 木：{{fiveElements.wood}} | 水：{{fiveElements.water}} | 火：{{fiveElements.fire}} | 土：{{fiveElements.earth}}
+    喜用神：{{favorableElements}} | 忌神：{{unfavorableElements}}
+
+    【十神关系】
+    {{tenGods}}
+
+    【大运信息】
+    {{daYunDetailed}}
+
+    【当前流年】
+    {{currentLiuNian}}
+
+    【命理要素】
+    - 胎元：{{taiYuan}}
+    - 命宫：{{mingGong}}
+    - 身宫：{{shenGong}}
+
+    【神煞信息】
+    {{shenSha}}
+
+    请从以下方面详细分析此人的感情运势：
+    1. 感情观和恋爱特点（根据日主和十神配置）
+    2. 适合的伴侣类型（根据五行喜用分析）
+    3. 感情中需要注意的问题
+    4. 根据大运流年分析感情发展的关键时期
+    5. 提升感情运的建议
+
+    请用专业但易懂的语言进行分析。
+
+  # 健康建议模块
+  health: |
+    你是一位资深的命理分析师，精通中国传统八字命理学。请根据以下八字信息分析此人的健康状况：
+
+    【八字四柱】
+    - 年柱：{{yearPillar.heavenlyStem}}{{yearPillar.earthlyBranch}}（纳音：{{yearPillar.naYin}}）
+    - 月柱：{{monthPillar.heavenlyStem}}{{monthPillar.earthlyBranch}}（纳音：{{monthPillar.naYin}}）
+    - 日柱：{{dayPillar.heavenlyStem}}{{dayPillar.earthlyBranch}}（纳音：{{dayPillar.naYin}}）
+    - 时柱：{{hourPillar.heavenlyStem}}{{hourPillar.earthlyBranch}}（纳音：{{hourPillar.naYin}}）
+
+    【日主信息】
+    - 日主：{{dayMaster}}（{{dayMasterElement}}）
+    - 身强弱：{{dayMasterStrength}}
+
+    【五行分布】
+    金：{{fiveElements.metal}} | 木：{{fiveElements.wood}} | 水：{{fiveElements.water}} | 火：{{fiveElements.fire}} | 土：{{fiveElements.earth}}
+    最强五行：{{fiveElements.strongest}} | 最弱五行：{{fiveElements.weakest}}
+    喜用神：{{favorableElements}} | 忌神：{{unfavorableElements}}
+
+    【大运信息】
+    {{daYun}}
+
+    【当前流年】
+    {{currentLiuNian}}
+
+    【星宿信息】
+    {{xingXiu}}
+
+    请从以下方面分析此人的健康状况：
+    1. 根据五行强弱分析易患的健康问题（五行对应脏腑：金-肺/大肠，木-肝/胆，水-肾/膀胱，火-心/小肠，土-脾/胃）
+    2. 需要特别注意的身体部位
+    3. 根据大运流年分析健康需要注意的时期
+    4. 养生保健建议（根据五行喜用）
+    5. 适合的运动和饮食调理方向
+
+    请用专业但易懂的语言进行分析，注意这只是命理参考，不能替代医学诊断。
+
+  # 综合分析模块
+  overall: |
+    你是一位资深的命理分析师，精通中国传统八字命理学。请根据以下八字信息进行综合分析和建议：
+
+    【基本信息】
+    - 农历：{{lunarDateStr}}
+    - 生肖：{{shengXiao}}
+
+    【八字四柱】
+    - 年柱：{{yearPillar.heavenlyStem}}{{yearPillar.earthlyBranch}}（纳音：{{yearPillar.naYin}}，藏干：{{yearPillar.hiddenStems}}）
+    - 月柱：{{monthPillar.heavenlyStem}}{{monthPillar.earthlyBranch}}（纳音：{{monthPillar.naYin}}，藏干：{{monthPillar.hiddenStems}}）
+    - 日柱：{{dayPillar.heavenlyStem}}{{dayPillar.earthlyBranch}}（纳音：{{dayPillar.naYin}}，藏干：{{dayPillar.hiddenStems}}）
+    - 时柱：{{hourPillar.heavenlyStem}}{{hourPillar.earthlyBranch}}（纳音：{{hourPillar.naYin}}，藏干：{{hourPillar.hiddenStems}}）
+
+    【日主信息】
+    - 日主：{{dayMaster}}（{{dayMasterElement}}）
+    - 身强弱：{{dayMasterStrength}}
+    - 日主特征：{{dayMasterCharacteristics}}
+
+    【五行分布】
+    金：{{fiveElements.metal}} | 木：{{fiveElements.wood}} | 水：{{fiveElements.water}} | 火：{{fiveElements.fire}} | 土：{{fiveElements.earth}}
+    最强五行：{{fiveElements.strongest}} | 最弱五行：{{fiveElements.weakest}}
+    喜用神：{{favorableElements}} | 忌神：{{unfavorableElements}}
+
+    【十神关系】
+    {{tenGods}}
+
+    【命理要素】
+    - 胎元：{{taiYuan}}
+    - 命宫：{{mingGong}}
+    - 身宫：{{shenGong}}
+    - 旬空：{{xunKong}}
+
+    【大运信息】
+    {{daYunDetailed}}
+
+    【当前流年】
+    {{currentLiuNian}}
+
+    【神煞信息】
+    {{shenSha}}
+
+    【吉神方位】
+    {{directions}}
+
+    【节气信息】
+    {{jieQi}}
+
+    【星宿信息】
+    {{xingXiu}}
+
+    请提供以下综合分析：
+    1. 命局整体格局评价（格局高低、用神取法）
+    2. 人生发展的关键时期（根据大运流年）
+    3. 五行调理建议（如何补足弱势五行、化解忌神）
+    4. 幸运元素：
+       - 幸运颜色（根据喜用神五行）
+       - 幸运数字
+       - 幸运方位
+       - 幸运行业
+    5. 总体人生建议
+
+    请用专业但易懂的语言进行分析，给出实用的建议。

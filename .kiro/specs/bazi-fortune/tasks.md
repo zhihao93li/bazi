@@ -1,0 +1,397 @@
+# Implementation Plan: 八字命理分析应用
+
+## Overview
+
+本实现计划将八字命理分析应用分解为可执行的编码任务，按照模块化架构逐步实现。使用 TypeScript + Next.js 15 + Prisma + PostgreSQL 技术栈。
+
+## Tasks
+
+- [x] 1. 项目初始化与基础配置
+  - [x] 1.1 创建 Next.js 15 项目并配置 TypeScript、Tailwind CSS
+    - 使用 `create-next-app` 创建项目
+    - 配置 Tailwind CSS v4
+    - 安装 Aceternity UI 依赖 (framer-motion, clsx, tailwind-merge)
+    - _Requirements: 8.1_
+  - [x] 1.2 配置 Prisma ORM 和 PostgreSQL 数据库
+    - 安装 prisma 和 @prisma/client
+    - 创建 prisma/schema.prisma 文件
+    - 配置数据库连接
+    - _Requirements: 7.1, 7.2_
+  - [x] 1.3 创建数据库模型
+    - 定义 User, VerificationCode, PointsAccount, PointsTransaction, PaymentOrder, PointsPackage, FortuneReport 模型
+    - 运行 prisma migrate 创建数据库表
+    - _Requirements: 7.1, 7.2_
+  - [x] 1.4 配置 Vitest 测试框架和 fast-check
+    - 安装 vitest, @vitest/coverage-v8, fast-check
+    - 创建 vitest.config.ts 配置文件
+    - _Requirements: 8.1_
+
+- [-] 2. 认证模块实现
+  - [x] 2.1 实现手机号格式验证工具函数
+    - 创建 lib/utils/phone-validator.ts
+    - 实现中国大陆手机号正则验证
+    - _Requirements: 1.6_
+  - [x] 2.2 编写手机号验证属性测试
+    - **Property 1: 手机号格式验证**
+    - **Validates: Requirements 1.6**
+  - [x] 2.3 实现验证码生成和存储服务
+    - 创建 lib/auth/verification-code.ts
+    - 实现6位数字验证码生成
+    - 实现验证码存储到数据库（含过期时间）
+    - 实现60秒发送频率限制
+    - 实现5次错误锁定机制
+    - _Requirements: 1.1, 1.2, 1.4, 1.5_
+  - [x] 2.4 编写验证码 Round-Trip 属性测试
+    - **Property 2: 验证码生成与验证 Round-Trip**
+    - **Validates: Requirements 1.1, 1.3**
+  - [ ] 2.5 编写验证码频率限制属性测试
+    - **Property 3: 验证码发送频率限制**
+    - **Validates: Requirements 1.2**
+  - [x] 2.6 实现短信服务抽象层
+    - 创建 lib/sms/types.ts 定义 SmsProvider 接口
+    - 创建 lib/sms/aliyun-sms.ts 实现阿里云短信
+    - 创建 lib/sms/index.ts 工厂函数
+    - _Requirements: 1.1_
+  - [x] 2.7 配置 NextAuth.js Credentials Provider
+    - 安装 next-auth
+    - 创建 app/api/auth/[...nextauth]/route.ts
+    - 实现手机号+验证码登录逻辑
+    - 配置 JWT Token 生成
+    - _Requirements: 1.3, 1.7_
+  - [ ] 2.8 编写 JWT Token 有效性属性测试
+    - **Property 6: JWT Token 有效性**
+    - **Validates: Requirements 1.7**
+  - [x] 2.9 实现首次注册积分赠送逻辑
+    - 在用户创建时调用 Points_Service 赠送初始积分
+    - 赠送积分数量为 100，赠送积分数量需要在环境变量可配置
+    - _Requirements: 1.8_
+  - [ ]* 2.10 编写首次注册积分赠送属性测试
+    - **Property 7: 首次注册积分赠送**
+    - **Validates: Requirements 1.8**
+
+- [ ] 3. Checkpoint - 认证模块完成
+  - 确保所有认证相关测试通过
+  - 如有问题请询问用户
+
+- [x] 3.5 用户名密码登录实现（轻量方案）
+  - [x] 3.5.1 更新 User 模型支持用户名密码
+    - 在 prisma/schema.prisma 添加 username 和 passwordHash 字段
+    - 运行 prisma migrate
+    - _Requirements: 1.7_
+  - [x] 3.5.2 实现用户名密码注册
+    - 创建 lib/auth/password-auth.ts
+    - 使用 bcrypt 加密密码
+    - 实现用户名唯一性检查
+    - 实现密码长度验证（最少6位）
+    - _Requirements: 1.7, 1.8, 1.9, 1.10_
+  - [x] 3.5.3 扩展 NextAuth Credentials Provider
+    - 添加用户名密码登录方式
+    - 复用现有 JWT 配置
+    - _Requirements: 1.8, 1.11_
+  - [x] 3.5.4 更新登录页面 UI
+    - 添加用户名密码登录表单
+    - 添加注册表单
+    - 支持手机号和用户名两种登录方式切换
+    - _Requirements: 1.7, 1.8_
+
+- [x] 4. 八字排盘引擎实现
+  - [x] 4.1 安装和配置 lunar-typescript
+    - 安装 lunar-typescript 依赖
+    - 创建 lib/bazi/types.ts 定义八字相关类型
+    - _Requirements: 2.1_
+  - [x] 4.2 实现公历农历转换功能
+    - 创建 lib/bazi/calendar.ts
+    - 封装 lunar-typescript 的日期转换方法
+    - _Requirements: 2.2_
+  - [ ]* 4.3 编写公历农历转换 Round-Trip 属性测试
+    - **Property 9: 公历农历转换 Round-Trip**
+    - **Validates: Requirements 2.2**
+  - [x] 4.4 实现八字四柱计算
+    - 创建 lib/bazi/engine.ts
+    - 实现年柱、月柱、日柱、时柱计算
+    - 参考 human_design2 项目的计算逻辑
+    - _Requirements: 2.1, 2.3_
+  - [x] 4.5 实现五行分布计算
+    - 在 engine.ts 中添加五行统计方法
+    - 计算金木水火土的数量和强弱
+    - _Requirements: 2.4_
+  - [ ]* 4.6 编写五行分布总数不变性属性测试
+    - **Property 10: 五行分布总数不变性**
+    - **Validates: Requirements 2.4**
+  - [x] 4.7 实现十神关系计算
+    - 在 engine.ts 中添加十神计算方法
+    - 基于日主计算各柱的十神关系
+    - _Requirements: 2.5_
+  - [x] 4.8 实现大运流年计算
+    - 在 engine.ts 中添加大运排列方法
+    - 根据性别和年干阴阳确定顺逆排
+    - _Requirements: 2.6_
+  - [ ]* 4.9 编写大运排列正确性属性测试
+    - **Property 11: 大运排列正确性**
+    - **Validates: Requirements 2.6**
+  - [x] 4.10 实现八字结果序列化
+    - 实现 BaziChart 到 JSON 的序列化和反序列化
+    - _Requirements: 2.8_
+  - [ ]* 4.11 编写八字序列化 Round-Trip 属性测试
+    - **Property 12: 八字序列化 Round-Trip**
+    - **Validates: Requirements 2.8**
+  - [ ]* 4.12 编写八字计算完整性属性测试
+    - **Property 8: 八字计算完整性**
+    - **Validates: Requirements 2.1, 2.3, 2.4, 2.5**
+
+- [x] 5. Checkpoint - 八字引擎完成
+  - 确保所有八字计算测试通过
+  - 如有问题请询问用户
+
+- [x] 6. AI 服务实现
+  - [x] 6.1 创建 AI 配置 YAML 文件结构
+    - 创建 config/ai-prompts.yaml
+    - 定义各分析模块的 prompt 模板
+    - 配置模型参数
+    - _Requirements: 9.1, 9.2, 9.3, 9.4_
+  - [x] 6.2 实现 YAML 配置加载器
+    - 创建 lib/ai/config-loader.ts
+    - 实现 YAML 解析和验证
+    - 实现配置错误回退默认值
+    - _Requirements: 9.1, 9.7_
+  - [ ]* 6.3 编写 AI 配置解析完整性属性测试
+    - **Property 17: AI 配置解析完整性**
+    - **Validates: Requirements 9.1, 9.2, 9.3, 9.4**
+  - [ ]* 6.4 编写配置错误回退默认值属性测试
+    - **Property 19: 配置错误回退默认值**
+    - **Validates: Requirements 9.7**
+  - [x] 6.5 实现 Prompt 变量替换功能
+    - 创建 lib/ai/template-engine.ts
+    - 实现占位符替换逻辑
+    - _Requirements: 9.6_
+  - [ ]* 6.6 编写 Prompt 变量替换完整性属性测试
+    - **Property 18: Prompt 变量替换完整性**
+    - **Validates: Requirements 9.6**
+  - [x] 6.7 实现 AI 服务调用层
+    - 创建 lib/ai/service.ts
+    - 集成 aihubmix SDK 
+    - 实现分模块生成分析内容
+    - _Requirements: 3.1, 3.3_
+  - [x] 6.8 实现命理报告生成和存储
+    - 创建完整报告生成流程
+    - 保存报告到数据库
+    - _Requirements: 3.2, 3.7_
+  - [ ]* 6.9 编写命理报告结构完整性属性测试
+    - **Property 13: 命理报告结构完整性**
+    - **Validates: Requirements 3.2**
+
+- [x] 7. Checkpoint - AI 服务完成
+  - 确保所有 AI 服务测试通过
+  - 如有问题请询问用户
+
+- [x] 8. 积分系统实现
+  - [x] 8.1 实现积分账户服务
+    - 创建 lib/points/service.ts
+    - 实现余额查询、积分明细查询
+    - _Requirements: 4.1, 4.2_
+  - [ ]* 8.2 编写积分查询返回完整信息属性测试
+    - **Property 20: 积分查询返回完整信息**
+    - **Validates: Requirements 4.2**
+  - [x] 8.3 实现积分变动操作
+    - 实现充值、消费、赠送三种变动类型
+    - 使用数据库事务确保原子性
+    - 记录完整的变动明细
+    - _Requirements: 4.3, 4.4, 4.6_
+  - [ ]* 8.4 编写积分变动记录完整性属性测试
+    - **Property 21: 积分变动记录完整性**
+    - **Validates: Requirements 4.3, 4.4**
+  - [x] 8.5 实现余额不足检查
+    - 在扣款前检查余额
+    - 余额不足时返回错误
+    - _Requirements: 4.5_
+  - [ ]* 8.6 编写积分余额不足拒绝扣款属性测试
+    - **Property 22: 积分余额不足拒绝扣款**
+    - **Validates: Requirements 4.5**
+  - [ ]* 8.7 编写积分操作原子性属性测试
+    - **Property 23: 积分操作原子性**
+    - **Validates: Requirements 4.6**
+  - [x] 8.8 实现命理分析积分扣除流程
+    - 分析前检查积分
+    - 分析完成后扣除积分
+    - _Requirements: 3.4, 3.5_
+  - [ ]* 8.9 编写积分不足拒绝分析属性测试
+    - **Property 14: 积分不足拒绝分析**
+    - **Validates: Requirements 3.4**
+  - [ ]* 8.10 编写分析完成扣除积分属性测试
+    - **Property 15: 分析完成扣除积分**
+    - **Validates: Requirements 3.5**
+
+- [x] 9. Checkpoint - 积分系统完成
+  - 确保所有积分相关测试通过
+  - 如有问题请询问用户
+
+- [ ] 10. 支付模块实现（Mock 版本）
+  - [x] 10.1 创建积分套餐数据
+    - 在数据库中创建 PointsPackage 初始数据
+    - _Requirements: 5.1_
+  - [x] 10.2 实现支付订单创建（Mock）
+    - 创建 lib/payment/service.ts
+    - 实现订单号生成（确保唯一性）
+    - 实现订单创建和状态管理
+    - Mock 支付：直接返回成功状态
+    - _Requirements: 5.2, 5.8_
+  - [ ]* 10.3 编写订单号唯一性属性测试
+    - **Property 27: 订单号唯一性**
+    - **Validates: Requirements 5.8**
+  - [x] 10.4 实现 Mock 支付确认接口
+    - 创建开发环境专用的支付确认接口
+    - 点击"确认支付"直接完成支付流程
+    - 调用积分服务增加积分
+    - _Requirements: 5.5_
+  - [ ]* 10.5 编写支付成功增加积分属性测试
+    - **Property 26: 支付成功增加积分**
+    - **Validates: Requirements 5.5**
+
+- [x] 11. Checkpoint - 支付模块完成
+  - 确保所有支付相关测试通过
+  - 如有问题请询问用户
+
+- [x] 12. 历史记录功能实现
+  - [x] 12.1 实现历史记录查询 API
+    - 创建 app/api/reports/route.ts
+    - 实现分页查询，按时间倒序
+    - 确保用户隔离（只返回当前用户的记录）
+    - _Requirements: 6.1, 6.2_
+  - [ ]* 12.2 编写历史记录用户隔离属性测试
+    - **Property 29: 历史记录用户隔离**
+    - **Validates: Requirements 6.1**
+  - [ ]* 12.3 编写历史记录时间倒序属性测试
+    - **Property 30: 历史记录时间倒序**
+    - **Validates: Requirements 6.2**
+  - [x] 12.4 实现历史记录详情查询
+    - 创建 app/api/reports/[id]/route.ts
+    - _Requirements: 6.3_
+  - [x] 12.5 实现软删除功能
+    - 实现删除 API，设置 deletedAt 字段
+    - 查询时过滤已删除记录
+    - _Requirements: 6.4, 6.5_
+  - [ ]* 12.6 编写软删除保留数据属性测试
+    - **Property 31: 软删除保留数据**
+    - **Validates: Requirements 6.4, 6.5**
+  - [ ]* 12.7 编写报告保存到历史记录属性测试
+    - **Property 16: 报告保存到历史记录**
+    - **Validates: Requirements 3.7**
+
+- [x] 13. Checkpoint - 历史记录功能完成
+  - 确保所有历史记录测试通过
+  - 如有问题请询问用户
+
+- [x] 14. 前端页面实现
+  - [x] 14.1 创建通用布局组件
+    - 创建 app/layout.tsx 主布局
+    - 创建 Header 导航组件
+    - 配置 Aceternity UI 基础样式
+    - _Requirements: 8.1_
+  - [x] 14.2 实现首页
+    - 创建 app/page.tsx
+    - 使用 Aceternity UI Background Beams 效果
+    - 实现 Hero Section 和功能介绍卡片
+    - _Requirements: 8.1_
+  - [x] 14.3 实现登录页
+    - 创建 app/login/page.tsx
+    - 实现手机号输入和验证码发送
+    - 实现验证码登录流程
+    - _Requirements: 1.1, 1.3_
+  - [x] 14.4 实现八字排盘页
+    - 创建 app/bazi/page.tsx
+    - 实现出生信息表单（公历/农历切换、日期选择、时辰选择、性别选择）
+    - 实现排盘结果展示（四柱、五行、十神）
+    - 实现 AI 分析报告展示（Tab 切换各模块）
+    - _Requirements: 2.1, 3.1, 3.2_
+  - [x] 14.5 实现积分中心页
+    - 创建 app/points/page.tsx
+    - 实现余额展示
+    - 实现充值套餐选择和支付
+    - 实现积分明细列表
+    - _Requirements: 4.2, 5.2_
+  - [x] 14.6 实现历史记录页
+    - 创建 app/history/page.tsx
+    - 实现报告列表展示
+    - 实现报告详情查看
+    - 实现删除功能
+    - _Requirements: 6.1, 6.3, 6.4_
+  - [x] 14.7 实现用户中心页
+    - 创建 app/profile/page.tsx
+    - 实现个人信息展示
+    - 实现登出功能
+    - _Requirements: 1.7_
+
+- [x] 15. API 路由实现
+  - [x] 15.1 实现认证相关 API
+    - POST /api/auth/send-code - 发送验证码
+    - POST /api/auth/verify - 验证码验证
+    - _Requirements: 1.1, 1.3_
+  - [x] 15.2 实现八字排盘 API
+    - POST /api/bazi/calculate - 计算八字
+    - _Requirements: 2.1_
+  - [x] 15.3 实现命理分析 API
+    - POST /api/fortune/analyze - 生成 AI 分析
+    - _Requirements: 3.1_
+  - [x] 15.4 实现积分相关 API
+    - GET /api/points - 查询余额和明细
+    - _Requirements: 4.2_
+  - [x] 15.5 实现支付相关 API（Mock 版本）
+    - POST /api/payment/create - 创建支付订单
+    - POST /api/payment/mock-confirm - Mock 支付确认（开发环境）
+    - GET /api/payment/status/[orderNo] - 查询支付状态
+    - _Requirements: 5.2_
+  - [x] 15.6 实现历史记录 API
+    - GET /api/reports - 查询历史记录
+    - GET /api/reports/[id] - 查询报告详情
+    - DELETE /api/reports/[id] - 删除报告
+    - _Requirements: 6.1, 6.3, 6.4_
+
+- [x] 16. 数据安全实现
+  - [x] 16.1 实现敏感数据加密
+    - 创建 lib/utils/encryption.ts
+    - 实现手机号等敏感数据加密存储
+    - _Requirements: 7.3_
+  - [ ]* 16.2 编写敏感数据加密存储属性测试
+    - **Property 32: 敏感数据加密存储**
+    - **Validates: Requirements 7.3**
+  - [x] 16.3 实现数据库事务封装
+    - 创建事务工具函数
+    - 确保关键操作的原子性
+    - _Requirements: 7.5_
+  - [ ]* 16.4 编写事务回滚一致性属性测试
+    - **Property 33: 事务回滚一致性**
+    - **Validates: Requirements 7.5**
+
+- [x] 17. Final Checkpoint - 全部功能完成
+  - 确保所有测试通过
+  - 进行端到端功能验证
+  - 如有问题请询问用户
+
+- [ ] 18. 支付宝真实集成（后续实现）
+  - [ ] 18.1 集成支付宝当面付（PC端扫码支付）
+    - 安装 alipay-sdk
+    - 实现二维码生成
+    - 实现轮询查询支付状态
+    - _Requirements: 5.1, 5.2_
+  - [ ] 18.2 集成支付宝手机网站支付（移动端H5）
+    - 实现H5支付链接生成
+    - 实现支付结果回调处理
+    - _Requirements: 5.1, 5.3_
+  - [ ] 18.3 实现支付回调签名验证
+    - 验证支付宝回调签名
+    - 处理重复回调（幂等性）
+    - _Requirements: 5.4, 5.6, 5.9_
+  - [ ]* 18.4 编写支付签名验证属性测试
+    - **Property 25: 支付签名验证**
+    - **Validates: Requirements 5.4, 5.6**
+  - [ ] 18.5 编写支付回调幂等性属性测试
+    - **Property 28: 支付回调幂等性**
+    - **Validates: Requirements 5.9**
+  
+
+## Notes
+
+- 标记 `*` 的任务为可选的属性测试任务，可以跳过以加快 MVP 开发
+- 每个 Checkpoint 是验证阶段性成果的节点
+- 属性测试使用 fast-check 库，每个测试至少运行100次迭代
+- 所有 API 路由需要添加适当的错误处理和认证中间件
