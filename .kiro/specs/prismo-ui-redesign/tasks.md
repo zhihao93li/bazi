@@ -4,26 +4,30 @@
 
 本实施计划将八字命理系统的前端界面升级为 Prismo 风格的"柔光晚霞"视觉语言。按照优先级顺序实施：先更新全局样式，再创建新组件，最后重构各页面。
 
+**参考项目**: `prismo-react-ref/` (已克隆到本地)
+
 ## Tasks
 
 - [x] 1. 更新全局样式系统
   - [x] 1.1 更新 globals.css 中的 CSS 变量和背景系统
-    - 定义新的 Prismo 色彩变量 (--bg-base, --text-primary, --text-muted, --accent-orange, --card-bg, --border-subtle)
+    - 定义完整的 Prismo 色彩变量 (--light-85/90/94/95/96, --dark-7/12, --grey-24/30/50, accent colors)
     - 实现多层弥散光晕背景 (body::before)
     - 添加颗粒纹理层 (body::after)
     - 更新 glass-card 类样式
     - 更新按钮样式 (.btn-primary, .btn-secondary)
+    - **新增**: Prismo Hero 背景系统 (ellipse-based, grid lines)
+    - **新增**: Prismo Badge 样式 (gradient text)
     - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 4.1, 4.2, 4.3, 4.4, 4.5_
 
   - [x] 1.2 创建颗粒纹理图片资源
-    - 在 public 目录创建或添加 noise.png 纹理图片
+    - 在 public 目录创建或添加 noise.svg 纹理图片
     - _Requirements: 1.4_
 
 - [x] 2. 创建新 UI 组件
   - [x] 2.1 创建 PillButton 组件
-    - 实现 primary 和 secondary 变体
+    - 实现 primary, secondary, outline, ghost 变体 (匹配 prismo-react)
     - 实现 sm, md, lg 尺寸
-    - 添加 hover 动效 (translateY + shadow)
+    - 添加 hover 动效 (translateY + color change)
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5_
 
   - [ ]* 2.2 编写 PillButton 属性测试
@@ -31,15 +35,23 @@
     - **Validates: Requirements 3.1, 3.2, 3.3, 3.5**
 
   - [x] 2.3 创建 SocialProof 组件
-    - 实现星级评分显示
+    - 实现星级评分显示 (prismo-react 风格)
     - 实现头像堆叠效果
     - 实现用户数量文本
+    - **新增**: 分隔线样式
     - _Requirements: 14.1, 14.2, 14.3_
 
   - [x] 2.4 创建 BentoGrid 组件
     - 实现 2/3/4 列布局选项
     - 实现响应式断点切换
     - _Requirements: 6.1, 6.2_
+
+  - [x] 2.5 创建 PrismoHeroBackground 组件 (新增)
+    - 实现 ellipse-based 背景 (匹配 prismo-react Hero.jsx)
+    - 实现垂直网格线
+    - 实现渐变遮罩层
+    - 实现噪点纹理层
+    - _Requirements: 1.1, 1.2, 1.3_
 
 - [x] 3. Checkpoint - 确保组件测试通过
   - 运行所有测试，确保新组件正常工作
@@ -51,6 +63,8 @@
     - 添加 SocialProof 组件
     - 将 CTA 按钮替换为 PillButton
     - 移除旧的渐变按钮样式
+    - **新增**: 使用 PrismoHeroBackground 组件
+    - **新增**: 使用 prismo-badge 样式
     - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5_
 
   - [x] 4.2 重构 Feature Cards 区域
@@ -156,3 +170,4 @@
 - Property tests validate universal correctness properties
 - Unit tests validate specific examples and edge cases
 - 后端 API 不需要修改，本次重构仅涉及前端 UI 层
+- **prismo-react 参考代码位于 `prismo-react-ref/` 目录**

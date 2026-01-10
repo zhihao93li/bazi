@@ -1,13 +1,71 @@
 @import "tailwindcss";
 
 :root {
-  /* Prismo Color Palette - 柔光晚霞 */
-  --bg-base: #F5F0EB;
-  --text-primary: #1A1A1A;
-  --text-muted: rgba(0,0,0,0.5);
-  --accent-orange: #F97518;
-  --card-bg: #FFFFFF;
+  /* Prismo Design System - Full Color Palette */
+  /* Light Colors */
+  --light-85: rgb(222, 216, 211);
+  --light-90: rgb(232, 228, 226);
+  --light-94: rgb(241, 240, 238);
+  --light-95: rgb(244, 242, 241);
+  --light-96: rgb(246, 245, 244);
+  
+  /* Dark Colors */
+  --dark-7: rgb(17, 17, 17);
+  --dark-12: rgb(30, 30, 30);
+  
+  /* Grey Colors */
+  --grey-24: rgb(61, 61, 61);
+  --grey-30: rgb(76, 76, 76);
+  --grey-50: rgb(128, 128, 128);
+  
+  /* Absolute Colors */
+  --absolute-white: rgb(255, 255, 255);
+  
+  /* Accent Colors */
+  --accent-red: rgb(255, 47, 47);
+  --accent-orange: rgb(239, 123, 22);
+  --accent-purple: rgb(138, 67, 225);
+  --accent-pink: rgb(213, 17, 253);
+  --accent-green: rgb(39, 179, 44);
+  --accent-green-light: rgb(93, 201, 131);
+  --accent-blue: rgb(94, 106, 210);
+  --accent-yellow: rgb(242, 190, 0);
+  
+  /* Prismo Color Palette - 柔光晚霞 (Legacy aliases) */
+  --bg-base: var(--light-95);
+  --text-primary: var(--dark-7);
+  --text-muted: var(--grey-50);
+  --card-bg: var(--absolute-white);
   --border-subtle: rgba(0,0,0,0.08);
+  
+  /* Typography - Noto Sans SC for Chinese, Geist for Latin */
+  --font-primary: var(--font-noto-sans-sc), var(--font-geist-sans), 'Noto Sans SC', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  
+  /* Font Sizes */
+  --text-small: 16px;
+  --text-medium: 17px;
+  --text-large: 18px;
+  --heading-5: 20px;
+  --heading-4: 32px;
+  --heading-2: 52px;
+  --heading-1: 64px;
+  
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 40px;
+  --spacing-2xl: 60px;
+  --spacing-3xl: 80px;
+  --spacing-4xl: 100px;
+  
+  /* Border Radius */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-full: 100px;
   
   /* Glass Effect Variables */
   --glass-bg: rgba(255,255,255,0.6);
@@ -17,8 +75,8 @@
   /* Legacy compatibility */
   --background: var(--bg-base);
   --foreground: var(--text-primary);
-  --primary: #8b5cf6;
-  --secondary: #f472b6;
+  --primary: var(--accent-purple);
+  --secondary: var(--accent-pink);
   --accent: var(--accent-orange);
 }
 
@@ -32,13 +90,127 @@
 body {
   background: var(--bg-base);
   color: var(--text-primary);
-  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-primary);
   min-height: 100vh;
   position: relative;
   overflow-x: hidden;
 }
 
-/* Prismo Background - Multi-layer Blur Clouds */
+/* ========================================
+   Prismo Background System
+   ======================================== */
+
+/* Prismo Hero Background Container */
+.prismo-hero-bg {
+  position: absolute;
+  top: 0;
+  left: -120px;
+  right: -120px;
+  height: 1024px;
+  z-index: 0;
+  background-color: var(--light-95);
+  overflow: hidden;
+}
+
+/* Vertical Grid Lines - Prismo Style */
+.prismo-grid-lines {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: space-between;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.prismo-grid-line {
+  flex: 1;
+  height: 100%;
+  border-right: 1px solid rgba(222, 216, 211, 0.35);
+}
+
+.prismo-grid-line:last-child {
+  border-right: none;
+}
+
+/* Ellipse Abstract Elements */
+.prismo-abstract {
+  position: absolute;
+  width: 420px;
+  height: 571px;
+}
+
+.prismo-abstract-left {
+  top: 0;
+  left: 0;
+}
+
+.prismo-abstract-right {
+  top: 0;
+  right: 0;
+  transform: rotate(180deg);
+}
+
+.prismo-ellipse-group {
+  position: absolute;
+  width: 420px;
+  height: 571px;
+  filter: blur(80px);
+}
+
+.prismo-ellipse-group:nth-child(2) {
+  filter: blur(60px);
+  opacity: 0.8;
+}
+
+.prismo-ellipse {
+  position: absolute;
+  width: 207px;
+  height: 207px;
+  border-radius: 50%;
+}
+
+/* Gradient Overlays - Matching Prismo original exactly */
+.prismo-gradient-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 415px;
+  background: linear-gradient(
+    180deg,
+    rgba(244, 242, 241, 0.85) 0%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 2;
+}
+
+.prismo-gradient-bottom {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(244, 242, 241, 0) 0%,
+    rgba(244, 242, 241, 0.7) 65%,
+    rgba(244, 242, 241, 1) 100%
+  );
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* Noise Texture Overlay - Using Prismo's original noise texture */
+.prismo-noise {
+  position: absolute;
+  inset: 0;
+  background-image: url('https://framerusercontent.com/images/6mcf62RlDfRfU61Yg5vb2pefpi4.png');
+  background-size: 200px;
+  opacity: 0.75;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+  z-index: 4;
+}
+
+/* Fallback body background for pages without hero */
 body::before {
   content: '';
   position: fixed;
@@ -46,16 +218,15 @@ body::before {
   z-index: -2;
   background:
     /* Deep indigo at top-left */
-    radial-gradient(circle at 0% 0%, rgba(79, 70, 229, 0.18) 0%, transparent 45%),
+    radial-gradient(circle at 0% 0%, rgba(138, 67, 225, 0.15) 0%, transparent 45%),
     /* Warm coral at top-right */
-    radial-gradient(circle at 100% 10%, rgba(251, 146, 60, 0.15) 0%, transparent 40%),
+    radial-gradient(circle at 100% 10%, rgba(239, 123, 22, 0.12) 0%, transparent 40%),
     /* Rose violet at bottom-right */
-    radial-gradient(circle at 100% 100%, rgba(219, 39, 119, 0.1) 0%, transparent 40%),
+    radial-gradient(circle at 100% 100%, rgba(213, 17, 253, 0.08) 0%, transparent 40%),
     /* Soft violet at bottom-left */
-    radial-gradient(circle at 0% 80%, rgba(167, 139, 250, 0.12) 0%, transparent 35%),
+    radial-gradient(circle at 0% 80%, rgba(138, 67, 225, 0.1) 0%, transparent 35%),
     /* Base color */
     var(--bg-base);
-  filter: blur(120px);
 }
 
 /* Grain Overlay - 颗粒纹理层 */
@@ -69,6 +240,38 @@ body::after {
   background-size: 200px 200px;
   opacity: 0.05;
   pointer-events: none;
+}
+
+/* Prismo Badge with Gradient Text */
+.prismo-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-full);
+  backdrop-filter: blur(10px);
+}
+
+.prismo-badge-number {
+  font-size: 17px;
+  font-weight: 600;
+  background: linear-gradient(
+    90deg,
+    var(--accent-red) 0%,
+    var(--accent-orange) 30%,
+    var(--accent-pink) 60%,
+    var(--accent-purple) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.prismo-badge-text {
+  font-size: 17px;
+  font-weight: 500;
+  color: var(--dark-7);
 }
 
 /* Custom scrollbar */
