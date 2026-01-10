@@ -4,7 +4,6 @@ import { useState, useEffect, Suspense } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { BackgroundBeams } from "@/components/ui/background-beams";
 import { motion } from "framer-motion";
 
 type LoginMode = "phone" | "username";
@@ -216,16 +215,14 @@ function LoginForm() {
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center px-4 bg-black">
-      <BackgroundBeams className="absolute inset-0" />
-
+    <div className="relative min-h-screen flex items-center justify-center px-4 py-20">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="relative z-10 w-full max-w-md"
       >
-        <div className="glass rounded-2xl p-8">
+        <div className="glass-card p-8">
           {/* Header */}
           <div className="text-center mb-6">
             <Link href="/" className="inline-flex items-center gap-2 mb-4">
@@ -233,10 +230,10 @@ function LoginForm() {
               <span className="text-2xl font-bold gradient-text">八字命理</span>
             </Link>
             <h1 className="text-2xl font-semibold mb-2">
-              {loginMode === "phone" 
-                ? "登录 / 注册" 
-                : formMode === "login" 
-                  ? "账号登录" 
+              {loginMode === "phone"
+                ? "登录 / 注册"
+                : formMode === "login"
+                  ? "账号登录"
                   : "注册账号"}
             </h1>
           </div>
@@ -246,22 +243,20 @@ function LoginForm() {
             <button
               type="button"
               onClick={() => setLoginMode("phone")}
-              className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
-                loginMode === "phone"
-                  ? "bg-purple-600 text-white"
-                  : "text-gray-400 hover:text-white"
-              }`}
+              className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${loginMode === "phone"
+                ? "bg-purple-600 text-white"
+                : "text-gray-400 hover:text-white"
+                }`}
             >
               手机号登录
             </button>
             <button
               type="button"
               onClick={() => setLoginMode("username")}
-              className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
-                loginMode === "username"
-                  ? "bg-purple-600 text-white"
-                  : "text-gray-400 hover:text-white"
-              }`}
+              className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${loginMode === "username"
+                ? "bg-purple-600 text-white"
+                : "text-gray-400 hover:text-white"
+                }`}
             >
               账号密码
             </button>
@@ -279,7 +274,7 @@ function LoginForm() {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 11))}
                   placeholder="请输入手机号"
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all"
+                  className="input-glass"
                   maxLength={11}
                 />
               </div>
@@ -294,7 +289,7 @@ function LoginForm() {
                     value={code}
                     onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
                     placeholder="请输入验证码"
-                    className="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all"
+                    className="flex-1 input-glass"
                     maxLength={6}
                   />
                   <button
@@ -306,8 +301,8 @@ function LoginForm() {
                     {sendingCode
                       ? "发送中..."
                       : countdown > 0
-                      ? `${countdown}s`
-                      : "获取验证码"}
+                        ? `${countdown}s`
+                        : "获取验证码"}
                   </button>
                 </div>
               </div>
@@ -365,29 +360,27 @@ function LoginForm() {
                 <button
                   type="button"
                   onClick={() => setFormMode("login")}
-                  className={`flex-1 py-2 border-b-2 transition-all ${
-                    formMode === "login"
-                      ? "border-purple-500 text-white"
-                      : "border-transparent text-gray-500 hover:text-gray-300"
-                  }`}
+                  className={`flex-1 py-2 border-b-2 transition-all ${formMode === "login"
+                    ? "border-purple-500 text-white"
+                    : "border-transparent text-gray-500 hover:text-gray-300"
+                    }`}
                 >
                   登录
                 </button>
                 <button
                   type="button"
                   onClick={() => setFormMode("register")}
-                  className={`flex-1 py-2 border-b-2 transition-all ${
-                    formMode === "register"
-                      ? "border-purple-500 text-white"
-                      : "border-transparent text-gray-500 hover:text-gray-300"
-                  }`}
+                  className={`flex-1 py-2 border-b-2 transition-all ${formMode === "register"
+                    ? "border-purple-500 text-white"
+                    : "border-transparent text-gray-500 hover:text-gray-300"
+                    }`}
                 >
                   注册
                 </button>
               </div>
 
-              <form 
-                onSubmit={formMode === "login" ? handleUsernameLogin : handleRegister} 
+              <form
+                onSubmit={formMode === "login" ? handleUsernameLogin : handleRegister}
                 className="space-y-5"
               >
                 <div>
@@ -399,7 +392,7 @@ function LoginForm() {
                     value={username}
                     onChange={(e) => setUsername(e.target.value.slice(0, 20))}
                     placeholder="请输入用户名"
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all"
+                    className="w-full input-glass"
                     maxLength={20}
                   />
                   {formMode === "register" && (
@@ -418,7 +411,7 @@ function LoginForm() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="请输入密码"
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all"
+                    className="w-full input-glass"
                   />
                   {formMode === "register" && (
                     <p className="mt-1 text-xs text-gray-500">密码至少6位</p>
@@ -435,7 +428,7 @@ function LoginForm() {
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       placeholder="请再次输入密码"
-                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all"
+                      className="w-full input-glass"
                     />
                   </div>
                 )}

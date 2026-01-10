@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { BackgroundBeams } from "@/components/ui/background-beams";
 import type { LunarDateInfo, BaziData } from "@/lib/bazi/types";
 
 interface ReportSummary {
@@ -129,13 +128,12 @@ export default function HistoryPage() {
   // Format date
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
-    return date.toLocaleString("zh-CN", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    const h = String(date.getHours()).padStart(2, "0");
+    const min = String(date.getMinutes()).padStart(2, "0");
+    return `${y}/${m}/${d} ${h}:${min}`;
   };
 
   // Format birth info
@@ -145,16 +143,14 @@ export default function HistoryPage() {
 
   if (status === "loading" || loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-gray-400">加载中...</div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-gray-500">加载中...</div>
       </div>
     );
   }
 
   return (
-    <div className="relative min-h-screen bg-black">
-      <BackgroundBeams className="absolute inset-0 opacity-30" />
-
+    <div className="relative min-h-screen pb-20">
       <div className="relative z-10 max-w-6xl mx-auto px-4 py-12">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -181,18 +177,17 @@ export default function HistoryPage() {
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Reports List */}
             <div className="lg:col-span-1">
-              <div className="glass rounded-2xl p-6">
+              <div className="glass-card p-6">
                 <h2 className="text-lg font-semibold mb-4">报告列表</h2>
                 <div className="space-y-3 max-h-[600px] overflow-y-auto">
                   {reports.map((report) => (
                     <motion.div
                       key={report.id}
                       whileHover={{ scale: 1.02 }}
-                      className={`p-4 rounded-xl cursor-pointer transition-all ${
-                        selectedReport?.id === report.id
-                          ? "bg-purple-500/20 border border-purple-500/50"
-                          : "bg-white/5 border border-white/10 hover:border-white/20"
-                      }`}
+                      className={`p-4 rounded-xl cursor-pointer transition-all ${selectedReport?.id === report.id
+                        ? "bg-purple-100 border border-purple-200 shadow-sm"
+                        : "bg-white/40 border border-white/60 hover:bg-white/60"
+                        }`}
                       onClick={() => handleViewReport(report.id)}
                     >
                       <div className="flex justify-between items-start">
@@ -327,11 +322,10 @@ export default function HistoryPage() {
                           <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
-                            className={`px-4 py-2 rounded-lg transition-all ${
-                              activeTab === tab.id
-                                ? "bg-purple-500 text-white"
-                                : "bg-white/10 text-gray-400 hover:bg-white/15"
-                            }`}
+                            className={`px-4 py-2 rounded-lg transition-all ${activeTab === tab.id
+                              ? "bg-purple-500 text-white"
+                              : "bg-white/10 text-gray-400 hover:bg-white/15"
+                              }`}
                           >
                             {tab.label}
                           </button>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import locationData from "china-location/dist/location.json";
+import { GlassSelect } from "@/components/ui/glass-select";
 
 interface LocationSelectProps {
   value: string;
@@ -26,150 +27,110 @@ export default function LocationSelect({ value, onChange, error }: LocationSelec
   const [cityCode, setCityCode] = useState<string>("");
   const [districtCode, setDistrictCode] = useState<string>("");
 
-  // 省份列表
+  // Transform data for GlassSelect
   const provinces = useMemo(() => {
     return Object.entries(locationData as Record<string, Province>).map(([code, data]) => ({
-      code,
-      name: data.name,
+      value: code,
+      label: data.name,
     }));
   }, []);
 
-  // 当前省份的城市列表
   const cities = useMemo(() => {
     if (!provinceCode) return [];
     const province = (locationData as Record<string, Province>)[provinceCode];
     if (!province?.cities) return [];
     return Object.entries(province.cities).map(([code, data]) => ({
-      code,
-      name: data.name,
+      value: code,
+      label: data.name,
     }));
   }, [provinceCode]);
 
-  // 当前城市的区县列表
   const districts = useMemo(() => {
     if (!provinceCode || !cityCode) return [];
     const province = (locationData as Record<string, Province>)[provinceCode];
     const city = province?.cities?.[cityCode];
     if (!city?.districts) return [];
     return Object.entries(city.districts).map(([code, name]) => ({
-      code,
-      name,
+      value: code,
+      label: name,
     }));
   }, [provinceCode, cityCode]);
 
-  // 获取当前选择的名称
+  // Construct location string
   const getLocationString = () => {
     const parts: string[] = [];
-    
+
     if (provinceCode) {
       const province = (locationData as Record<string, Province>)[provinceCode];
       parts.push(province.name);
-      
+
       if (cityCode) {
         const city = province.cities[cityCode];
-        // 直辖市的市名和省名相同，不重复显示
         if (city.name !== province.name) {
           parts.push(city.name);
         }
-        
+
         if (districtCode && city.districts[districtCode]) {
           parts.push(city.districts[districtCode]);
         }
       }
     }
-    
+
     return parts.join("");
   };
 
-  // 当选择变化时通知父组件
   useEffect(() => {
     if (provinceCode) {
       const locationStr = getLocationString();
       onChange(locationStr);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [provinceCode, cityCode, districtCode]);
 
-  // 省份变化时重置城市和区县
-  const handleProvinceChange = (code: string) => {
-    setProvinceCode(code);
+  const handleProvinceChange = (code: string | number) => {
+    setProvinceCode(String(code));
     setCityCode("");
     setDistrictCode("");
+    onChange(""); // Clear full location until re-selected
   };
 
-  // 城市变化时重置区县
-  const handleCityChange = (code: string) => {
-    setCityCode(code);
+  const handleCityChange = (code: string | number) => {
+    setCityCode(String(code));
     setDistrictCode("");
   };
 
-  const selectClass = `w-full px-4 py-3 bg-white/5 border rounded-xl text-white ${
-    error && !value ? 'border-red-500/50' : 'border-white/10'
-  }`;
-
   return (
-    <div className="space-y-3">
-      {/* 省份选择 */}
-      <div>
-        <label className="block text-xs text-gray-400 mb-1">省/直辖市 <span className="text-red-400">*</span></label>
-        <select
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+      <div className="z-30">
+        <label className="block text-xs text-gray-500 mb-1 font-medium">省/直辖市</label>
+        <GlassSelect
           value={provinceCode}
-          onChange={(e) => handleProvinceChange(e.target.value)}
-          className={selectClass}
-        >
-          <option value="" className="bg-gray-900">请选择省份</option>
-          {provinces.map((p) => (
-            <option key={p.code} value={p.code} className="bg-gray-900">
-              {p.name}
-            </option>
-          ))}
-        </select>
+          onChange={handleProvinceChange}
+          options={provinces}
+          placeholder="选择省份"
+          className={error && !provinceCode ? "ring-2 ring-red-400 rounded-xl" : ""}
+        />
       </div>
 
-      {/* 城市选择 */}
-      {provinceCode && cities.length > 0 && (
-        <div>
-          <label className="block text-xs text-gray-400 mb-1">市</label>
-          <select
-            value={cityCode}
-            onChange={(e) => handleCityChange(e.target.value)}
-            className={selectClass}
-          >
-            <option value="" className="bg-gray-900">请选择城市</option>
-            {cities.map((c) => (
-              <option key={c.code} value={c.code} className="bg-gray-900">
-                {c.name}
-              </option>
-            ))}
-          </select>
-        </div>
-      )}
+      <div className="z-20">
+        <label className="block text-xs text-gray-500 mb-1 font-medium">城市</label>
+        <GlassSelect
+          value={cityCode}
+          onChange={handleCityChange}
+          options={cities}
+          placeholder="选择城市"
+        />
+      </div>
 
-      {/* 区县选择 */}
-      {cityCode && districts.length > 0 && (
-        <div>
-          <label className="block text-xs text-gray-400 mb-1">区/县</label>
-          <select
-            value={districtCode}
-            onChange={(e) => setDistrictCode(e.target.value)}
-            className={selectClass}
-          >
-            <option value="" className="bg-gray-900">请选择区县（可选）</option>
-            {districts.map((d) => (
-              <option key={d.code} value={d.code} className="bg-gray-900">
-                {d.name}
-              </option>
-            ))}
-          </select>
-        </div>
-      )}
-
-      {/* 显示已选择的地址 */}
-      {value && (
-        <div className="text-xs text-gray-500 pt-1 border-t border-white/10">
-          已选择: {value}
-        </div>
-      )}
+      <div className="z-10">
+        <label className="block text-xs text-gray-500 mb-1 font-medium">区/县</label>
+        <GlassSelect
+          value={districtCode}
+          onChange={(val) => setDistrictCode(String(val))}
+          options={districts}
+          placeholder="选择区县"
+        />
+      </div>
     </div>
   );
 }
