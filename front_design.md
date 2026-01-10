@@ -9,10 +9,10 @@
 
 ## 1. 设计理念 (Design Philosophy)
 
-参考 Prismo 模板的"**柔光晨曦**"视觉语言，打造一个**温暖、专业、高转化**的命理工具。
+参考 Prismo 模板的"**柔光晚霞**"视觉语言，打造一个**温暖、神秘、高转化**的命理工具。
 
-- **核心体验**: 用户应该感受到"晨光初照，云雾渐散"的通透与希望感
-- **视觉关键词**: `Soft Gradient` (柔和渐变), `Grain Texture` (颗粒质感), `Warm Minimalism` (暖色极简)
+- **核心体验**: 用户应该感受到"暮色渐浓，霞光满天"的沉静与神秘感
+- **视觉关键词**: `Soft Gradient` (柔和渐变), `Grain Texture` (颗粒质感), `Warm Mysticism` (暖色神秘)
 
 ---
 
@@ -24,11 +24,11 @@ Prismo 最具辨识度的视觉元素是其**多层弥散光晕背景**。
 
 **背景结构 (由下至上):**
 
-1. **底色**: `#F2F0EE` (暖米白)
+1. **底色**: `#F5F0EB` (暖杏白，略带黄昏调)
 2. **弥散光晕层 (Blur Clouds)**:
-   - 左上角: 淡紫蓝色 (Indigo/Light Blue)
-   - 右上角/右侧: 淡粉橙色 (Soft Peach/Coral)
-   - 底部/左下: 淡紫色 (Pale Violet)
+   - 左上角: 深紫蓝色 (Deep Indigo) - 模拟天际渐暗
+   - 右上角/右侧: 暖橙粉色 (Warm Coral/Peach) - 晚霞主色
+   - 底部/左下: 玫瑰紫色 (Rose Violet) - 霞光余韵
    - 所有光晕应用 `filter: blur(100px - 150px)`
 3. **颗粒纹理层 (Grain Overlay)**:
    - 全屏覆盖一层细微的 Noise/Grain 纹理
@@ -44,11 +44,11 @@ body::before {
   inset: 0;
   z-index: -1;
   background:
-    radial-gradient(circle at 0% 0%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
-    radial-gradient(circle at 100% 10%, rgba(251, 146, 60, 0.12) 0%, transparent 35%),
-    radial-gradient(circle at 100% 100%, rgba(192, 132, 252, 0.1) 0%, transparent 40%),
-    radial-gradient(circle at 0% 80%, rgba(244, 114, 182, 0.08) 0%, transparent 35%),
-    #F2F0EE;
+    radial-gradient(circle at 0% 0%, rgba(79, 70, 229, 0.18) 0%, transparent 45%),    /* Deep Indigo - 天际渐暗 */
+    radial-gradient(circle at 100% 10%, rgba(251, 146, 60, 0.15) 0%, transparent 40%), /* Warm Orange - 晚霞主光 */
+    radial-gradient(circle at 100% 100%, rgba(219, 39, 119, 0.1) 0%, transparent 40%), /* Rose Pink - 霞光余韵 */
+    radial-gradient(circle at 0% 80%, rgba(167, 139, 250, 0.12) 0%, transparent 35%),  /* Soft Violet - 暮色渐浓 */
+    #F5F0EB; /* 暖杏白底色 */
 }
 
 body::after {
@@ -66,7 +66,7 @@ body::after {
 
 | Token Name | Value | Usage |
 | :--- | :--- | :--- |
-| `--bg-base` | `#F2F0EE` | 页面底色 (暖奶油白) |
+| `--bg-base` | `#F5F0EB` | 页面底色 (暖杏白) |
 | `--text-primary` | `#1A1A1A` | 主标题/正文 (深黑) |
 | `--text-muted` | `rgba(0,0,0,0.5)` | 次要文字 |
 | `--accent-orange` | `#F97518` | 高亮文字、标签 |
@@ -247,4 +247,4 @@ body::after {
 3. **优先级 P2**: 统一按钮样式为胶囊形
 4. **优先级 P3**: 添加颗粒纹理层
 
-**备注**: 设计师应重点参考 Prismo 的背景渐变处理和整体"柔光"氛围，将其与八字命理的"神秘/希望"主题融合。
+**备注**: 设计师应重点参考 Prismo 的背景渐变处理和整体"柔光"氛围，将其与八字命理的"神秘/命运"主题融合。晚霞的意象更契合命理的深邃与未知感。
