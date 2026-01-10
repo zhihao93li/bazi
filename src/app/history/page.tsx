@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { PageTransition, StaggerItem } from "@/components/ui/page-transition";
 import type { LunarDateInfo, BaziData } from "@/lib/bazi/types";
 
 interface ReportSummary {
@@ -136,7 +137,7 @@ export default function HistoryPage() {
     return `${y}/${m}/${d} ${h}:${min}`;
   };
 
-  // Format birth info
+  // Format birth info (lunar date)
   const formatBirthInfo = (info: LunarDateInfo) => {
     return `农历 ${info.yearInChinese}年 ${info.monthInChinese}月 ${info.dayInChinese}`;
   };
@@ -144,7 +145,7 @@ export default function HistoryPage() {
   if (status === "loading" || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-gray-500">加载中...</div>
+        <div className="animate-spin w-8 h-8 border-2 border-[var(--accent-orange)] border-t-transparent rounded-full" />
       </div>
     );
   }
@@ -152,55 +153,60 @@ export default function HistoryPage() {
   return (
     <div className="relative min-h-screen pb-20">
       <div className="relative z-10 max-w-6xl mx-auto px-4 py-12">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          {/* Page Title */}
-          <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold mb-4 gradient-text">历史记录</h1>
-            <p className="text-gray-400">查看您的命理分析报告</p>
-          </div>
+        <PageTransition>
+          {/* Page Title - Requirement 12.1: Staggered fade-in-up */}
+          <StaggerItem className="text-center mb-8 sm:mb-12">
+            <h1 className="text-responsive-title font-semibold mb-3 sm:mb-4 gradient-text">历史记录</h1>
+            <p className="text-sm sm:text-base text-[var(--text-muted)]">查看您的命理分析报告</p>
+          </StaggerItem>
 
           {/* Error Message */}
           {error && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mb-8 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400"
-            >
-              {error}
-            </motion.div>
+            <StaggerItem>
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-8 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600"
+              >
+                {error}
+              </motion.div>
+            </StaggerItem>
           )}
 
-          <div className="grid lg:grid-cols-3 gap-8">
-            {/* Reports List */}
-            <div className="lg:col-span-1">
-              <div className="glass-card p-6">
-                <h2 className="text-lg font-semibold mb-4">报告列表</h2>
-                <div className="space-y-3 max-h-[600px] overflow-y-auto">
+          {/* 1:2 ratio layout - Reports List : Report Detail */}
+          <StaggerItem>
+            <div className="layout-two-panel">
+            {/* Reports List - 1 part */}
+            <div className="panel-list">
+              <div className="glass-card p-4 sm:p-6 h-full">
+                <h2 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-[var(--text-primary)]">报告列表</h2>
+                <div className="space-y-2 sm:space-y-3 max-h-[400px] lg:max-h-[600px] overflow-y-auto pr-1">
                   {reports.map((report) => (
                     <motion.div
                       key={report.id}
-                      whileHover={{ scale: 1.02 }}
-                      className={`p-4 rounded-xl cursor-pointer transition-all ${selectedReport?.id === report.id
-                        ? "bg-purple-100 border border-purple-200 shadow-sm"
-                        : "bg-white/40 border border-white/60 hover:bg-white/60"
-                        }`}
+                      whileHover={{ scale: 1.01 }}
+                      className={`glass-card p-3 sm:p-4 cursor-pointer transition-all duration-200 ${
+                        selectedReport?.id === report.id
+                          ? "!border-purple-400 !border-2 bg-purple-50/50 shadow-md"
+                          : "hover:shadow-md"
+                      }`}
+                      style={{ 
+                        // Prevent hover scale on glass-card when it's a list item
+                        transform: 'none'
+                      }}
                       onClick={() => handleViewReport(report.id)}
                     >
                       <div className="flex justify-between items-start">
                         <div className="flex-1 min-w-0">
                           {report.subjectName && (
-                            <div className="text-sm text-purple-400 mb-1">
+                            <div className="text-xs sm:text-sm text-purple-500 font-medium mb-1">
                               {report.subjectName}
                             </div>
                           )}
-                          <div className="font-medium truncate">
+                          <div className="font-medium text-sm sm:text-base text-[var(--text-primary)] truncate">
                             {formatBirthInfo(report.birthInfo)}
                           </div>
-                          <div className="text-sm text-gray-500 mt-1">
+                          <div className="text-xs sm:text-sm text-[var(--text-muted)] mt-1">
                             {formatDate(report.createdAt)}
                           </div>
                         </div>
@@ -210,7 +216,7 @@ export default function HistoryPage() {
                             handleDelete(report.id);
                           }}
                           disabled={deleting === report.id}
-                          className="ml-2 p-2 text-gray-500 hover:text-red-400 transition-colors"
+                          className="ml-2 p-2 text-[var(--text-muted)] hover:text-red-500 transition-colors rounded-lg hover:bg-red-50"
                         >
                           {deleting === report.id ? (
                             <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24">
@@ -244,7 +250,7 @@ export default function HistoryPage() {
                     </motion.div>
                   ))}
                   {reports.length === 0 && (
-                    <div className="text-center text-gray-500 py-8">
+                    <div className="text-center text-[var(--text-muted)] py-8">
                       暂无历史记录
                     </div>
                   )}
@@ -252,8 +258,8 @@ export default function HistoryPage() {
               </div>
             </div>
 
-            {/* Report Detail */}
-            <div className="lg:col-span-2">
+            {/* Report Detail - 2 parts */}
+            <div className="panel-detail">
               <AnimatePresence mode="wait">
                 {loadingDetail ? (
                   <motion.div
@@ -261,9 +267,9 @@ export default function HistoryPage() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="glass rounded-2xl p-8 flex items-center justify-center min-h-[400px]"
+                    className="glass-card p-6 sm:p-8 flex items-center justify-center min-h-[300px] lg:min-h-[500px]"
                   >
-                    <div className="text-gray-400">加载中...</div>
+                    <div className="animate-spin w-8 h-8 border-2 border-[var(--accent-orange)] border-t-transparent rounded-full" />
                   </motion.div>
                 ) : selectedReport ? (
                   <motion.div
@@ -271,25 +277,25 @@ export default function HistoryPage() {
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
-                    className="glass rounded-2xl p-8"
+                    className="glass-card p-4 sm:p-6 md:p-8"
                   >
-                    {/* Birth Info */}
-                    <div className="mb-6">
-                      <h3 className="text-lg font-semibold mb-2">出生信息</h3>
+                    {/* Birth Info - Lunar Date Display (Requirement 9.4) */}
+                    <div className="mb-4 sm:mb-6 pb-4 sm:pb-6 border-b border-[var(--border-subtle)]">
+                      <h3 className="text-base sm:text-lg font-semibold mb-2 sm:mb-3 text-[var(--text-primary)]">出生信息</h3>
                       {selectedReport.subjectName && (
-                        <div className="text-purple-400 mb-1">
+                        <div className="text-purple-500 font-medium mb-2 text-sm sm:text-base">
                           测算对象：{selectedReport.subjectName}
                         </div>
                       )}
-                      <div className="text-gray-400">
+                      <div className="text-sm sm:text-base text-[var(--text-muted)]">
                         {formatBirthInfo(selectedReport.birthInfo)}
                       </div>
                     </div>
 
                     {/* Bazi Chart */}
-                    <div className="mb-6">
-                      <h3 className="text-lg font-semibold mb-4">八字四柱</h3>
-                      <div className="grid grid-cols-4 gap-4">
+                    <div className="mb-4 sm:mb-6 pb-4 sm:pb-6 border-b border-[var(--border-subtle)]">
+                      <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-[var(--text-primary)]">八字四柱</h3>
+                      <div className="grid grid-cols-4 gap-2 sm:gap-4">
                         {[
                           { label: "年柱", pillar: selectedReport.baziChart.fourPillars.year },
                           { label: "月柱", pillar: selectedReport.baziChart.fourPillars.month },
@@ -297,49 +303,50 @@ export default function HistoryPage() {
                           { label: "时柱", pillar: selectedReport.baziChart.fourPillars.hour },
                         ].map(({ label, pillar }) => (
                           <div key={label} className="text-center">
-                            <div className="text-sm text-gray-400 mb-2">{label}</div>
-                            <div className="bg-white/5 rounded-xl p-3">
-                              <div className="text-2xl font-bold">
+                            <div className="text-xs sm:text-sm text-[var(--text-muted)] mb-1 sm:mb-2">{label}</div>
+                            <div className="bg-white/60 backdrop-blur-sm rounded-lg sm:rounded-xl p-2 sm:p-3 border border-[var(--border-subtle)]">
+                              <div className="text-lg sm:text-2xl font-bold text-[var(--text-primary)]">
                                 {pillar.heavenlyStem.chinese}
                               </div>
-                              <div className="text-2xl font-bold">
+                              <div className="text-lg sm:text-2xl font-bold text-[var(--text-primary)]">
                                 {pillar.earthlyBranch.chinese}
                               </div>
                             </div>
                           </div>
                         ))}
                       </div>
-                      <div className="mt-4 text-center text-gray-400">
-                        日主：<span className="text-white font-medium">{selectedReport.baziChart.dayMaster.stem.chinese}</span>
+                      <div className="mt-3 sm:mt-4 text-center text-sm sm:text-base text-[var(--text-muted)]">
+                        日主：<span className="text-[var(--text-primary)] font-medium">{selectedReport.baziChart.dayMaster.stem.chinese}</span>
                       </div>
                     </div>
 
                     {/* Analysis Tabs */}
-                    <div className="mb-6">
-                      <h3 className="text-lg font-semibold mb-4">命理分析</h3>
-                      <div className="flex flex-wrap gap-2 mb-4">
+                    <div className="mb-4 sm:mb-6">
+                      <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-[var(--text-primary)]">命理分析</h3>
+                      <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-3 sm:mb-4">
                         {ANALYSIS_TABS.map((tab) => (
                           <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
-                            className={`px-4 py-2 rounded-lg transition-all ${activeTab === tab.id
-                              ? "bg-purple-500 text-white"
-                              : "bg-white/10 text-gray-400 hover:bg-white/15"
-                              }`}
+                            className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full transition-all text-xs sm:text-sm font-medium ${
+                              activeTab === tab.id
+                                ? "bg-[var(--text-primary)] text-white shadow-md"
+                                : "bg-white/60 text-[var(--text-muted)] hover:bg-white/80 border border-[var(--border-subtle)]"
+                            }`}
                           >
                             {tab.label}
                           </button>
                         ))}
                       </div>
-                      <div className="bg-white/5 rounded-xl p-6">
-                        <div className="whitespace-pre-wrap text-gray-300">
+                      <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-[var(--border-subtle)]">
+                        <div className="whitespace-pre-wrap text-sm sm:text-base text-[var(--text-primary)] leading-relaxed">
                           {selectedReport.analysis[activeTab] || "暂无分析内容"}
                         </div>
                       </div>
                     </div>
 
-                    {/* Meta Info */}
-                    <div className="text-sm text-gray-500 flex justify-between">
+                    {/* Meta Info - Generation Time Display (Requirement 9.4) */}
+                    <div className="text-xs sm:text-sm text-[var(--text-muted)] flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0 pt-3 sm:pt-4 border-t border-[var(--border-subtle)]">
                       <span>消耗积分：{selectedReport.pointsCost}</span>
                       <span>生成时间：{formatDate(selectedReport.createdAt)}</span>
                     </div>
@@ -350,11 +357,11 @@ export default function HistoryPage() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="glass rounded-2xl p-8 flex items-center justify-center min-h-[400px]"
+                    className="glass-card p-6 sm:p-8 flex items-center justify-center min-h-[300px] lg:min-h-[500px]"
                   >
-                    <div className="text-center text-gray-500">
+                    <div className="text-center text-[var(--text-muted)]">
                       <svg
-                        className="w-16 h-16 mx-auto mb-4 opacity-50"
+                        className="w-16 h-16 mx-auto mb-4 opacity-40"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -373,7 +380,8 @@ export default function HistoryPage() {
               </AnimatePresence>
             </div>
           </div>
-        </motion.div>
+          </StaggerItem>
+        </PageTransition>
       </div>
     </div>
   );

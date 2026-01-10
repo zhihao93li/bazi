@@ -13,18 +13,14 @@ export function DaYunTimeline({ yun }: DaYunTimelineProps) {
 
     if (!yun) return null;
 
-    // Find current DaYun index on mount if possible
-    // Effects are better for this but for simplicity we default to 0 or logic in parent
-    // We can let user explore.
-
     const selectedDaYun = yun.daYunList[selectedDaYunIndex];
 
     return (
-        <div className="glass-card p-6 md:p-8 mb-8">
+        <div className="bg-white/80 backdrop-blur-xl border border-white/60 rounded-3xl p-6 md:p-8 mb-8 shadow-[0_8px_32px_rgba(0,0,0,0.06)]">
             <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                    <span className="text-pink-500">❖</span> 大运历程
-                    <span className="text-xs font-normal text-gray-500 ml-2">
+                <h3 className="text-lg font-medium text-[var(--text-primary)] flex items-center gap-2">
+                    <span className="text-rose-400">❖</span> 大运历程
+                    <span className="text-xs font-normal text-[var(--text-muted)] ml-2">
                         ({yun.forward ? '顺行' : '逆行'} · {yun.startAge}岁起运)
                     </span>
                 </h3>
@@ -43,18 +39,18 @@ export function DaYunTimeline({ yun }: DaYunTimelineProps) {
                             <button
                                 key={index}
                                 onClick={() => setSelectedDaYunIndex(index)}
-                                className={`flex-shrink-0 snap-start w-24 h-32 rounded-xl flex flex-col items-center justify-between p-3 transition-all border ${isSelected
-                                        ? 'bg-purple-600 text-white shadow-lg scale-105 border-purple-600'
-                                        : 'bg-white/40 text-gray-600 hover:bg-white/60 border-white/50'
-                                    } ${isCurrent && !isSelected ? 'ring-2 ring-purple-400 ring-offset-2' : ''}`}
+                                className={`flex-shrink-0 snap-start w-24 h-32 rounded-2xl flex flex-col items-center justify-between p-3 transition-all border relative ${isSelected
+                                        ? 'bg-[var(--text-primary)] text-white shadow-lg scale-105 border-[var(--text-primary)]'
+                                        : 'bg-white/60 text-[var(--text-primary)] hover:bg-white/80 border-white/50 hover:shadow-md'
+                                    } ${isCurrent && !isSelected ? 'ring-2 ring-[var(--accent-orange)] ring-offset-2' : ''}`}
                             >
-                                <div className="text-xs opacity-80">{daYun.startAge}-{daYun.endAge}岁</div>
-                                <div className={`text-2xl font-serif font-bold ${isSelected ? 'text-white' : 'text-gray-800'}`}>
+                                <div className={`text-xs ${isSelected ? 'opacity-80' : 'text-[var(--text-muted)]'}`}>{daYun.startAge}-{daYun.endAge}岁</div>
+                                <div className={`text-2xl font-medium ${isSelected ? 'text-white' : 'text-[var(--text-primary)]'}`}>
                                     {daYun.ganZhi}
                                 </div>
-                                <div className="text-[10px] opacity-60">{daYun.startYear}起</div>
+                                <div className={`text-[10px] ${isSelected ? 'opacity-60' : 'text-[var(--text-muted)]'}`}>{daYun.startYear}起</div>
                                 {isCurrent && (
-                                    <div className="absolute top-2 right-2 w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+                                    <div className="absolute top-2 right-2 w-2 h-2 bg-[var(--accent-orange)] rounded-full animate-pulse" />
                                 )}
                             </button>
                         );
@@ -70,9 +66,9 @@ export function DaYunTimeline({ yun }: DaYunTimelineProps) {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
                     transition={{ duration: 0.3 }}
-                    className="bg-white/30 rounded-2xl p-6 border border-white/40"
+                    className="bg-white/50 rounded-2xl p-6 border border-white/40"
                 >
-                    <h4 className="text-sm font-bold text-gray-700 mb-4 flex items-center justify-between">
+                    <h4 className="text-sm font-medium text-[var(--text-primary)] mb-4 flex items-center justify-between">
                         <span>{selectedDaYun?.ganZhi}运 ({selectedDaYun?.startYear} - {selectedDaYun?.endYear}) 流年详情</span>
                     </h4>
 
@@ -82,13 +78,15 @@ export function DaYunTimeline({ yun }: DaYunTimelineProps) {
                             return (
                                 <div
                                     key={ln.year}
-                                    className={`p-3 rounded-lg text-center transition-colors ${isThisYear ? 'bg-purple-100 border border-purple-200 shadow-sm' : 'hover:bg-white/40'
-                                        }`}
+                                    className={`p-3 rounded-xl text-center transition-all ${isThisYear 
+                                        ? 'bg-[var(--accent-orange)]/10 border border-[var(--accent-orange)]/20 shadow-sm' 
+                                        : 'hover:bg-white/60'
+                                    }`}
                                 >
-                                    <div className={`font-medium ${isThisYear ? 'text-purple-700' : 'text-gray-800'}`}>
+                                    <div className={`font-medium ${isThisYear ? 'text-[var(--accent-orange)]' : 'text-[var(--text-primary)]'}`}>
                                         {ln.ganZhi}
                                     </div>
-                                    <div className="text-xs text-gray-500 mt-1">{ln.year}</div>
+                                    <div className="text-xs text-[var(--text-muted)] mt-1">{ln.year}</div>
                                 </div>
                             );
                         })}

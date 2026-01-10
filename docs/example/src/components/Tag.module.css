@@ -1,0 +1,55 @@
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 10px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: var(--radius-full);
+  background: var(--dark-7);
+  color: var(--absolute-white);
+}
+
+.default {
+  background: var(--dark-7);
+  color: var(--absolute-white);
+}
+
+.light {
+  background: rgba(255, 255, 255, 0.2);
+  color: var(--dark-7);
+}
+
+.red {
+  background: var(--accent-red);
+  color: var(--absolute-white);
+}
+
+.purple {
+  background: var(--accent-purple);
+  color: var(--absolute-white);
+}
+
+.green {
+  background: var(--accent-green-light);
+  color: var(--absolute-white);
+}
+
+.orange {
+  background: var(--accent-orange);
+  color: var(--absolute-white);
+}
+
+.pink {
+  background: var(--accent-pink);
+  color: var(--absolute-white);
+}
+
+.yellow {
+  background: var(--accent-yellow);
+  color: var(--dark-7);
+}
+
+.blue {
+  background: var(--accent-blue);
+  color: var(--absolute-white);
+}

@@ -1,0 +1,114 @@
+.main {
+  position: relative;
+  min-height: 100vh;
+  padding: 150px 40px 100px;
+  background: var(--light-94);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.background {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.leftAbstract,
+.rightAbstract {
+  position: absolute;
+  width: 400px;
+  height: 600px;
+  filter: blur(120px);
+  opacity: 0.5;
+}
+
+.leftAbstract {
+  top: 0;
+  left: -100px;
+  background: linear-gradient(
+    180deg,
+    rgba(239, 123, 22, 0.6),
+    rgba(255, 47, 47, 0.6),
+    rgba(138, 67, 225, 0.6),
+    rgba(213, 17, 253, 0.6)
+  );
+}
+
+.rightAbstract {
+  top: 0;
+  right: -100px;
+  background: linear-gradient(
+    180deg,
+    rgba(213, 17, 253, 0.6),
+    rgba(138, 67, 225, 0.6),
+    rgba(255, 47, 47, 0.6),
+    rgba(239, 123, 22, 0.6)
+  );
+}
+
+.noise {
+  position: absolute;
+  inset: 0;
+  background-image: url('https://framerusercontent.com/images/6mcf62RlDfRfU61Yg5vb2pefpi4.png');
+  opacity: 0.75;
+  pointer-events: none;
+}
+
+.container {
+  position: relative;
+  z-index: 1;
+  max-width: 700px;
+  padding: 0 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 24px;
+}
+
+.errorCode {
+  font-size: 120px;
+  font-weight: 700;
+  color: var(--dark-7);
+  line-height: 1;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.title {
+  font-size: 32px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--dark-7);
+}
+
+.description {
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--grey-50);
+  line-height: 1.5;
+}
+
+@media (max-width: 768px) {
+  .main {
+    padding: 120px 20px 60px;
+  }
+
+  .errorCode {
+    font-size: 80px;
+  }
+
+  .title {
+    font-size: 24px;
+  }
+
+  .description {
+    font-size: 16px;
+  }
+}

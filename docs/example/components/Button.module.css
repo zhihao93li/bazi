@@ -1,0 +1,78 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 500;
+  border-radius: var(--radius-full);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/* Variants */
+.primary {
+  background: var(--dark-7);
+  color: var(--absolute-white);
+}
+
+.primary:hover {
+  background: var(--grey-24);
+  transform: translateY(-1px);
+}
+
+.secondary {
+  background: var(--absolute-white);
+  color: var(--dark-7);
+  border: 1px solid var(--light-85);
+}
+
+.secondary:hover {
+  background: var(--light-96);
+}
+
+.outline {
+  background: transparent;
+  color: var(--dark-7);
+  border: 1px solid var(--dark-7);
+}
+
+.outline:hover {
+  background: var(--dark-7);
+  color: var(--absolute-white);
+}
+
+.ghost {
+  background: transparent;
+  color: var(--dark-7);
+}
+
+.ghost:hover {
+  background: var(--light-94);
+}
+
+/* Sizes */
+.small {
+  padding: 10px 16px;
+  font-size: 14px;
+}
+
+.medium {
+  padding: 14px 24px;
+  font-size: 15px;
+}
+
+.large {
+  padding: 16px 28px;
+  font-size: 16px;
+}
+
+/* Light variant for dark backgrounds */
+.light {
+  background: var(--absolute-white);
+  color: var(--dark-7);
+}
+
+.light:hover {
+  background: var(--light-90);
+}

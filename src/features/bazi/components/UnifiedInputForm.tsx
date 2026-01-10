@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { GlassSelect } from "@/components/ui/glass-select";
 import { GlassSwitch } from "@/components/ui/glass-switch";
 import LocationSelect from "@/components/LocationSelect";
+import { PillButton } from "@/components/ui/pill-button";
 import { useBaziForm } from "../hooks/useBaziForm";
 
 const YEARS = Array.from({ length: 120 }, (_, i) => ({ value: 1920 + i, label: `${1920 + i}年` })).reverse();
@@ -29,19 +30,20 @@ export function UnifiedInputForm({ onCalculate }: UnifiedInputFormProps) {
     };
 
     return (
-        <div className="glass-card p-8 md:p-10 max-w-4xl mx-auto relative overflow-hidden">
-            {/* Decorative gradient blob inside card */}
-            <div className="absolute top-0 right-0 w-64 h-64 bg-purple-200 rounded-full blur-3xl opacity-20 -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+        <div className="bg-white/80 backdrop-blur-xl border border-white/60 rounded-3xl p-8 md:p-10 max-w-4xl mx-auto relative overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.06)] hover:shadow-[0_12px_40px_rgba(0,0,0,0.1)] transition-all duration-300">
+            {/* Decorative gradient blob inside card - Prismo warm tones */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-orange-200 to-rose-200 rounded-full blur-3xl opacity-20 -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-violet-200 to-indigo-200 rounded-full blur-3xl opacity-15 translate-y-1/2 -translate-x-1/2 pointer-events-none" />
 
             <div className="relative z-10">
-                <h2 className="text-2xl font-serif font-bold text-gray-800 mb-8 text-center">
+                <h2 className="text-2xl font-medium text-[var(--text-primary)] mb-8 text-center">
                     输入您的出生信息
                 </h2>
 
                 {/* Top Row: Basic Switches */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                     <div className="flex flex-col gap-2">
-                        <span className="text-sm text-gray-500 font-medium">性别</span>
+                        <span className="text-sm text-[var(--text-muted)] font-medium">性别</span>
                         <GlassSwitch
                             checked={formState.gender === 'female'}
                             onChange={(checked) => updateField('gender', checked ? 'female' : 'male')}
@@ -49,7 +51,7 @@ export function UnifiedInputForm({ onCalculate }: UnifiedInputFormProps) {
                         />
                     </div>
                     <div className="flex flex-col gap-2">
-                        <span className="text-sm text-gray-500 font-medium">历法</span>
+                        <span className="text-sm text-[var(--text-muted)] font-medium">历法</span>
                         <GlassSwitch
                             checked={formState.calendarType === 'lunar'}
                             onChange={(checked) => updateField('calendarType', checked ? 'lunar' : 'solar')}
@@ -61,7 +63,7 @@ export function UnifiedInputForm({ onCalculate }: UnifiedInputFormProps) {
                 {/* Date Selection Row */}
                 <div className="grid grid-cols-3 gap-3 mb-6">
                     <div className="z-40">
-                        <span className="text-xs text-gray-500 font-medium mb-1 block">年份</span>
+                        <span className="text-xs text-[var(--text-muted)] font-medium mb-1 block">年份</span>
                         <GlassSelect
                             value={formState.year}
                             onChange={(v) => updateField('year', Number(v))}
@@ -70,7 +72,7 @@ export function UnifiedInputForm({ onCalculate }: UnifiedInputFormProps) {
                         />
                     </div>
                     <div className="z-40">
-                        <span className="text-xs text-gray-500 font-medium mb-1 block">月份</span>
+                        <span className="text-xs text-[var(--text-muted)] font-medium mb-1 block">月份</span>
                         <GlassSelect
                             value={formState.month}
                             onChange={(v) => updateField('month', Number(v))}
@@ -79,7 +81,7 @@ export function UnifiedInputForm({ onCalculate }: UnifiedInputFormProps) {
                         />
                     </div>
                     <div className="z-40">
-                        <span className="text-xs text-gray-500 font-medium mb-1 block">日期</span>
+                        <span className="text-xs text-[var(--text-muted)] font-medium mb-1 block">日期</span>
                         <GlassSelect
                             value={formState.day}
                             onChange={(v) => updateField('day', Number(v))}
@@ -92,7 +94,7 @@ export function UnifiedInputForm({ onCalculate }: UnifiedInputFormProps) {
                 {/* Time Selection Row */}
                 <div className="grid grid-cols-2 gap-4 mb-8">
                     <div className="z-30">
-                        <span className="text-xs text-gray-500 font-medium mb-1 block">出生时辰 (24小时制)</span>
+                        <span className="text-xs text-[var(--text-muted)] font-medium mb-1 block">出生时辰 (24小时制)</span>
                         <GlassSelect
                             value={formState.hour}
                             onChange={(v) => updateField('hour', Number(v))}
@@ -101,7 +103,7 @@ export function UnifiedInputForm({ onCalculate }: UnifiedInputFormProps) {
                         />
                     </div>
                     <div className="z-30">
-                        <span className="text-xs text-gray-500 font-medium mb-1 block">分钟 (可选)</span>
+                        <span className="text-xs text-[var(--text-muted)] font-medium mb-1 block">分钟 (可选)</span>
                         <GlassSelect
                             value={formState.minute}
                             onChange={(v) => updateField('minute', Number(v))}
@@ -118,7 +120,7 @@ export function UnifiedInputForm({ onCalculate }: UnifiedInputFormProps) {
                         onChange={(loc) => updateField('location', loc)}
                         error={!!error && !formState.location}
                     />
-                    <p className="text-xs text-gray-400 mt-2">
+                    <p className="text-xs text-[var(--text-muted)] mt-2">
                         * 即使不确定准确时间，也请填写大致出生地点，将用于真太阳时校正。
                     </p>
                 </div>
@@ -126,33 +128,34 @@ export function UnifiedInputForm({ onCalculate }: UnifiedInputFormProps) {
                 {/* Leap Month (Conditional) */}
                 {formState.calendarType === 'lunar' && (
                     <div className="mb-8 flex items-center justify-center">
-                        <label className="flex items-center gap-2 cursor-pointer text-gray-600">
+                        <label className="flex items-center gap-2 cursor-pointer text-[var(--text-primary)]">
                             <input
                                 type="checkbox"
                                 checked={formState.isLeapMonth}
                                 onChange={(e) => updateField('isLeapMonth', e.target.checked)}
-                                className="w-4 h-4 rounded text-purple-600 focus:ring-purple-400"
+                                className="w-4 h-4 rounded text-[var(--accent-orange)] focus:ring-[var(--accent-orange)] border-[var(--border-subtle)]"
                             />
                             <span>是否为闰月</span>
                         </label>
                     </div>
                 )}
 
-                {/* Action Button */}
+                {/* Action Button - Prismo PillButton */}
                 <div className="mt-8">
-                    <button
+                    <PillButton
                         onClick={handleSubmit}
                         disabled={loading}
-                        className="w-full btn-primary py-4 text-lg shadow-xl shadow-purple-200"
+                        size="lg"
+                        className="w-full py-4 text-lg"
                     >
                         {loading ? "正在推算..." : "排布命盘"}
-                    </button>
+                    </PillButton>
 
                     {error && (
                         <motion.div
                             initial={{ opacity: 0, y: -10 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="mt-4 text-center text-red-500 text-sm bg-red-50 py-2 rounded-lg"
+                            className="mt-4 text-center text-red-500 text-sm bg-red-50/80 py-2 rounded-xl border border-red-100"
                         >
                             {error}
                         </motion.div>

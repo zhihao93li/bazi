@@ -4,7 +4,8 @@ import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { BackgroundBeams } from "@/components/ui/background-beams";
+import { PillButton } from "@/components/ui/pill-button";
+import { PageTransition, StaggerItem } from "@/components/ui/page-transition";
 
 interface PointsPackage {
   id: string;
@@ -135,146 +136,171 @@ export default function PointsPage() {
     });
   };
 
-  // Get transaction type label and color
+  // Get transaction type label and color - Prismo style color coding
   const getTransactionStyle = (type: string) => {
     if (type === "recharge" || type === "gift") {
       return {
         label: type === "recharge" ? "充值" : "赠送",
-        color: "text-green-400",
+        color: "text-emerald-600",
+        bgColor: "bg-emerald-50",
         prefix: "+",
       };
     }
     return {
       label: "消费",
-      color: "text-red-400",
-      prefix: "",
+      color: "text-rose-600",
+      bgColor: "bg-rose-50",
+      prefix: "-",
     };
   };
 
   if (status === "loading" || loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-gray-400">加载中...</div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="flex items-center gap-3 text-[var(--text-muted)]">
+          <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+          <span>加载中...</span>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="relative min-h-screen bg-black">
-      <BackgroundBeams className="absolute inset-0 opacity-30" />
+    <div className="min-h-screen">
+      <div className="max-w-6xl mx-auto px-4 py-12">
+        <PageTransition>
+          {/* Page Title - Requirement 12.1: Staggered fade-in-up */}
+          <StaggerItem className="text-center mb-8 sm:mb-12">
+            <h1 className="text-responsive-title font-semibold mb-3 sm:mb-4 text-[var(--text-primary)]">
+              积分中心
+            </h1>
+            <p className="text-sm sm:text-base text-[var(--text-muted)]">管理您的积分余额和充值</p>
+          </StaggerItem>
 
-      <div className="relative z-10 max-w-6xl mx-auto px-4 py-12">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          {/* Page Title */}
-          <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold mb-4 gradient-text">积分中心</h1>
-            <p className="text-gray-400">管理您的积分余额和充值</p>
-          </div>
-
-          {/* Balance Card */}
-          <div className="glass rounded-2xl p-8 mb-8 text-center">
-            <div className="text-gray-400 mb-2">当前积分</div>
-            <div className="text-5xl font-bold gradient-text mb-4">{balance}</div>
-            <div className="text-sm text-gray-500">
+          {/* Balance Card - Requirement 10.1: Large gradient text */}
+          <StaggerItem className="glass-card p-6 sm:p-8 md:p-12 mb-6 sm:mb-8 text-center">
+            <div className="text-[var(--text-muted)] mb-2 sm:mb-3 text-base sm:text-lg">当前积分</div>
+            <div className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold gradient-text mb-3 sm:mb-4">
+              {balance.toLocaleString()}
+            </div>
+            <div className="text-xs sm:text-sm text-[var(--text-muted)]">
               积分可用于命理分析服务
             </div>
-          </div>
+          </StaggerItem>
 
           {/* Messages */}
           {error && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mb-8 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400"
-            >
-              {error}
-            </motion.div>
+            <StaggerItem>
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-6 sm:mb-8 p-3 sm:p-4 bg-rose-50 border border-rose-200 rounded-xl sm:rounded-2xl text-rose-600 text-sm sm:text-base"
+              >
+                {error}
+              </motion.div>
+            </StaggerItem>
           )}
 
           {success && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mb-8 p-4 bg-green-500/10 border border-green-500/20 rounded-xl text-green-400"
-            >
-              {success}
-            </motion.div>
+            <StaggerItem>
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-6 sm:mb-8 p-3 sm:p-4 bg-emerald-50 border border-emerald-200 rounded-xl sm:rounded-2xl text-emerald-600 text-sm sm:text-base"
+              >
+                {success}
+              </motion.div>
+            </StaggerItem>
           )}
 
-          {/* Packages */}
-          <div className="glass rounded-2xl p-8 mb-8">
-            <h2 className="text-xl font-semibold mb-6">充值套餐</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {packages.map((pkg) => (
+          {/* Packages - Requirement 10.2: Four-column layout, 10.3: Hover scale */}
+          <StaggerItem
+            className="glass-card no-hover-scale p-4 sm:p-6 md:p-8 mb-6 sm:mb-8"
+          >
+            <h2 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 text-[var(--text-primary)]">充值套餐</h2>
+            <div className="grid-packages">
+              {packages.map((pkg, index) => (
                 <motion.div
                   key={pkg.id}
-                  whileHover={{ scale: 1.02 }}
-                  className="bg-white/5 rounded-xl p-6 text-center border border-white/10 hover:border-purple-500/50 transition-all"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: 0.1 * index }}
+                  whileHover={{ scale: 1.05 }}
+                  className="bg-white/80 rounded-xl sm:rounded-2xl p-4 sm:p-6 text-center border border-[var(--border-subtle)] 
+                             hover:border-[var(--accent-orange)] hover:shadow-lg transition-all cursor-pointer"
                 >
-                  <div className="text-2xl font-bold text-purple-400 mb-2">
+                  <div className="text-2xl sm:text-3xl font-bold gradient-text mb-1 sm:mb-2">
                     {pkg.points}
                   </div>
-                  <div className="text-sm text-gray-400 mb-4">积分</div>
-                  <div className="text-xl font-semibold mb-4">
+                  <div className="text-xs sm:text-sm text-[var(--text-muted)] mb-3 sm:mb-4">积分</div>
+                  <div className="text-lg sm:text-xl font-semibold text-[var(--text-primary)] mb-3 sm:mb-4">
                     {formatPrice(pkg.price)}
                   </div>
-                  <button
+                  <PillButton
                     onClick={() => handlePurchase(pkg.id)}
                     disabled={purchasing === pkg.id}
-                    className="w-full btn-primary py-2 rounded-lg text-sm disabled:opacity-50"
+                    size="sm"
+                    className="w-full"
                   >
                     {purchasing === pkg.id ? "处理中..." : "购买"}
-                  </button>
+                  </PillButton>
                 </motion.div>
               ))}
             </div>
             {packages.length === 0 && (
-              <div className="text-center text-gray-500 py-8">
+              <div className="text-center text-[var(--text-muted)] py-6 sm:py-8 text-sm sm:text-base">
                 暂无可用套餐
               </div>
             )}
-          </div>
+          </StaggerItem>
 
-          {/* Transaction History */}
-          <div className="glass rounded-2xl p-8">
-            <h2 className="text-xl font-semibold mb-6">积分明细</h2>
-            <div className="space-y-4">
-              {transactions.map((tx) => {
+          {/* Transaction History - Requirement 10.4: Color coding */}
+          <StaggerItem
+            className="glass-card no-hover-scale p-4 sm:p-6 md:p-8"
+          >
+            <h2 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 text-[var(--text-primary)]">积分明细</h2>
+            <div className="space-y-2 sm:space-y-3">
+              {transactions.map((tx, index) => {
                 const style = getTransactionStyle(tx.type);
                 return (
-                  <div
+                  <motion.div
                     key={tx.id}
-                    className="flex items-center justify-between p-4 bg-white/5 rounded-xl"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.3, delay: 0.05 * index }}
+                    className="flex items-center justify-between p-3 sm:p-4 bg-white/60 rounded-lg sm:rounded-xl 
+                               border border-[var(--border-subtle)] hover:bg-white/80 transition-colors"
                   >
-                    <div className="flex-1">
-                      <div className="font-medium">{tx.description}</div>
-                      <div className="text-sm text-gray-500">
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-sm sm:text-base text-[var(--text-primary)] truncate">
+                        {tx.description}
+                      </div>
+                      <div className="text-xs sm:text-sm text-[var(--text-muted)]">
                         {formatDate(tx.createdAt)}
                       </div>
                     </div>
-                    <div className="text-right">
-                      <div className={`font-semibold ${style.color}`}>
+                    <div className="text-right ml-3">
+                      <div 
+                        className={`font-semibold text-base sm:text-lg ${style.color}`}
+                        data-transaction-type={tx.type}
+                      >
                         {style.prefix}{Math.abs(tx.amount)}
                       </div>
-                      <div className="text-sm text-gray-500">
-                        余额: {tx.balance}
+                      <div className="text-xs sm:text-sm text-[var(--text-muted)]">
+                        余额: {tx.balance.toLocaleString()}
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 );
               })}
               {transactions.length === 0 && (
-                <div className="text-center text-gray-500 py-8">
+                <div className="text-center text-[var(--text-muted)] py-6 sm:py-8 text-sm sm:text-base">
                   暂无积分记录
                 </div>
               )}
             </div>
-          </div>
-        </motion.div>
+          </StaggerItem>
+        </PageTransition>
       </div>
     </div>
   );

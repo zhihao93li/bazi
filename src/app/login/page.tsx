@@ -5,6 +5,8 @@ import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { PillButton } from "@/components/ui/pill-button";
+import { PageTransition, StaggerItem } from "@/components/ui/page-transition";
 
 type LoginMode = "phone" | "username";
 type FormMode = "login" | "register";
@@ -215,21 +217,17 @@ function LoginForm() {
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center px-4 py-20">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="relative z-10 w-full max-w-md"
-      >
-        <div className="glass-card p-8">
+    <div className="relative min-h-screen flex items-center justify-center px-4 py-12 sm:py-20">
+      <PageTransition className="relative z-10 w-full max-w-md">
+        <StaggerItem>
+          <div className="glass-card p-5 sm:p-8 hover:scale-100">
           {/* Header */}
-          <div className="text-center mb-6">
-            <Link href="/" className="inline-flex items-center gap-2 mb-4">
-              <span className="text-3xl">☯</span>
-              <span className="text-2xl font-bold gradient-text">八字命理</span>
+          <div className="text-center mb-5 sm:mb-6">
+            <Link href="/" className="inline-flex items-center gap-2 mb-3 sm:mb-4">
+              <span className="text-2xl sm:text-3xl">☯</span>
+              <span className="text-xl sm:text-2xl font-bold gradient-text">八字命理</span>
             </Link>
-            <h1 className="text-2xl font-semibold mb-2">
+            <h1 className="text-xl sm:text-2xl font-semibold text-[var(--text-primary)] mb-2">
               {loginMode === "phone"
                 ? "登录 / 注册"
                 : formMode === "login"
@@ -238,14 +236,14 @@ function LoginForm() {
             </h1>
           </div>
 
-          {/* Login Mode Tabs */}
-          <div className="flex mb-6 bg-white/5 rounded-xl p-1">
+          {/* Login Mode Tabs - Prismo Style */}
+          <div className="flex mb-5 sm:mb-6 bg-black/5 rounded-full p-1">
             <button
               type="button"
               onClick={() => setLoginMode("phone")}
-              className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${loginMode === "phone"
-                ? "bg-purple-600 text-white"
-                : "text-gray-400 hover:text-white"
+              className={`flex-1 py-2 sm:py-2.5 px-3 sm:px-4 rounded-full text-xs sm:text-sm font-medium transition-all ${loginMode === "phone"
+                ? "bg-[var(--text-primary)] text-white shadow-md"
+                : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
                 }`}
             >
               手机号登录
@@ -253,9 +251,9 @@ function LoginForm() {
             <button
               type="button"
               onClick={() => setLoginMode("username")}
-              className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${loginMode === "username"
-                ? "bg-purple-600 text-white"
-                : "text-gray-400 hover:text-white"
+              className={`flex-1 py-2 sm:py-2.5 px-3 sm:px-4 rounded-full text-xs sm:text-sm font-medium transition-all ${loginMode === "username"
+                ? "bg-[var(--text-primary)] text-white shadow-md"
+                : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
                 }`}
             >
               账号密码
@@ -264,9 +262,9 @@ function LoginForm() {
 
           {/* Phone Login Form */}
           {loginMode === "phone" && (
-            <form onSubmit={handlePhoneLogin} className="space-y-5">
+            <form onSubmit={handlePhoneLogin} className="space-y-4 sm:space-y-5">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-xs sm:text-sm font-medium text-[var(--text-primary)] mb-1.5 sm:mb-2">
                   手机号
                 </label>
                 <input
@@ -274,29 +272,29 @@ function LoginForm() {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 11))}
                   placeholder="请输入手机号"
-                  className="input-glass"
+                  className="input-glass text-sm sm:text-base"
                   maxLength={11}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-xs sm:text-sm font-medium text-[var(--text-primary)] mb-1.5 sm:mb-2">
                   验证码
                 </label>
-                <div className="flex gap-3">
+                <div className="flex gap-2 sm:gap-3">
                   <input
                     type="text"
                     value={code}
                     onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
                     placeholder="请输入验证码"
-                    className="flex-1 input-glass"
+                    className="flex-1 input-glass text-sm sm:text-base"
                     maxLength={6}
                   />
                   <button
                     type="button"
                     onClick={handleSendCode}
                     disabled={countdown > 0 || sendingCode || !isValidPhone(phone)}
-                    className="px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white font-medium hover:bg-white/15 disabled:opacity-50 disabled:cursor-not-allowed transition-all whitespace-nowrap"
+                    className="px-3 sm:px-4 py-2 sm:py-3 bg-white/40 border border-[var(--border-subtle)] rounded-lg sm:rounded-xl text-xs sm:text-sm text-[var(--text-primary)] font-medium hover:bg-white/60 disabled:opacity-50 disabled:cursor-not-allowed transition-all whitespace-nowrap"
                   >
                     {sendingCode
                       ? "发送中..."
@@ -312,7 +310,7 @@ function LoginForm() {
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm"
+                  className="p-2.5 sm:p-3 bg-red-50 border border-red-200 rounded-lg sm:rounded-xl text-red-600 text-xs sm:text-sm"
                 >
                   {error}
                 </motion.div>
@@ -321,16 +319,18 @@ function LoginForm() {
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="p-3 bg-green-500/10 border border-green-500/20 rounded-xl text-green-400 text-sm"
+                  className="p-2.5 sm:p-3 bg-green-50 border border-green-200 rounded-lg sm:rounded-xl text-green-600 text-xs sm:text-sm"
                 >
                   {success}
                 </motion.div>
               )}
 
-              <button
+              <PillButton
                 type="submit"
                 disabled={loading || !isValidPhone(phone) || code.length !== 6}
-                className="w-full btn-primary py-4 rounded-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                variant="primary"
+                size="lg"
+                className="w-full text-sm sm:text-base"
               >
                 {loading ? (
                   <span className="inline-flex items-center gap-2">
@@ -343,9 +343,9 @@ function LoginForm() {
                 ) : (
                   "登录"
                 )}
-              </button>
+              </PillButton>
 
-              <div className="text-center text-sm text-gray-500">
+              <div className="text-center text-xs sm:text-sm text-[var(--text-muted)]">
                 <p>新用户首次登录自动注册</p>
                 <p className="mt-1">注册即送 100 积分</p>
               </div>
@@ -355,14 +355,14 @@ function LoginForm() {
           {/* Username Login/Register Form */}
           {loginMode === "username" && (
             <>
-              {/* Login/Register Toggle */}
-              <div className="flex mb-5 text-sm">
+              {/* Login/Register Toggle - Prismo Style */}
+              <div className="flex mb-4 sm:mb-5 text-xs sm:text-sm border-b border-[var(--border-subtle)]">
                 <button
                   type="button"
                   onClick={() => setFormMode("login")}
-                  className={`flex-1 py-2 border-b-2 transition-all ${formMode === "login"
-                    ? "border-purple-500 text-white"
-                    : "border-transparent text-gray-500 hover:text-gray-300"
+                  className={`flex-1 py-2 sm:py-2.5 border-b-2 transition-all ${formMode === "login"
+                    ? "border-[var(--accent-orange)] text-[var(--text-primary)] font-medium"
+                    : "border-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)]"
                     }`}
                 >
                   登录
@@ -370,9 +370,9 @@ function LoginForm() {
                 <button
                   type="button"
                   onClick={() => setFormMode("register")}
-                  className={`flex-1 py-2 border-b-2 transition-all ${formMode === "register"
-                    ? "border-purple-500 text-white"
-                    : "border-transparent text-gray-500 hover:text-gray-300"
+                  className={`flex-1 py-2 sm:py-2.5 border-b-2 transition-all ${formMode === "register"
+                    ? "border-[var(--accent-orange)] text-[var(--text-primary)] font-medium"
+                    : "border-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)]"
                     }`}
                 >
                   注册
@@ -381,10 +381,10 @@ function LoginForm() {
 
               <form
                 onSubmit={formMode === "login" ? handleUsernameLogin : handleRegister}
-                className="space-y-5"
+                className="space-y-4 sm:space-y-5"
               >
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-xs sm:text-sm font-medium text-[var(--text-primary)] mb-1.5 sm:mb-2">
                     用户名
                   </label>
                   <input
@@ -392,18 +392,18 @@ function LoginForm() {
                     value={username}
                     onChange={(e) => setUsername(e.target.value.slice(0, 20))}
                     placeholder="请输入用户名"
-                    className="w-full input-glass"
+                    className="w-full input-glass text-sm sm:text-base"
                     maxLength={20}
                   />
                   {formMode === "register" && (
-                    <p className="mt-1 text-xs text-gray-500">
+                    <p className="mt-1 text-[10px] sm:text-xs text-[var(--text-muted)]">
                       字母开头，3-20位字母、数字或下划线
                     </p>
                   )}
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-xs sm:text-sm font-medium text-[var(--text-primary)] mb-1.5 sm:mb-2">
                     密码
                   </label>
                   <input
@@ -411,16 +411,16 @@ function LoginForm() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="请输入密码"
-                    className="w-full input-glass"
+                    className="w-full input-glass text-sm sm:text-base"
                   />
                   {formMode === "register" && (
-                    <p className="mt-1 text-xs text-gray-500">密码至少6位</p>
+                    <p className="mt-1 text-[10px] sm:text-xs text-[var(--text-muted)]">密码至少6位</p>
                   )}
                 </div>
 
                 {formMode === "register" && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                    <label className="block text-xs sm:text-sm font-medium text-[var(--text-primary)] mb-1.5 sm:mb-2">
                       确认密码
                     </label>
                     <input
@@ -428,7 +428,7 @@ function LoginForm() {
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       placeholder="请再次输入密码"
-                      className="w-full input-glass"
+                      className="w-full input-glass text-sm sm:text-base"
                     />
                   </div>
                 )}
@@ -438,7 +438,7 @@ function LoginForm() {
                   <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm"
+                    className="p-2.5 sm:p-3 bg-red-50 border border-red-200 rounded-lg sm:rounded-xl text-red-600 text-xs sm:text-sm"
                   >
                     {error}
                   </motion.div>
@@ -447,16 +447,18 @@ function LoginForm() {
                   <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="p-3 bg-green-500/10 border border-green-500/20 rounded-xl text-green-400 text-sm"
+                    className="p-2.5 sm:p-3 bg-green-50 border border-green-200 rounded-lg sm:rounded-xl text-green-600 text-xs sm:text-sm"
                   >
                     {success}
                   </motion.div>
                 )}
 
-                <button
+                <PillButton
                   type="submit"
                   disabled={loading || !username || !password || (formMode === "register" && !confirmPassword)}
-                  className="w-full btn-primary py-4 rounded-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  variant="primary"
+                  size="lg"
+                  className="w-full text-sm sm:text-base"
                 >
                   {loading ? (
                     <span className="inline-flex items-center gap-2">
@@ -469,10 +471,10 @@ function LoginForm() {
                   ) : (
                     formMode === "login" ? "登录" : "注册"
                   )}
-                </button>
+                </PillButton>
 
                 {formMode === "register" && (
-                  <div className="text-center text-sm text-gray-500">
+                  <div className="text-center text-xs sm:text-sm text-[var(--text-muted)]">
                     <p>注册即送 100 积分</p>
                   </div>
                 )}
@@ -480,20 +482,21 @@ function LoginForm() {
             </>
           )}
         </div>
+        </StaggerItem>
 
         {/* Back to home */}
-        <div className="mt-6 text-center">
+        <StaggerItem className="mt-5 sm:mt-6 text-center">
           <Link
             href="/"
-            className="text-gray-400 hover:text-white transition-colors inline-flex items-center gap-2"
+            className="text-sm sm:text-base text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors inline-flex items-center gap-2"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
             返回首页
           </Link>
-        </div>
-      </motion.div>
+        </StaggerItem>
+      </PageTransition>
     </div>
   );
 }
@@ -501,8 +504,8 @@ function LoginForm() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-gray-400">加载中...</div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-[var(--text-muted)]">加载中...</div>
       </div>
     }>
       <LoginForm />
