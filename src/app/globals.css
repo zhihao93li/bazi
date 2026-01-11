@@ -98,68 +98,88 @@ body {
 
 /* ========================================
    Prismo Background System
+   Refined for subtle, high-quality glassmorphism
    ======================================== */
 
-/* Prismo Hero Background Container */
 .prismo-hero-bg {
   position: absolute;
   top: 0;
   left: -120px;
   right: -120px;
-  height: 1024px;
+  height: 100%;
+  min-height: 100vh;
   z-index: 0;
+  /* Ensure background color is consistent */
   background-color: var(--light-95);
-  overflow: hidden;
+  /* Removed overflow: hidden to allow abstract elements to bleed */
 }
 
-/* Vertical Grid Lines - Prismo Style */
+/* Vertical Grid Lines */
 .prismo-grid-lines {
   position: absolute;
   inset: 0;
   display: flex;
-  justify-content: space-between;
   pointer-events: none;
-  z-index: 1;
+  z-index: 1; /* Keep above abstract blobs */
+  mix-blend-mode: normal;
 }
 
 .prismo-grid-line {
-  flex: 1;
+  flex: 1 1 0;
   height: 100%;
-  border-right: 1px solid rgba(222, 216, 211, 0.35);
+  position: relative;
+  /* Exact match to Prismo React */
+  background: linear-gradient(270deg, rgba(242, 240, 238, 0.2) 0%, rgba(242, 240, 238, 0) 100%);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
 }
 
-.prismo-grid-line:last-child {
-  border-right: none;
-}
-
-/* Ellipse Abstract Elements */
-.prismo-abstract {
+/* Border using ::after for exact match */
+.prismo-grid-line::after {
+  content: '';
   position: absolute;
-  width: 420px;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 1px;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.prismo-grid-line:last-child::after {
+  display: none;
+}
+
+/* Abstract Elements - Exact match to Prismo React */
+.prismo-abstract-left,
+.prismo-abstract-right {
+  position: absolute;
+  width: 378px;
   height: 571px;
+  z-index: 0;
 }
 
 .prismo-abstract-left {
   top: 0;
-  left: 0;
+  left: -80px;
 }
 
 .prismo-abstract-right {
   top: 0;
-  right: 0;
+  right: -80px;
   transform: rotate(180deg);
 }
 
 .prismo-ellipse-group {
   position: absolute;
-  width: 420px;
+  width: 378px;
   height: 571px;
-  filter: blur(80px);
+  filter: blur(120px);
+  opacity: 1;
 }
 
 .prismo-ellipse-group:nth-child(2) {
-  filter: blur(60px);
-  opacity: 0.8;
+  filter: blur(100px);
+  opacity: 1;
 }
 
 .prismo-ellipse {
@@ -167,9 +187,10 @@ body {
   width: 207px;
   height: 207px;
   border-radius: 50%;
+  /* Removed transform: translateZ(0) to match original rendering behavior */
 }
 
-/* Gradient Overlays - Matching Prismo original exactly */
+/* Gradients - Exact match to Prismo React */
 .prismo-gradient-top {
   position: absolute;
   top: 0;
@@ -178,7 +199,7 @@ body {
   height: 415px;
   background: linear-gradient(
     180deg,
-    rgba(244, 242, 241, 0.85) 0%,
+    rgba(244, 242, 241, 0.9) 0%,
     transparent 100%
   );
   pointer-events: none;
@@ -191,20 +212,20 @@ body {
   background: linear-gradient(
     180deg,
     rgba(244, 242, 241, 0) 0%,
-    rgba(244, 242, 241, 0.7) 65%,
-    rgba(244, 242, 241, 1) 100%
+    var(--light-95) 100%
   );
   pointer-events: none;
   z-index: 3;
 }
 
-/* Noise Texture Overlay - Using Prismo's original noise texture */
+/* Noise - Using Framer original texture for exact match */
 .prismo-noise {
   position: absolute;
   inset: 0;
+  /* Use the exact image from Prismo React */
   background-image: url('https://framerusercontent.com/images/6mcf62RlDfRfU61Yg5vb2pefpi4.png');
   background-size: 200px;
-  opacity: 0.75;
+  opacity: 0.75; /* Exact match to reference */
   pointer-events: none;
   mix-blend-mode: overlay;
   z-index: 4;

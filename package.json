@@ -24,6 +24,7 @@
     "lunar-typescript": "^1.8.6",
     "next": "16.1.1",
     "next-auth": "^5.0.0-beta.30",
+    "@phosphor-icons/react": "^2.1.4",
     "openai": "^6.15.0",
     "pg": "^8.16.3",
     "prisma": "^7.2.0",

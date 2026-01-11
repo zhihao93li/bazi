@@ -4,108 +4,114 @@ import { useMemo } from "react";
 
 interface PrismoHeroBackgroundProps {
   className?: string;
-  showGridLines?: boolean;
-  gridLineCount?: number;
+  gridCount?: number;
+  showLeftGlow?: boolean;
+  showRightGlow?: boolean;
+  glowColors?: string[];
+  backgroundColor?: string;
+  showTopGradient?: boolean;
+  showBottomGradient?: boolean;
+  noiseOpacity?: number;
 }
 
-// Ellipse configuration matching prismo-react
-const ellipseConfig = [
-  { color: "rgba(138, 67, 225, 1)", top: 207, left: 0 },    // Purple
-  { color: "rgba(213, 17, 253, 1)", top: 363, left: 37 },   // Pink
-  { color: "rgba(239, 123, 22, 1)", top: 0, left: 213 },    // Orange
-  { color: "rgba(255, 47, 47, 1)", top: 80, left: 9 },      // Red
+// Exact values from Prismo React reference
+const DEFAULT_GLOW_COLORS = [
+  'rgba(138, 67, 225, 1)',   // Purple
+  'rgba(213, 17, 253, 1)',   // Pink
+  'rgba(239, 123, 22, 1)',   // Orange
+  'rgba(255, 47, 47, 1)',    // Red
+];
+
+const ELLIPSE_POSITIONS = [
+  { top: '207px', left: '0' },
+  { top: '363px', left: '37px' },
+  { top: '0', left: '213px' },
+  { top: '80px', left: '9px' },
 ];
 
 export function PrismoHeroBackground({
   className = "",
-  showGridLines = true,
-  gridLineCount = 24,
+  gridCount = 24,
+  showLeftGlow = true,
+  showRightGlow = true,
+  glowColors = DEFAULT_GLOW_COLORS,
+  backgroundColor = "var(--light-95)",
+  showTopGradient = true,
+  showBottomGradient = true,
+  noiseOpacity = 0.75, // Exact match
 }: PrismoHeroBackgroundProps) {
-  const gridLines = useMemo(
-    () => Array.from({ length: gridLineCount }, (_, i) => i),
-    [gridLineCount]
-  );
+  // Generate grid lines
+  const gridLines = useMemo(() => Array.from({ length: gridCount }, (_, i) => i), [gridCount]);
 
   return (
-    <div className={`prismo-hero-bg ${className}`}>
-      {/* Left Abstract - Two groups of ellipses */}
-      <div className="prismo-abstract prismo-abstract-left">
-        <div className="prismo-ellipse-group">
-          {ellipseConfig.map((ellipse, i) => (
-            <div
-              key={`left-1-${i}`}
-              className="prismo-ellipse"
-              style={{
-                background: ellipse.color,
-                top: `${ellipse.top}px`,
-                left: `${ellipse.left}px`,
-              }}
-            />
-          ))}
-        </div>
-        <div className="prismo-ellipse-group">
-          {ellipseConfig.map((ellipse, i) => (
-            <div
-              key={`left-2-${i}`}
-              className="prismo-ellipse"
-              style={{
-                background: ellipse.color,
-                top: `${ellipse.top}px`,
-                left: `${ellipse.left}px`,
-              }}
-            />
-          ))}
-        </div>
-      </div>
-
-      {/* Right Abstract - Two groups of ellipses (rotated 180deg) */}
-      <div className="prismo-abstract prismo-abstract-right">
-        <div className="prismo-ellipse-group">
-          {ellipseConfig.map((ellipse, i) => (
-            <div
-              key={`right-1-${i}`}
-              className="prismo-ellipse"
-              style={{
-                background: ellipse.color,
-                top: `${ellipse.top}px`,
-                left: `${ellipse.left}px`,
-              }}
-            />
-          ))}
-        </div>
-        <div
-          className="prismo-ellipse-group"
-          style={{ transform: "rotate(-25deg)", top: "20px", left: "-50px" }}
-        >
-          {ellipseConfig.map((ellipse, i) => (
-            <div
-              key={`right-2-${i}`}
-              className="prismo-ellipse"
-              style={{
-                background: ellipse.color,
-                top: `${ellipse.top}px`,
-                left: `${ellipse.left}px`,
-              }}
-            />
-          ))}
-        </div>
-      </div>
-
-      {/* Vertical Grid Lines */}
-      {showGridLines && (
-        <div className="prismo-grid-lines">
-          {gridLines.map((i) => (
-            <div key={i} className="prismo-grid-line" />
-          ))}
+    <div 
+      className={`prismo-hero-bg ${className}`}
+      style={{ backgroundColor }}
+    >
+      {/* Left Abstract */}
+      {showLeftGlow && (
+        <div className="prismo-abstract-left">
+          <div className="prismo-ellipse-group">
+            {glowColors.map((color, i) => (
+              <div 
+                key={`l1-${i}`} 
+                className="prismo-ellipse" 
+                style={{ background: color, ...ELLIPSE_POSITIONS[i] }} 
+              />
+            ))}
+          </div>
+          <div className="prismo-ellipse-group">
+            {glowColors.map((color, i) => (
+              <div 
+                key={`l2-${i}`} 
+                className="prismo-ellipse" 
+                style={{ background: color, ...ELLIPSE_POSITIONS[i] }} 
+              />
+            ))}
+          </div>
         </div>
       )}
 
-      {/* Gradient overlays - Order matches Prismo original: top first, then bottom */}
-      <div className="prismo-gradient-top" />
-      <div className="prismo-gradient-bottom" />
+      {/* Right Abstract */}
+      {showRightGlow && (
+        <div className="prismo-abstract-right">
+          <div className="prismo-ellipse-group">
+            {glowColors.map((color, i) => (
+              <div 
+                key={`r1-${i}`} 
+                className="prismo-ellipse" 
+                style={{ background: color, ...ELLIPSE_POSITIONS[i] }} 
+              />
+            ))}
+          </div>
+          <div 
+            className="prismo-ellipse-group"
+            style={{ transform: 'rotate(-25deg)', top: '20px', left: '-50px' }}
+          >
+            {glowColors.map((color, i) => (
+              <div 
+                key={`r2-${i}`} 
+                className="prismo-ellipse" 
+                style={{ background: color, ...ELLIPSE_POSITIONS[i] }} 
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
-      {/* Noise texture - Using Prismo's original texture */}
-      <div className="prismo-noise" />
+      {/* Grid Lines */}
+      <div className="prismo-grid-lines">
+        {gridLines.map((i) => (
+          <div key={i} className="prismo-grid-line" />
+        ))}
+      </div>
+
+      {/* Gradients */}
+      {showTopGradient && <div className="prismo-gradient-top" />}
+      {showBottomGradient && <div className="prismo-gradient-bottom" />}
+
+      {/* Noise */}
+      <div className="prismo-noise" style={{ opacity: noiseOpacity }} />
     </div>
   );
 }
