@@ -43,14 +43,14 @@ import type {
   FourPillarsShiShenInfo,
   GongNaYinInfo,
   OtherLunarInfo,
-} from './types';
+} from './types.js';
 import {
   getHeavenlyStem,
   getEarthlyBranch,
   getHiddenStems,
   FIVE_ELEMENTS,
   CITY_LONGITUDES,
-} from './constants';
+} from './constants.js';
 
 /**
  * 从地点字符串中提取经度

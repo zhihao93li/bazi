@@ -3,11 +3,11 @@
  * 短信服务工厂函数
  */
 
-import type { SmsProvider, SendSmsResult } from './types';
-import { AliyunSmsService } from './aliyun-sms';
+import type { SmsProvider, SendSmsResult } from './types.js';
+import { AliyunSmsService } from './aliyun-sms.js';
 
-export type { SmsProvider, SendSmsResult, SmsConfig } from './types';
-export { AliyunSmsService } from './aliyun-sms';
+export type { SmsProvider, SendSmsResult, SmsConfig } from './types.js';
+export { AliyunSmsService } from './aliyun-sms.js';
 
 /**
  * Mock SMS Provider for development and testing

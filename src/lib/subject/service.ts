@@ -2,8 +2,8 @@
  * 测算对象服务
  */
 
-import prisma from '../prisma';
-import type { SubjectData, CreateSubjectInput, UpdateSubjectInput } from './types';
+import prisma from '../prisma.js';
+import type { SubjectData, CreateSubjectInput, UpdateSubjectInput } from './types.js';
 
 /**
  * 创建测算对象

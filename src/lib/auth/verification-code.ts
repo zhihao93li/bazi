@@ -8,8 +8,8 @@
  * - 5次错误锁定机制
  */
 
-import prisma from "@/lib/prisma";
-import { validatePhoneFormat } from "@/lib/utils/phone-validator";
+import prisma from "../prisma.js";
+import { validatePhoneFormat } from "../utils/phone-validator.js";
 
 // 验证码配置
 const VERIFICATION_CODE_LENGTH = 6;

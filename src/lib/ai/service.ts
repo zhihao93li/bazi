@@ -5,10 +5,10 @@
  */
 
 import OpenAI from 'openai';
-import { loadAIConfig, getPromptTemplate } from './config-loader';
-import { replaceTemplateVariables, TemplateContext } from './template-engine';
-import type { AnalysisSection, FortuneAnalysis } from './types';
-import type { BaziData } from '../bazi/types';
+import { loadAIConfig, getPromptTemplate } from './config-loader.js';
+import { replaceTemplateVariables, TemplateContext } from './template-engine.js';
+import type { AnalysisSection, FortuneAnalysis } from './types.js';
+import type { BaziData } from '../bazi/types.js';
 
 // AI 服务单例
 let openaiClient: OpenAI | null = null;

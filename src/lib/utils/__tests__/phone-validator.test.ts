@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import fc from "fast-check";
-import { validatePhoneFormat, validatePhoneWithMessage } from "../phone-validator";
+import { validatePhoneFormat, validatePhoneWithMessage } from "../phone-validator.js";
 
 /**
  * Property 1: 手机号格式验证

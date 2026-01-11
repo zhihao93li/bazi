@@ -14,7 +14,7 @@ import {
   maskPhone,
   generateEncryptionKey,
   EncryptedData,
-} from '../encryption';
+} from '../encryption.js';
 
 describe('encryption', () => {
   describe('encrypt and decrypt', () => {

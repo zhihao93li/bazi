@@ -3,10 +3,10 @@
  * 实现完整的报告生成流程和数据库存储
  */
 
-import prisma from '../prisma';
-import { generateFullAnalysis } from './service';
-import type { FortuneAnalysis, AnalysisSection } from './types';
-import type { BaziData } from '../bazi/types';
+import prisma from '../prisma.js';
+import { generateFullAnalysis } from './service.js';
+import type { FortuneAnalysis, AnalysisSection } from './types.js';
+import type { BaziData } from '../bazi/types.js';
 
 /**
  * 命理报告数据结构

@@ -6,7 +6,7 @@
  */
 
 import bcrypt from "bcryptjs";
-import prisma from "@/lib/prisma";
+import prisma from "../prisma.js";
 
 // 密码最小长度
 const MIN_PASSWORD_LENGTH = 6;

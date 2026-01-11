@@ -3,7 +3,7 @@
  * 阿里云短信服务实现
  */
 
-import type { SmsProvider, SendSmsResult } from './types';
+import type { SmsProvider, SendSmsResult } from './types.js';
 
 // Type declarations for optional Aliyun SDK
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

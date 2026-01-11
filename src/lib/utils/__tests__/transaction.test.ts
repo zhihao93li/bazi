@@ -12,16 +12,16 @@ import {
   TransactionError,
   TransactionErrorCode,
   TransactionClient,
-} from '../transaction';
+} from '../transaction.js';
 
 // Mock prisma
-vi.mock('@/lib/prisma', () => ({
+vi.mock('../prisma.js', () => ({
   default: {
     $transaction: vi.fn(),
   },
 }));
 
-import prisma from '@/lib/prisma';
+import prisma from '../../prisma.js';
 
 describe('transaction utilities', () => {
   beforeEach(() => {

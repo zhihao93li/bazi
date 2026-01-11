@@ -8,8 +8,8 @@
  * - 订单查询
  */
 
-import prisma from "@/lib/prisma";
-import { addPoints } from "@/lib/points/service";
+import prisma from "../prisma.js";
+import { addPoints } from "../points/service.js";
 import {
   PaymentOrderInfo,
   CreateOrderParams,
@@ -22,7 +22,7 @@ import {
   OrderStatus,
   PaymentError,
   PaymentErrorCode,
-} from "./types";
+} from "./types.js";
 
 /**
  * 生成唯一订单号

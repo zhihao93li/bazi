@@ -28,7 +28,7 @@ export type {
   BaziData,
   BaziBirthData,
   BaziInterpretation,
-} from './types';
+} from './types.js';
 
 // 常量导出
 export {
@@ -51,7 +51,7 @@ export {
   getNayin,
   getFiveElementColor,
   getFiveElementChinese,
-} from './constants';
+} from './constants.js';
 
 // 计算器导出
-export { calculateBazi } from './calculator';
+export { calculateBazi } from './calculator.js';

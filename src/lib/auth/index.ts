@@ -4,8 +4,13 @@
  * 统一导出认证相关的功能
  */
 
-// NextAuth.js handlers and utilities
-export { handlers, auth, signIn, signOut } from "./auth";
+// JWT utilities
+export {
+  signToken,
+  verifyToken,
+  extractTokenFromHeader,
+  type JwtPayload,
+} from "./jwt.js";
 
 // Verification code service
 export {
@@ -16,7 +21,7 @@ export {
   cleanupExpiredCodes,
   type SendCodeResult,
   type VerifyCodeResult,
-} from "./verification-code";
+} from "./verification-code.js";
 
 // Password authentication service
 export {
@@ -27,4 +32,4 @@ export {
   isUsernameExists,
   type RegisterResult,
   type ValidateResult,
-} from "./password-auth";
+} from "./password-auth.js";

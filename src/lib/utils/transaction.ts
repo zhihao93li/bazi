@@ -8,8 +8,8 @@
  * - 嵌套事务支持
  */
 
-import prisma from "@/lib/prisma";
-import { Prisma, PrismaClient } from "@/generated/prisma/client";
+import prisma from "../prisma.js";
+import { Prisma, PrismaClient } from "../../generated/prisma/client.js";
 
 /**
  * 事务客户端类型

@@ -9,7 +9,7 @@
  * - 使用数据库事务确保原子性
  */
 
-import prisma from "@/lib/prisma";
+import prisma from "../prisma.js";
 import {
   PointsAccountInfo,
   PointsQueryResult,
@@ -18,7 +18,7 @@ import {
   PointsTransactionType,
   PointsError,
   PointsErrorCode,
-} from "./types";
+} from "./types.js";
 
 /**
  * 获取或创建用户积分账户

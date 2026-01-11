@@ -6,9 +6,9 @@
  * - 分析完成后扣除积分
  */
 
-import { checkSufficientBalance, deductPoints } from "./service";
-import { PointsError, PointsErrorCode } from "./types";
-import { createFortuneReport, type CreateReportInput, type FortuneReportData } from "../ai/fortune-report";
+import { checkSufficientBalance, deductPoints } from "./service.js";
+import { PointsError, PointsErrorCode } from "./types.js";
+import { createFortuneReport, type CreateReportInput, type FortuneReportData } from "../ai/fortune-report.js";
 
 // 默认命理分析消耗积分（可通过环境变量配置）
 const DEFAULT_FORTUNE_ANALYSIS_COST = 50;

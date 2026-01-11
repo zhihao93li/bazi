@@ -3,8 +3,8 @@
  * 实现占位符变量替换功能
  */
 
-import type { BaziData, TenGodsAnalysis, DaYunInfo, YunInfo, ShenShaInfo, DirectionsInfo, JieQiInfo, XingXiuInfo, PengZuInfo, YiJiInfo, DiShiInfo, NineStarsInfo, TianShenInfo, JiXiongInfo, TimeYiJiInfo, ChongShaInfo, TaiShenInfo, FourPillarsXunKongInfo, FourPillarsShiShenInfo, GongNaYinInfo, OtherLunarInfo } from '../bazi/types';
-import { FIVE_ELEMENTS_CHINESE } from '../bazi/constants';
+import type { BaziData, TenGodsAnalysis, DaYunInfo, YunInfo, ShenShaInfo, DirectionsInfo, JieQiInfo, XingXiuInfo, PengZuInfo, YiJiInfo, DiShiInfo, NineStarsInfo, TianShenInfo, JiXiongInfo, TimeYiJiInfo, ChongShaInfo, TaiShenInfo, FourPillarsXunKongInfo, FourPillarsShiShenInfo, GongNaYinInfo, OtherLunarInfo } from '../bazi/types.js';
+import { FIVE_ELEMENTS_CHINESE } from '../bazi/constants.js';
 
 /**
  * 模板变量上下文

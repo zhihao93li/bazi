@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import fc from "fast-check";
 import {
   generateVerificationCode,
-} from "../verification-code";
+} from "../verification-code.js";
 
 describe("Verification Code - Unit Tests", () => {
   it("should generate 6-digit verification code", () => {

@@ -8,9 +8,9 @@ export type {
   PromptTemplates,
   AnalysisSection,
   FortuneAnalysis,
-} from './types';
+} from './types.js';
 
-export { DEFAULT_AI_CONFIG } from './types';
+export { DEFAULT_AI_CONFIG } from './types.js';
 
 // 配置加载器
 export {
@@ -18,23 +18,23 @@ export {
   reloadAIConfig,
   getPromptTemplate,
   clearConfigCache,
-} from './config-loader';
+} from './config-loader.js';
 
 // 模板引擎
 export {
   replaceTemplateVariables,
   findUnreplacedPlaceholders,
   validateTemplateReplacement,
-} from './template-engine';
+} from './template-engine.js';
 
-export type { TemplateContext } from './template-engine';
+export type { TemplateContext } from './template-engine.js';
 
 // AI 服务
 export {
   generateSectionAnalysis,
   generateFullAnalysis,
   resetAIClient,
-} from './service';
+} from './service.js';
 
 // 命理报告服务
 export {
@@ -43,9 +43,9 @@ export {
   getUserReports,
   deleteFortuneReport,
   reportExists,
-} from './fortune-report';
+} from './fortune-report.js';
 
 export type {
   FortuneReportData,
   CreateReportInput,
-} from './fortune-report';
+} from './fortune-report.js';

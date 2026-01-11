@@ -6,7 +6,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { parse as parseYaml } from 'yaml';
-import { AIConfig, DEFAULT_AI_CONFIG, PromptTemplates } from './types';
+import { AIConfig, DEFAULT_AI_CONFIG, PromptTemplates } from './types.js';
 
 // 配置文件路径
 const CONFIG_FILE_PATH = path.join(process.cwd(), 'config', 'ai-prompts.yaml');

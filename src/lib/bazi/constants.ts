@@ -5,7 +5,7 @@
  * 复用自 https://github.com/zhihao93li/human_design2
  */
 
-import type { FiveElement, HeavenlyStem, EarthlyBranch } from './types';
+import type { FiveElement, HeavenlyStem, EarthlyBranch } from './types.js';
 
 // ============================================================================
 // 天干 (Heavenly Stems) - 十天干
