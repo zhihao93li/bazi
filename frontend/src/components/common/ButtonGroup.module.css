@@ -1,0 +1,68 @@
+.buttonGroup {
+  display: inline-flex;
+  background: var(--light-94);
+  border-radius: var(--radius-full);
+  padding: 4px;
+}
+
+.fullWidth {
+  display: flex;
+  width: 100%;
+}
+
+.fullWidth .button {
+  flex: 1;
+}
+
+.button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 500;
+  color: var(--grey-50);
+  border-radius: var(--radius-full);
+  transition: all 0.2s;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.button.active {
+  background: var(--dark-7);
+  color: var(--absolute-white);
+}
+
+.button:not(.active):hover {
+  color: var(--dark-7);
+}
+
+/* Variants */
+.default .button.active {
+  background: var(--dark-7);
+  color: var(--absolute-white);
+}
+
+.light {
+  background: var(--absolute-white);
+}
+
+.light .button.active {
+  background: var(--dark-7);
+  color: var(--absolute-white);
+}
+
+/* Sizes */
+.small .button {
+  padding: 8px 16px;
+  font-size: 14px;
+}
+
+.medium .button {
+  padding: 12px 24px;
+  font-size: 15px;
+}
+
+.large .button {
+  padding: 14px 28px;
+  font-size: 16px;
+}

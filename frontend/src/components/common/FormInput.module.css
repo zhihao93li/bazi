@@ -1,0 +1,58 @@
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.label {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--dark-7);
+}
+
+.required {
+  color: var(--accent-red);
+  margin-left: 4px;
+}
+
+.input {
+  width: 100%;
+  padding: 14px 16px;
+  font-size: 16px;
+  font-family: inherit;
+  border: 1px solid var(--light-85);
+  border-radius: var(--radius-md);
+  background: var(--light-96);
+  color: var(--dark-7);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--dark-7);
+  box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.1);
+}
+
+.input::placeholder {
+  color: var(--grey-50);
+}
+
+.input:disabled {
+  background: var(--light-90);
+  color: var(--grey-50);
+  cursor: not-allowed;
+}
+
+/* Error state */
+.hasError .input {
+  border-color: var(--accent-red);
+}
+
+.hasError .input:focus {
+  box-shadow: 0 0 0 3px rgba(255, 47, 47, 0.1);
+}
+
+.error {
+  font-size: 14px;
+  color: var(--accent-red);
+}

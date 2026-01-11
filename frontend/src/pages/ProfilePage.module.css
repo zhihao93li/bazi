@@ -1,0 +1,278 @@
+.main {
+  min-height: 100vh;
+  background: var(--light-95);
+  padding: 120px 40px 100px;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.title {
+  font-size: 40px;
+  font-weight: 600;
+  color: var(--dark-7);
+  margin-bottom: 8px;
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  font-size: 18px;
+  color: var(--grey-50);
+}
+
+/* 用户信息卡片 */
+.userCard {
+  margin-bottom: 24px;
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 40px;
+}
+
+.avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--dark-7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--absolute-white);
+  box-shadow: var(--shadow-md);
+}
+
+.userDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.userName {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--dark-7);
+  margin: 0;
+}
+
+.userStatus {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: var(--grey-50);
+  background: var(--light-94);
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+}
+
+/* 统计数据 */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--light-90);
+}
+
+.statItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.statValue {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--dark-7);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.statLabel {
+  font-size: 13px;
+  color: var(--grey-50);
+  font-weight: 500;
+}
+
+/* Section */
+.section {
+  margin-bottom: 24px;
+}
+
+.sectionTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--dark-7);
+  margin-bottom: 16px;
+  margin-left: 4px;
+}
+
+/* 快捷操作 */
+.actionsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.actionCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 24px 16px;
+  background: var(--absolute-white);
+  border-radius: var(--radius-lg);
+  text-decoration: none;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  box-shadow: var(--shadow-sm);
+}
+
+.actionCard:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: rgba(0,0,0,0.05);
+}
+
+.actionIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--light-96);
+  color: var(--dark-7);
+  transition: all 0.2s ease;
+}
+
+/* Prismo Colors for Actions */
+.purple .actionIcon { color: var(--accent-purple); background: rgba(138, 67, 225, 0.1); }
+.blue .actionIcon { color: var(--accent-blue); background: rgba(94, 106, 210, 0.1); }
+.orange .actionIcon { color: var(--accent-orange); background: rgba(239, 123, 22, 0.1); }
+.red .actionIcon { color: var(--accent-red); background: rgba(255, 47, 47, 0.1); }
+
+.actionCard:hover .actionIcon {
+  transform: scale(1.1);
+}
+
+.actionLabel {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--dark-7);
+}
+
+/* 账户信息 */
+.infoCard {
+  overflow: hidden;
+  border: 1px solid rgba(0,0,0,0.05);
+}
+
+.infoRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--light-94);
+  background: var(--absolute-white);
+  transition: background 0.2s;
+}
+
+.infoRow:hover {
+  background: var(--light-96);
+}
+
+.infoRow:last-child {
+  border-bottom: none;
+}
+
+.infoLabel {
+  font-size: 14px;
+  color: var(--grey-50);
+}
+
+.infoValue {
+  font-size: 14px;
+  color: var(--dark-7);
+  font-weight: 500;
+}
+
+.statusNormal {
+  color: var(--accent-green);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.statusNormal::before {
+  content: '';
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* 移动端退出按钮 */
+.mobileLogout {
+  display: none;
+}
+
+.logoutButton {
+  width: 100%;
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+  .main {
+    padding: 100px 20px 80px;
+  }
+
+  .title {
+    font-size: 32px;
+  }
+
+  .statsGrid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+
+  .statValue {
+    font-size: 24px;
+  }
+
+  .actionsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .mobileLogout {
+    display: block;
+    margin-top: 32px;
+  }
+}
+
+@media (max-width: 480px) {
+  .userInfo {
+    flex-direction: column;
+    text-align: center;
+    gap: 16px;
+  }
+
+  .statsGrid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}

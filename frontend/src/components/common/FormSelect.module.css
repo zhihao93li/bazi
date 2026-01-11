@@ -1,0 +1,110 @@
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: relative;
+}
+
+.label {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--dark-7);
+}
+
+.required {
+  color: var(--accent-red);
+  margin-left: 4px;
+}
+
+.select {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 14px 16px;
+  font-size: 16px;
+  font-family: inherit;
+  border: 1px solid var(--light-85);
+  border-radius: var(--radius-md);
+  background: var(--light-96);
+  color: var(--dark-7);
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.select:hover:not(.disabled) {
+  border-color: var(--grey-50);
+}
+
+.select.open {
+  border-color: var(--dark-7);
+  box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.1);
+}
+
+.select.disabled {
+  background: var(--light-90);
+  color: var(--grey-50);
+  cursor: not-allowed;
+}
+
+.value {
+  color: var(--dark-7);
+}
+
+.placeholder {
+  color: var(--grey-50);
+}
+
+.icon {
+  color: var(--grey-50);
+  transition: transform 0.2s;
+}
+
+.select.open .icon {
+  transform: rotate(180deg);
+}
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--absolute-white);
+  border: 1px solid var(--light-85);
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  max-height: 240px;
+  overflow-y: auto;
+  z-index: 100;
+}
+
+.option {
+  padding: 12px 16px;
+  font-size: 16px;
+  color: var(--dark-7);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.option:hover {
+  background: var(--light-96);
+}
+
+.option.selected {
+  background: var(--light-94);
+  font-weight: 500;
+}
+
+/* Error state */
+.hasError .select {
+  border-color: var(--accent-red);
+}
+
+.hasError .select.open {
+  box-shadow: 0 0 0 3px rgba(255, 47, 47, 0.1);
+}
+
+.error {
+  font-size: 14px;
+  color: var(--accent-red);
+}

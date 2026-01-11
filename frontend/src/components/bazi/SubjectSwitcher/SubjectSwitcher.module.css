@@ -1,0 +1,140 @@
+.switcher {
+  position: relative;
+  min-width: 200px;
+}
+
+.trigger {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: 8px 12px;
+  background-color: white;
+  border: 1px solid var(--light-90);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all 0.2s;
+  user-select: none;
+}
+
+.trigger:hover {
+  border-color: var(--grey-50);
+  background-color: var(--light-96);
+}
+
+.trigger.open {
+  border-color: var(--dark-7);
+  box-shadow: var(--shadow-sm);
+}
+
+.avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: var(--light-94);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: var(--grey-50);
+  font-weight: 600;
+}
+
+.avatar.self {
+  background-color: var(--dark-7);
+  color: white;
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--dark-7);
+  line-height: 1.2;
+}
+
+.role {
+  font-size: 10px;
+  color: var(--grey-50);
+}
+
+.chevron {
+  color: var(--grey-50);
+  transition: transform 0.2s;
+}
+
+.open .chevron {
+  transform: rotate(180deg);
+}
+
+/* Dropdown */
+.dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 280px;
+  background: white;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--light-90);
+  padding: var(--spacing-xs);
+  z-index: 100;
+  animation: slideDown 0.2s ease-out;
+}
+
+.sectionTitle {
+  padding: 8px 12px 4px;
+  font-size: 11px;
+  color: var(--grey-50);
+  font-weight: 500;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color 0.1s;
+}
+
+.option:hover {
+  background-color: var(--light-96);
+}
+
+.option.active {
+  background-color: var(--light-94);
+}
+
+.option.active .name {
+  font-weight: 600;
+}
+
+.addOption {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: 12px;
+  margin-top: 4px;
+  border-top: 1px solid var(--light-90);
+  color: var(--dark-7);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.1s;
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+}
+
+.addOption:hover {
+  background-color: var(--light-96);
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

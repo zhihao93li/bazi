@@ -1,0 +1,182 @@
+.main {
+  position: relative;
+  min-height: 100vh;
+  padding: 150px 40px 100px;
+  background: var(--light-95);
+  overflow: hidden;
+}
+
+.container {
+  position: relative;
+  z-index: 1;
+  max-width: var(--max-width-2xl);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 50px;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+  text-align: center;
+  max-width: 1240px;
+}
+
+.logo {
+  width: 102px;
+  height: 108px;
+}
+
+.textContent {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.title {
+  font-size: 52px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--dark-7);
+}
+
+.subtitle {
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--grey-50);
+  line-height: 1.5;
+  max-width: 600px;
+}
+
+.form {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: var(--absolute-white);
+  border-radius: var(--radius-lg);
+  padding: 4px;
+  max-width: 480px;
+  width: 100%;
+}
+
+.form input {
+  flex: 1;
+  padding: 16px 20px;
+  font-size: 16px;
+  font-family: inherit;
+  border: none;
+  background: transparent;
+  color: var(--dark-7);
+}
+
+.form input:focus {
+  outline: none;
+}
+
+.form input::placeholder {
+  color: var(--grey-50);
+}
+
+.form button {
+  padding: 16px 24px;
+  font-size: 15px;
+  font-weight: 500;
+  background: var(--dark-7);
+  color: var(--absolute-white);
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background-color 0.2s;
+  white-space: nowrap;
+}
+
+.form button:hover:not(:disabled) {
+  background: var(--grey-24);
+}
+
+.form button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.form button.success {
+  background: var(--accent-green);
+}
+
+.rating {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--dark-7);
+}
+
+.stars {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  color: var(--dark-7);
+}
+
+.divider {
+  width: 1px;
+  height: 20px;
+  background: var(--light-85);
+}
+
+.videoContainer {
+  width: 100%;
+  max-width: 1200px;
+}
+
+.videoWrapper {
+  position: relative;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+.previewImage {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .main {
+    padding: 120px 20px 60px;
+  }
+
+  .title {
+    font-size: 36px;
+  }
+
+  .form {
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .form input {
+    width: 100%;
+    text-align: center;
+  }
+
+  .form button {
+    width: 100%;
+  }
+
+  .rating {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .divider {
+    display: none;
+  }
+}

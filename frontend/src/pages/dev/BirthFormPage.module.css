@@ -1,0 +1,26 @@
+.container {
+  padding: 40px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  margin-top: 40px;
+}
+
+.formSection {
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.debugSection {
+  background: #f5f5f5;
+  padding: 24px;
+  border-radius: 12px;
+  overflow: auto;
+}

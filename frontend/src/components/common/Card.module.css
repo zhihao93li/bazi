@@ -1,0 +1,82 @@
+.card {
+  background: var(--absolute-white);
+  border-radius: var(--radius-xl);
+  border: 1px solid rgba(0, 0, 0, 0.05); /* Subtle border for definition */
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+}
+
+/* Variants */
+.default {
+  background: var(--absolute-white);
+  box-shadow: var(--shadow-sm);
+}
+
+.outlined {
+  background: var(--absolute-white);
+  border: 1px solid var(--light-90);
+  box-shadow: none;
+}
+
+.gradient {
+  position: relative;
+  background: var(--absolute-white);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+}
+
+/* Top Gradient Line - Cleaner Prismo Style */
+.gradient::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--accent-red), var(--accent-purple), var(--accent-orange));
+  z-index: 1;
+}
+
+.dark {
+  background: var(--dark-7);
+  color: var(--absolute-white);
+}
+
+/* Padding */
+.padding-none {
+  padding: 0;
+}
+
+.padding-small {
+  padding: 16px;
+}
+
+.padding-medium {
+  padding: 24px;
+}
+
+.padding-large {
+  padding: 40px;
+}
+
+/* Hover effect */
+.hover:hover {
+  transform: translateY(-2px); /* Subtle lift */
+  box-shadow: var(--shadow-lg);
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Clickable */
+.clickable {
+  cursor: pointer;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .padding-large {
+    padding: 24px;
+  }
+  
+  .padding-medium {
+    padding: 16px;
+  }
+}

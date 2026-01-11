@@ -1,0 +1,278 @@
+/**
+ * GradientBackground 组件样式
+ * 
+ * 可复用的渐变背景效果，包含：
+ * - 栅格线（带毛玻璃效果）
+ * - 彩色椭圆光效
+ * - 渐变遮罩
+ * - 噪点纹理
+ * - 响应式设计（小屏幕优化）
+ */
+
+.background {
+  position: absolute;
+  top: 0;
+  left: -120px;
+  right: -120px;
+  bottom: 0;
+  z-index: 0;
+  /* 默认背景色，可通过 props 覆盖 */
+  background-color: rgb(244, 242, 241);
+}
+
+/* ==================== 栅格线 ==================== */
+
+.gridLines {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  pointer-events: none;
+  z-index: 1;
+  mix-blend-mode: normal;
+}
+
+.gridLine {
+  flex: 1 1 0;
+  height: 100%;
+  position: relative;
+  /* 水平渐变背景 */
+  background: linear-gradient(270deg, rgba(242, 240, 238, 0.2) 0%, rgba(242, 240, 238, 0) 100%);
+  /* 毛玻璃效果 */
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+}
+
+/* 使用 ::after 画右边框 */
+.gridLine::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 1px;
+  /* 白色半透明边框 */
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* 最后一条栅格线不需要右边框 */
+.gridLine:last-child::after {
+  display: none;
+}
+
+/* ==================== 彩色光效 ==================== */
+
+.leftAbstract,
+.rightAbstract {
+  position: absolute;
+  width: 378px;
+  height: 571px;
+}
+
+.leftAbstract {
+  top: 0;
+  left: -80px;
+}
+
+.rightAbstract {
+  top: 0;
+  right: -80px;
+  transform: rotate(180deg);
+}
+
+.ellipseGroup {
+  position: absolute;
+  width: 378px;
+  height: 571px;
+  filter: blur(120px);
+  opacity: 1;
+}
+
+.ellipseGroup:nth-child(2) {
+  filter: blur(100px);
+  opacity: 1;
+}
+
+.ellipse {
+  position: absolute;
+  width: 207px;
+  height: 207px;
+  border-radius: 50%;
+}
+
+/* ==================== 渐变遮罩 ==================== */
+
+/* 底部渐变：从透明到背景色 */
+.bgGradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(244, 242, 241, 0) 0%,
+    rgb(244, 242, 241) 100%
+  );
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* 顶部渐变：从背景色到透明 */
+.bgGradientTop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 415px;
+  background: linear-gradient(
+    180deg,
+    rgba(244, 242, 241, 0.9) 0%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* ==================== 噪点纹理 ==================== */
+
+.noise {
+  position: absolute;
+  inset: 0;
+  background-size: 200px;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+  /* 大屏幕下降低噪点透明度 */
+  opacity: 0.4;
+  /* 噪点在最上层 */
+  z-index: 4;
+}
+
+/* ==================== 响应式设计 ==================== */
+/* 
+ * 小屏幕下：
+ * 1. 栅格线变淡 - 因为每条线相对变宽，视觉上更突出
+ * 2. 噪点变淡 - 避免在小屏幕上显得杂乱
+ * 3. 光效缩小 - 适应屏幕尺寸
+ */
+
+/* 平板端 */
+@media (max-width: 900px) {
+  .gridLine {
+    /* 降低栅格线渐变透明度 */
+    background: linear-gradient(270deg, rgba(242, 240, 238, 0.12) 0%, rgba(242, 240, 238, 0) 100%);
+  }
+
+  .gridLine::after {
+    /* 降低边框透明度 */
+    background-color: rgba(255, 255, 255, 0.06);
+  }
+
+  .noise {
+    /* 降低噪点透明度 */
+    opacity: 0.5;
+  }
+
+  .ellipseGroup {
+    /* 缩小光效尺寸 */
+    width: 300px;
+    height: 450px;
+    filter: blur(100px);
+    opacity: 0.8;
+  }
+
+  .ellipseGroup:nth-child(2) {
+    filter: blur(80px);
+    opacity: 0.8;
+  }
+
+  .ellipse {
+    width: 160px;
+    height: 160px;
+  }
+}
+
+/* 移动端 */
+@media (max-width: 600px) {
+  .background {
+    /* 减少左右扩展 */
+    left: -60px;
+    right: -60px;
+  }
+
+  .gridLine {
+    /* 进一步降低栅格线渐变透明度 */
+    background: linear-gradient(270deg, rgba(242, 240, 238, 0.06) 0%, rgba(242, 240, 238, 0) 100%);
+  }
+
+  .gridLine::after {
+    /* 进一步降低边框透明度，几乎不可见 */
+    background-color: rgba(255, 255, 255, 0.03);
+  }
+
+  .noise {
+    /* 大幅降低噪点透明度 */
+    opacity: 0.25;
+    /* 减小噪点图案尺寸 */
+    background-size: 150px;
+  }
+
+  .leftAbstract,
+  .rightAbstract {
+    width: 250px;
+    height: 400px;
+  }
+
+  .leftAbstract {
+    left: -100px;
+  }
+
+  .rightAbstract {
+    right: -100px;
+  }
+
+  .ellipseGroup {
+    width: 250px;
+    height: 400px;
+    filter: blur(80px);
+    opacity: 0.6;
+  }
+
+  .ellipseGroup:nth-child(2) {
+    filter: blur(60px);
+    opacity: 0.6;
+  }
+
+  .ellipse {
+    width: 120px;
+    height: 120px;
+  }
+
+  .bgGradientTop {
+    height: 300px;
+  }
+}
+
+/* 超小屏幕 */
+@media (max-width: 400px) {
+  .gridLine {
+    /* 栅格线几乎不可见 */
+    background: linear-gradient(270deg, rgba(242, 240, 238, 0.03) 0%, rgba(242, 240, 238, 0) 100%);
+  }
+
+  .gridLine::after {
+    /* 边框完全不可见 */
+    background-color: rgba(255, 255, 255, 0.01);
+  }
+
+  .noise {
+    /* 噪点非常淡 */
+    opacity: 0.15;
+  }
+
+  .ellipseGroup {
+    opacity: 0.4;
+    filter: blur(60px);
+  }
+
+  .ellipseGroup:nth-child(2) {
+    opacity: 0.4;
+    filter: blur(50px);
+  }
+}

@@ -1,0 +1,46 @@
+.formGrid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-md);
+}
+
+.fullWidth {
+  grid-column: 1 / -1;
+}
+
+.dateRow {
+  display: grid;
+  grid-template-columns: 1.2fr 0.9fr 0.9fr;
+  gap: var(--spacing-sm);
+}
+
+.timeRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-sm);
+}
+
+.sectionTitle {
+  font-size: var(--text-small);
+  font-weight: 500;
+  color: var(--grey-50);
+  margin-bottom: var(--spacing-xs);
+}
+
+/* Mobile responsive */
+@media (max-width: 640px) {
+  .row {
+    grid-template-columns: 1fr;
+  }
+  
+  .dateRow {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+}

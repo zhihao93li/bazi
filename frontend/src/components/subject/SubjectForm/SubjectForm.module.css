@@ -1,0 +1,27 @@
+.formContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  padding: var(--spacing-sm);
+}
+
+.basicInfo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-md);
+}
+
+.submitButton {
+  width: 100%;
+  padding: var(--spacing-md);
+  background-color: var(--dark-7);
+  color: white;
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  margin-top: var(--spacing-md);
+  transition: opacity 0.2s;
+}
+
+.submitButton:hover {
+  opacity: 0.9;
+}

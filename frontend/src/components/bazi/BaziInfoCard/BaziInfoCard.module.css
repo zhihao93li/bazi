@@ -1,0 +1,28 @@
+.infoGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-sm);
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+  padding: var(--spacing-sm);
+  background-color: var(--light-96);
+  border-radius: var(--radius-sm);
+}
+
+.label {
+  font-size: 11px;
+  color: var(--grey-50);
+}
+
+.value {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--dark-7);
+}
+
+.fullWidth {
+  grid-column: 1 / -1;
+}

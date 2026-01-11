@@ -1,0 +1,50 @@
+.main {
+  min-height: 100vh;
+  background: var(--light-95);
+  padding: 120px 40px 100px;
+  display: flex;
+  justify-content: center;
+}
+
+.container {
+  width: 100%;
+  max-width: 600px; /* Optimized width for form focus */
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.title {
+  font-size: 40px;
+  font-weight: 600;
+  color: var(--dark-7);
+  margin-bottom: 8px;
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  font-size: 18px;
+  color: var(--grey-50);
+}
+
+.inputCard {
+  width: 100%;
+}
+
+.submitButton {
+  width: 100%;
+  margin-top: 24px;
+}
+
+/* 响应式 */
+@media (max-width: 600px) {
+  .main {
+    padding: 100px 20px 80px;
+  }
+
+  .title {
+    font-size: 32px;
+  }
+}

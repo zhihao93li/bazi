@@ -1,0 +1,61 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.header {
+  font-size: var(--text-small);
+  color: var(--grey-50);
+  font-weight: 500;
+  text-align: center;
+  margin-bottom: var(--spacing-sm);
+}
+
+.pillarsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacing-sm);
+}
+
+.pillar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm);
+  background-color: var(--light-96);
+  border-radius: var(--radius-md);
+  transition: transform 0.2s;
+}
+
+.pillar:hover {
+  transform: translateY(-2px);
+  background-color: var(--light-94);
+}
+
+.pillarTitle {
+  font-size: 12px;
+  color: var(--grey-50);
+  margin-bottom: var(--spacing-xs);
+}
+
+.charBox {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  color: var(--dark-7);
+}
+
+.tenGods {
+  font-size: 10px;
+  color: var(--grey-50);
+  margin-top: 4px;
+}
+
+/* Color Modifiers via JS inline styles or CSS classes */

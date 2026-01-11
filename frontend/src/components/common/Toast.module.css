@@ -1,0 +1,106 @@
+.toastContainer {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 2000;
+  pointer-events: none;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  color: var(--absolute-white);
+  border-radius: var(--radius-full);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+  pointer-events: auto;
+  min-width: 300px;
+  max-width: 400px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  
+  /* Gradient Border Magic */
+  border: 1px solid transparent;
+  background: 
+    linear-gradient(rgba(17, 17, 17, 0.95), rgba(17, 17, 17, 0.95)) padding-box,
+    linear-gradient(90deg, var(--accent-red), var(--accent-orange), var(--accent-purple), var(--accent-pink)) border-box;
+}
+
+.icon {
+  flex-shrink: 0;
+}
+
+.message {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+}
+
+.closeButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-full);
+  color: var(--grey-50);
+  transition: all 0.2s;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.closeButton:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: var(--absolute-white);
+}
+
+/* 
+ * Icon Colors - Warm & Brand Aligned
+ * Replacing Green with Prismo Brand Colors
+ */
+
+/* Success -> Purple (Magic/Done) */
+.success .icon {
+  color: var(--accent-purple);
+  filter: drop-shadow(0 0 8px rgba(138, 67, 225, 0.4));
+}
+
+/* Error -> Red (Passion/Alert) */
+.error .icon {
+  color: var(--accent-red);
+  filter: drop-shadow(0 0 8px rgba(255, 47, 47, 0.4));
+}
+
+/* Warning -> Orange (Warmth/Caution) */
+.warning .icon {
+  color: var(--accent-orange);
+  filter: drop-shadow(0 0 8px rgba(239, 123, 22, 0.4));
+}
+
+/* Info -> Pink (Vibrant/Notice) */
+.info .icon {
+  color: var(--accent-pink);
+  filter: drop-shadow(0 0 8px rgba(213, 17, 253, 0.4));
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .toastContainer {
+    left: 16px;
+    right: 16px;
+    transform: none;
+    bottom: 32px;
+  }
+
+  .toast {
+    min-width: auto;
+    max-width: 100%;
+  }
+}

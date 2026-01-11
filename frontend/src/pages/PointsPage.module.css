@@ -1,0 +1,281 @@
+.main {
+  min-height: 100vh;
+  background: var(--light-95);
+  padding: 120px 40px 100px;
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.title {
+  font-size: 40px;
+  font-weight: 600;
+  color: var(--dark-7);
+  margin-bottom: 8px;
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  font-size: 18px;
+  color: var(--grey-50);
+}
+
+/* 余额卡片 - Prismo Style: Clean & Big Numbers */
+.balanceCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.balanceLabel {
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--grey-50);
+}
+
+.balanceValue {
+  font-size: 72px;
+  font-weight: 700;
+  color: var(--dark-7);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  /* Add a subtle gradient text effect matching Prismo brand */
+  background: linear-gradient(135deg, var(--dark-7) 30%, var(--grey-50) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.balanceHint {
+  font-size: 14px;
+  color: var(--grey-50);
+  background: var(--light-94);
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+}
+
+/* Section */
+.section {
+  margin-bottom: 40px;
+}
+
+.sectionTitle {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--dark-7);
+  margin-bottom: 20px;
+  margin-left: 4px;
+}
+
+/* 套餐网格 */
+.packagesGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.packageCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between; /* Align content */
+  gap: 16px;
+  text-align: center;
+  height: 100%;
+}
+
+.packageCard.popular {
+  border-color: var(--dark-7);
+  box-shadow: var(--shadow-md);
+}
+
+.popularBadge {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 12px;
+  background: var(--dark-7);
+  color: var(--absolute-white);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: var(--radius-full);
+}
+
+.packageContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.packagePoints {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--dark-7);
+  line-height: 1;
+}
+
+.packagePointsLabel {
+  font-size: 13px;
+  color: var(--grey-50);
+  font-weight: 500;
+}
+
+.packagePrice {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--dark-7);
+  margin-top: 8px;
+}
+
+.packageButton {
+  width: 100%;
+  margin-top: auto; /* Push to bottom */
+}
+
+/* 交易记录 */
+.transactionsCard {
+  overflow: hidden;
+  border: 1px solid rgba(0,0,0,0.05);
+}
+
+.loadingState,
+.emptyState {
+  padding: 60px 24px;
+  text-align: center;
+  color: var(--grey-50);
+  font-size: 14px;
+}
+
+.transactionItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--light-94);
+  transition: background 0.15s;
+  background: var(--absolute-white);
+}
+
+.transactionItem:last-child {
+  border-bottom: none;
+}
+
+.transactionItem:hover {
+  background: var(--light-96);
+}
+
+.transactionLeft {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.transactionIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full); /* Circular icons for transactions */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--light-96);
+  color: var(--dark-7);
+}
+
+/* Icon Colors */
+.recharge .transactionIcon { color: var(--accent-green); background: rgba(39, 179, 44, 0.1); }
+.consume .transactionIcon { color: var(--dark-7); background: var(--light-94); }
+.bonus .transactionIcon { color: var(--accent-orange); background: rgba(239, 123, 22, 0.1); }
+
+.transactionInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.transactionDesc {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--dark-7);
+}
+
+.transactionTime {
+  font-size: 12px;
+  color: var(--grey-50);
+}
+
+.transactionRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.transactionAmount {
+  font-size: 15px;
+  font-weight: 600;
+  font-family: monospace; /* Align numbers */
+}
+
+.transactionAmount.positive {
+  color: var(--accent-green);
+}
+
+.transactionAmount.negative {
+  color: var(--dark-7);
+}
+
+.transactionBalance {
+  font-size: 12px;
+  color: var(--grey-50);
+}
+
+/* 响应式 */
+@media (max-width: 900px) {
+  .packagesGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .main {
+    padding: 100px 20px 80px;
+  }
+
+  .title {
+    font-size: 32px;
+  }
+
+  .balanceValue {
+    font-size: 48px;
+  }
+
+  .transactionItem {
+    padding: 12px 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .packagesGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .packagePoints {
+    font-size: 24px;
+  }
+}

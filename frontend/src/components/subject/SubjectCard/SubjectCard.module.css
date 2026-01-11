@@ -1,0 +1,73 @@
+.cardContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.name {
+  font-size: var(--heading-5);
+  font-weight: 600;
+  color: var(--dark-7);
+}
+
+.meta {
+  font-size: var(--text-small);
+  color: var(--grey-50);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.actions {
+  display: flex;
+  gap: var(--spacing-sm);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.card:hover .actions {
+  opacity: 1;
+}
+
+.actionButton {
+  padding: var(--spacing-xs);
+  border-radius: var(--radius-sm);
+  color: var(--grey-50);
+  transition: all 0.2s;
+}
+
+.actionButton:hover {
+  background: var(--light-94);
+  color: var(--dark-7);
+}
+
+.deleteButton:hover {
+  background: var(--accent-red); /* mild red bg? or just text color */
+  color: white;
+  background-color: var(--accent-red);
+}
+
+.tag {
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  background-color: var(--light-94);
+  color: var(--grey-50);
+}
+
+.selfTag {
+  background-color: var(--accent-purple);
+  color: white;
+}
