@@ -1,107 +1,88 @@
 import { createContext, useContext, useState, useEffect } from 'react'
+import { api, setToken, getToken, clearToken } from '../services/api';
 
 const AuthContext = createContext(null)
 
-const STORAGE_KEY = 'bazi_auth'
+const STORAGE_KEY = 'bazi_user_cache' // Only cache user info, token is handled by api.js
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
 
-  // 初始化时从 localStorage 读取
+  // 初始化时从 localStorage 读取缓存的用户信息，并验证 token
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY)
-    if (stored) {
+    const token = getToken();
+    const storedUser = localStorage.getItem(STORAGE_KEY);
+    
+    if (storedUser) {
       try {
-        const data = JSON.parse(stored)
-        setUser(data.user)
+        const data = JSON.parse(storedUser);
+        setUser(data);
       } catch (e) {
-        localStorage.removeItem(STORAGE_KEY)
+        localStorage.removeItem(STORAGE_KEY);
       }
     }
-    setIsLoading(false)
+
+    if (token) {
+      api.get('/auth/me')
+        .then(res => {
+          const userData = { ...res.user, balance: res.user.pointsBalance };
+          setUser(userData);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(userData));
+        })
+        .catch(() => {
+          // Token invalid
+          clearToken();
+          setUser(null);
+          localStorage.removeItem(STORAGE_KEY);
+        })
+        .finally(() => setIsLoading(false));
+    } else {
+      setIsLoading(false);
+    }
   }, [])
 
-  // Mock 登录
   const login = async (username, password) => {
-    // 模拟 API 调用延迟
-    await new Promise(resolve => setTimeout(resolve, 800))
+    const res = await api.post('/auth/login/password', { username, password });
+    setToken(res.token);
     
-    // Mock 验证 - 任何用户名密码都可以登录
-    if (!username || !password) {
-      throw new Error('请输入用户名和密码')
-    }
+    // Get full profile including points
+    const userRes = await api.get('/auth/me');
+    const userData = {
+      ...userRes.user,
+      balance: userRes.user.pointsBalance,
+    };
     
-    if (password.length < 6) {
-      throw new Error('密码至少6位')
-    }
-
-    const mockUser = {
-      id: `user-${Date.now()}`,
-      username,
-      phone: null,
-      balance: 100, // 新用户赠送 100 积分
-      createdAt: new Date().toISOString(),
-    }
-
-    setUser(mockUser)
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ user: mockUser }))
-    
-    return mockUser
+    setUser(userData);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(userData));
+    return userData;
   }
 
-  // Mock 注册
   const register = async (username, password) => {
-    // 模拟 API 调用延迟
-    await new Promise(resolve => setTimeout(resolve, 800))
+    const res = await api.post('/auth/register', { username, password });
+    setToken(res.token); // Backend now returns token on register
     
-    if (!username || !password) {
-      throw new Error('请输入用户名和密码')
-    }
+    const userRes = await api.get('/auth/me');
+    const userData = {
+      ...userRes.user,
+      balance: userRes.user.pointsBalance,
+    };
     
-    if (username.length < 3) {
-      throw new Error('用户名至少3位')
-    }
-    
-    if (password.length < 6) {
-      throw new Error('密码至少6位')
-    }
-
-    // 检查用户名是否已存在 (mock)
-    const existingUsers = JSON.parse(localStorage.getItem('bazi_users') || '[]')
-    if (existingUsers.includes(username)) {
-      throw new Error('用户名已存在')
-    }
-    
-    // 保存用户名
-    existingUsers.push(username)
-    localStorage.setItem('bazi_users', JSON.stringify(existingUsers))
-
-    const mockUser = {
-      id: `user-${Date.now()}`,
-      username,
-      phone: null,
-      balance: 100, // 新用户赠送 100 积分
-      createdAt: new Date().toISOString(),
-    }
-
-    setUser(mockUser)
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ user: mockUser }))
-    
-    return mockUser
+    setUser(userData);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(userData));
+    return userData;
   }
 
-  // 退出登录
   const logout = () => {
-    setUser(null)
-    localStorage.removeItem(STORAGE_KEY)
+    setUser(null);
+    clearToken();
+    localStorage.removeItem(STORAGE_KEY);
   }
 
-  // 更新用户信息
   const updateUser = (updates) => {
-    const updatedUser = { ...user, ...updates }
-    setUser(updatedUser)
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ user: updatedUser }))
+    const updatedUser = { ...user, ...updates };
+    setUser(updatedUser);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedUser));
   }
 
   const value = {

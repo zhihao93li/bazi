@@ -32,35 +32,35 @@ export default function FourPillarsCard({ data, className = '' }) {
       <div className={styles.pillarsGrid}>
         <Pillar 
           title="年柱"
-          stem={data.year.heavenlyStem}
-          branch={data.year.earthlyBranch}
-          stemElement={data.year.heavenlyStemElement}
-          branchElement={data.year.earthlyBranchElement}
-          tenGods={data.year.tenGods}
+          stem={data.year.heavenlyStem.chinese}
+          branch={data.year.earthlyBranch.chinese}
+          stemElement={data.year.heavenlyStem.element}
+          branchElement={data.year.earthlyBranch.element}
+          tenGods={data.year.tenGod}
         />
         <Pillar 
           title="月柱"
-          stem={data.month.heavenlyStem}
-          branch={data.month.earthlyBranch}
-          stemElement={data.month.heavenlyStemElement}
-          branchElement={data.month.earthlyBranchElement}
-          tenGods={data.month.tenGods}
+          stem={data.month.heavenlyStem.chinese}
+          branch={data.month.earthlyBranch.chinese}
+          stemElement={data.month.heavenlyStem.element}
+          branchElement={data.month.earthlyBranch.element}
+          tenGods={data.month.tenGod}
         />
         <Pillar 
           title="日柱"
-          stem={data.day.heavenlyStem}
-          branch={data.day.earthlyBranch}
-          stemElement={data.day.heavenlyStemElement}
-          branchElement={data.day.earthlyBranchElement}
-          tenGods={data.day.tenGods}
+          stem={data.day.heavenlyStem.chinese}
+          branch={data.day.earthlyBranch.chinese}
+          stemElement={data.day.heavenlyStem.element}
+          branchElement={data.day.earthlyBranch.element}
+          tenGods={data.day.tenGod}
         />
         <Pillar 
           title="时柱"
-          stem={data.hour.heavenlyStem}
-          branch={data.hour.earthlyBranch}
-          stemElement={data.hour.heavenlyStemElement}
-          branchElement={data.hour.earthlyBranchElement}
-          tenGods={data.hour.tenGods}
+          stem={data.hour.heavenlyStem.chinese}
+          branch={data.hour.earthlyBranch.chinese}
+          stemElement={data.hour.heavenlyStem.element}
+          branchElement={data.hour.earthlyBranch.element}
+          tenGods={data.hour.tenGod}
         />
       </div>
     </Card>

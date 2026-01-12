@@ -104,8 +104,14 @@ export default function LoginPage() {
 
   return (
     <main className={styles.main}>
-      {/* 背景 - 使用 GradientBackground 组件 */}
-      <GradientBackground />
+        {/* Background - Customized for Login (Warm/Welcoming) */}
+        <GradientBackground 
+          gridCount={0} 
+          glowColors={['rgba(255, 47, 47, 0.2)', 'rgba(239, 123, 22, 0.2)']} 
+          noiseOpacity={0.1}
+          animated
+          expanded
+        />
 
       {/* 内容 */}
       <div className={styles.container}>
@@ -126,10 +132,6 @@ export default function LoginPage() {
 
           {/* 表单卡片 */}
           <Card variant="gradient" padding="large" className={styles.formCard}>
-            <h1 className={styles.title}>
-              {mode === 'login' ? '欢迎回来' : '创建账户'}
-            </h1>
-            
             {/* 模式切换 */}
             <ButtonGroup
               options={modeOptions}
@@ -149,6 +151,7 @@ export default function LoginPage() {
                 onChange={handleChange}
                 placeholder="请输入用户名"
                 error={errors.username}
+                maxLength={20}
                 required
               />
               
@@ -160,6 +163,7 @@ export default function LoginPage() {
                 onChange={handleChange}
                 placeholder="请输入密码"
                 error={errors.password}
+                maxLength={32}
                 required
               />
               
@@ -172,6 +176,7 @@ export default function LoginPage() {
                   onChange={handleChange}
                   placeholder="请再次输入密码"
                   error={errors.confirmPassword}
+                  maxLength={32}
                   required
                 />
               )}
@@ -182,13 +187,9 @@ export default function LoginPage() {
                 disabled={isLoading}
                 className={styles.submitButton}
               >
-                {isLoading ? '处理中...' : (mode === 'login' ? '登录' : '注册')}
+                {isLoading ? '处理中...' : (mode === 'login' ? '登录' : '注册得100积分')}
               </Button>
             </form>
-            
-            {mode === 'register' && (
-              <p className={styles.hint}>注册即送 100 积分</p>
-            )}
           </Card>
 
           {/* 返回首页 */}

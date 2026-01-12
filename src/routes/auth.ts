@@ -172,6 +172,8 @@ authRoutes.post('/login/password', async (c) => {
 /**
  * 用户名密码注册
  * POST /api/auth/register
+ * 
+ * 注册成功后直接返回 token，一次调用完成注册+登录
  */
 authRoutes.post('/register', async (c) => {
   try {
@@ -188,10 +190,22 @@ authRoutes.post('/register', async (c) => {
       return c.json({ success: false, message: result.message }, 400);
     }
 
+    // 注册成功后直接生成 token
+    const token = await signToken({
+      id: result.userId!,
+      username,
+      isNewUser: true,
+    });
+
     return c.json({
       success: true,
       message: result.message,
-      userId: result.userId,
+      token,  // 新增：返回 token
+      user: {
+        id: result.userId,
+        username,
+        isNewUser: true,
+      },
     });
   } catch (error) {
     console.error('Registration error:', error);

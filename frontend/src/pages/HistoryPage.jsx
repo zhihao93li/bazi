@@ -3,56 +3,84 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ClockCounterClockwise, Trash, CaretRight, User, MagnifyingGlass } from '@phosphor-icons/react';
 import { useAuth } from '../context/AuthContext';
-import { useToast } from '../components/common';
+import { useToast, LoadingSpinner, LoadingOverlay } from '../components/common'; // Import
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-// import FormInput from '../components/common/FormInput';
+import GradientBackground from '../components/GradientBackground';
+import { api } from '../services/api';
 import styles from './HistoryPage.module.css';
-
-// Mock Data Structure
-// { id, subjectName, subjectRel, action, createdAt, isAnalyzed }
 
 export default function HistoryPage() {
   const navigate = useNavigate();
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, isLoading: authLoading } = useAuth();
   const toast = useToast();
   const [records, setRecords] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
 
   // 1. Check Login
   useEffect(() => {
-    if (!isLoggedIn) {
+    if (!authLoading && !isLoggedIn) {
       navigate('/login?callbackUrl=/history', { replace: true });
     }
-  }, [isLoggedIn, navigate]);
+  }, [authLoading, isLoggedIn, navigate]);
 
-  // 2. Load Data (Simulated)
+  // 2. Load Data
   useEffect(() => {
-    // Generate some mock history data if empty
-    const mockHistory = [
-      { id: 'h1', subjectName: '张三', subjectRel: 'self', action: '排盘查看', createdAt: '2023-10-24 14:30', isAnalyzed: true },
-      { id: 'h2', subjectName: '李四', subjectRel: 'friend', action: '排盘查看', createdAt: '2023-10-23 09:15', isAnalyzed: false },
-      { id: 'h3', subjectName: '王五', subjectRel: 'other', action: '排盘查看', createdAt: '2023-10-20 18:45', isAnalyzed: true },
-    ];
-    setRecords(mockHistory);
-  }, []);
+    if (isLoggedIn) {
+      loadRecords();
+    }
+  }, [isLoggedIn]);
 
-  const handleDelete = (e, id) => {
-    e.preventDefault(); // Prevent link navigation
+  const loadRecords = async () => {
+    try {
+      const res = await api.get('/reports?page=1&limit=50');
+      setRecords(res.reports);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDelete = async (e, id) => {
+    e.preventDefault();
     if (confirm('确定要删除这条记录吗？')) {
-      setRecords(prev => prev.filter(r => r.id !== id));
-      toast.success('记录已删除');
+      try {
+        await api.delete(`/reports/${id}`);
+        setRecords(prev => prev.filter(r => r.id !== id));
+        toast.success('记录已删除');
+      } catch (error) {
+        toast.error('删除失败');
+      }
     }
   };
 
   const filteredRecords = records.filter(r => 
-    r.subjectName.toLowerCase().includes(searchTerm.toLowerCase())
+    (r.subjectName || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  if (authLoading) {
+    return <LoadingOverlay fixed />;
+  }
+
+  if (!isLoggedIn) {
+    return null;
+  }
 
   return (
     <>
       <Navbar />
       <main className={styles.main}>
+        {/* Background - Memory/Cool for History - Strengthened */}
+        <GradientBackground 
+          gridCount={0} 
+          glowColors={['rgba(94, 106, 210, 0.5)', 'rgba(138, 67, 225, 0.4)']} 
+          noiseOpacity={0.15}
+          animated
+          expanded
+        />
+
         <div className={styles.container}>
           
           {/* Header */}
@@ -63,12 +91,10 @@ export default function HistoryPage() {
             </div>
             
             <div className={styles.filterGroup}>
-              {/* Simple Search */}
-               {/* Note: FormInput might need adjustment for this small usage, using standard input style for now if needed or simple styling */}
                <div style={{ position: 'relative' }}>
                  <input 
                    type="text" 
-                   placeholder="搜索姓名..." 
+                   placeholder="搜索称呼..." 
                    value={searchTerm}
                    onChange={(e) => setSearchTerm(e.target.value)}
                    style={{
@@ -90,7 +116,12 @@ export default function HistoryPage() {
 
           {/* List */}
           <div className={styles.listContainer}>
-            {filteredRecords.length === 0 ? (
+            {isLoading ? (
+              <div className={styles.emptyState}>
+                <LoadingSpinner size="medium" />
+                <p style={{ marginTop: '12px' }}>加载中...</p>
+              </div>
+            ) : filteredRecords.length === 0 ? (
               <div className={styles.emptyState}>
                 <ClockCounterClockwise size={48} className={styles.emptyIcon} />
                 <p>暂无历史记录</p>
@@ -105,20 +136,21 @@ export default function HistoryPage() {
                     exit={{ opacity: 0, height: 0, marginBottom: 0 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <Link to={`/bazi?historyId=${record.id}`} className={styles.recordCard}>
+                    {/* Link to Bazi Result Page with subjectId or reportId */}
+                    <Link to={`/bazi?subjectId=${record.subjectId}&reportId=${record.id}`} className={styles.recordCard}>
                       <div className={styles.cardLeft}>
                         <div className={`${styles.avatar} ${record.subjectRel === 'self' ? styles.self : ''}`}>
-                          {record.subjectRel === 'self' ? <User weight="fill" /> : record.subjectName[0]}
+                          <User weight="fill" />
                         </div>
                         <div className={styles.info}>
                           <div className={styles.nameRow}>
-                            <span className={styles.name}>{record.subjectName}</span>
-                            {record.isAnalyzed && <span className={`${styles.tag} ${styles.analyzed}`}>已分析</span>}
+                            <span className={styles.name}>{record.subjectName || '未知对象'}</span>
+                            {record.analysis && <span className={`${styles.tag} ${styles.analyzed}`}>已分析</span>}
                           </div>
                           <div className={styles.dateInfo}>
-                            <span>{record.createdAt}</span>
+                            <span>{new Date(record.createdAt).toLocaleDateString()}</span>
                             <div className={styles.divider} />
-                            <span>{record.action}</span>
+                            <span>消耗 {record.pointsCost} 积分</span>
                           </div>
                         </div>
                       </div>

@@ -3,19 +3,17 @@ import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { 
   User, 
-  CurrencyCircleDollar, 
-  FileText, 
   SignOut,
   YinYang,
   ClockCounterClockwise,
   Coins,
-  CaretRight
 } from '@phosphor-icons/react'
 import { useAuth } from '../context/AuthContext'
-import { useToast, Card } from '../components/common'
+import { useToast, Card, LoadingSpinner, LoadingOverlay } from '../components/common' // Updated import
 import Button from '../components/Button'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
+import GradientBackground from '../components/GradientBackground'
 import { mockUserStats } from '../mock/user'
 import styles from './ProfilePage.module.css'
 
@@ -54,7 +52,11 @@ export default function ProfilePage() {
     navigate('/', { replace: true })
   }
 
-  if (authLoading || !isLoggedIn) {
+  if (authLoading) {
+    return <LoadingOverlay fixed />
+  }
+
+  if (!isLoggedIn) {
     return null
   }
 
@@ -69,6 +71,15 @@ export default function ProfilePage() {
     <>
       <Navbar />
       <main className={styles.main}>
+        {/* Background - Calm Blue/Purple for Personal Space */}
+        <GradientBackground 
+          gridCount={0} 
+          glowColors={['rgba(94, 106, 210, 0.2)', 'rgba(138, 67, 225, 0.2)']} 
+          noiseOpacity={0.1}
+          animated
+          expanded
+        />
+
         <div className={styles.container}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -99,19 +110,19 @@ export default function ProfilePage() {
               <div className={styles.statsGrid}>
                 <div className={styles.statItem}>
                   <span className={styles.statValue}>
-                    {isLoading ? '-' : stats?.balance}
+                    {isLoading ? <LoadingSpinner size="small" /> : stats?.balance}
                   </span>
                   <span className={styles.statLabel}>当前积分</span>
                 </div>
                 <div className={styles.statItem}>
                   <span className={styles.statValue}>
-                    {isLoading ? '-' : stats?.reportCount}
+                    {isLoading ? <LoadingSpinner size="small" /> : stats?.reportCount}
                   </span>
                   <span className={styles.statLabel}>分析报告</span>
                 </div>
                 <div className={styles.statItem}>
                   <span className={styles.statValue}>
-                    {isLoading ? '-' : stats?.totalSpent}
+                    {isLoading ? <LoadingSpinner size="small" /> : stats?.totalSpent}
                   </span>
                   <span className={styles.statLabel}>累计消费</span>
                 </div>

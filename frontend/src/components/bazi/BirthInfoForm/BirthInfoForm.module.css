@@ -26,6 +26,12 @@
   gap: var(--spacing-sm);
 }
 
+.locationRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: var(--spacing-sm);
+}
+
 .sectionTitle {
   font-size: var(--text-small);
   font-weight: 500;
@@ -40,6 +46,11 @@
   }
   
   .dateRow {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+
+  .locationRow {
     grid-template-columns: 1fr;
     gap: var(--spacing-md);
   }

@@ -4,7 +4,7 @@ import styles from './BirthFormPage.module.css';
 
 export default function BirthFormPage() {
   const [formData, setFormData] = useState({
-    gender: 'male',
+    gender: 'female',
     calendarType: 'solar',
     birthYear: 1990,
     birthMonth: 1,

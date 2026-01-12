@@ -6,6 +6,19 @@ import prisma from '../prisma.js';
 import type { SubjectData, CreateSubjectInput, UpdateSubjectInput } from './types.js';
 
 /**
+ * 检查用户名下是否已存在同名测算对象
+ */
+export async function isSubjectNameExists(
+  userId: string,
+  name: string
+): Promise<boolean> {
+  const existing = await prisma.subject.findFirst({
+    where: { userId, name },
+  });
+  return !!existing;
+}
+
+/**
  * 创建测算对象
  */
 export async function createSubject(
@@ -25,6 +38,7 @@ export async function createSubject(
       birthMinute: input.birthMinute,
       isLeapMonth: input.isLeapMonth ?? false,
       location: input.location,
+      baziData: input.baziData ?? undefined, // 存储前端计算的完整八字数据
       relationship: input.relationship,
       note: input.note,
     },

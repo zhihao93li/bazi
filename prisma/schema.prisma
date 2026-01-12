@@ -39,7 +39,8 @@ model Subject {
   birthHour    Int
   birthMinute  Int
   isLeapMonth  Boolean  @default(false)
-  location     String   // 出生地点
+  location     String   // 出生地点（省/市/区 三级格式，如 "北京市/北京市/朝阳区"）
+  baziData     Json?    // 存储完整八字计算结果（前端计算后传入）
   relationship String?  // 与用户关系：self/family/friend/other
   note         String?  // 备注
   createdAt    DateTime @default(now())

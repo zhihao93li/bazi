@@ -1,0 +1,52 @@
+.spinner {
+  display: inline-block;
+  animation: spin 1s linear infinite;
+  color: var(--dark-7);
+}
+
+.small { font-size: 16px; }
+.medium { font-size: 24px; }
+.large { font-size: 40px; }
+
+.default { color: var(--dark-7); }
+.white { color: var(--absolute-white); }
+.purple { color: var(--accent-purple); }
+.brand { color: var(--dark-7); } 
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 50;
+  gap: 16px;
+  border-radius: inherit; /* Inherit border radius from parent if possible */
+}
+
+.fixed {
+  position: fixed;
+  z-index: 2000;
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.text {
+  font-size: 14px;
+  color: var(--dark-7);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}

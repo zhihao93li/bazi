@@ -1,26 +1,3 @@
-/**
- * GradientBackground - 可复用的渐变背景组件
- * 
- * 特性：
- * - 24条垂直栅格线（带毛玻璃效果）
- * - 左右两侧彩色椭圆光效（可自定义颜色）
- * - 顶部/底部渐变遮罩
- * - 噪点纹理覆盖层
- * - 响应式设计（小屏幕自动降低视觉强度）
- * 
- * @example
- * // 基础用法
- * <GradientBackground />
- * 
- * // 自定义配置
- * <GradientBackground 
- *   gridCount={12}
- *   glowColors={['#FF2F2F', '#EF7B16', '#8A43E1', '#D511FD']}
- *   backgroundColor="#F4F2F1"
- *   noiseOpacity={0.5}
- * />
- */
-
 import styles from './GradientBackground.module.css'
 
 // 默认的光效颜色
@@ -49,6 +26,8 @@ export default function GradientBackground({
   noiseUrl = 'https://framerusercontent.com/images/6mcf62RlDfRfU61Yg5vb2pefpi4.png',
   showTopGradient = true,
   showBottomGradient = true,
+  animated = false, // New Prop
+  expanded = false, // New Prop
   className = '',
   style = {},
 }) {
@@ -73,7 +52,12 @@ export default function GradientBackground({
 
   return (
     <div
-      className={`${styles.background} ${className}`}
+      className={`
+        ${styles.background} 
+        ${animated ? styles.animated : ''} 
+        ${expanded ? styles.expanded : ''} 
+        ${className}
+      `}
       style={{
         ...(backgroundColor && { backgroundColor }),
         ...style,

@@ -2,11 +2,15 @@
   min-height: 100vh;
   background: var(--light-95);
   padding: 120px 40px 100px;
+  position: relative;
+  overflow-x: hidden; /* Ensure background doesn't overflow */
 }
 
 .container {
   max-width: 800px;
   margin: 0 auto;
+  position: relative; /* z-index context */
+  z-index: 1;
 }
 
 .header {

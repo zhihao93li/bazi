@@ -18,6 +18,7 @@
   z-index: 0;
   /* 默认背景色，可通过 props 覆盖 */
   background-color: rgb(244, 242, 241);
+  overflow: hidden;
 }
 
 /* ==================== 栅格线 ==================== */
@@ -66,6 +67,7 @@
   position: absolute;
   width: 378px;
   height: 571px;
+  transition: all 0.5s ease;
 }
 
 .leftAbstract {
@@ -85,6 +87,7 @@
   height: 571px;
   filter: blur(120px);
   opacity: 1;
+  transition: all 0.5s ease;
 }
 
 .ellipseGroup:nth-child(2) {
@@ -97,6 +100,7 @@
   width: 207px;
   height: 207px;
   border-radius: 50%;
+  transition: all 0.5s ease;
 }
 
 /* ==================== 渐变遮罩 ==================== */
@@ -144,98 +148,119 @@
   z-index: 4;
 }
 
+/* ==================== 动画与扩展 (Enhanced Mode) ==================== */
+
+@keyframes float {
+  0% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -20px) scale(1.1); }
+  66% { transform: translate(-20px, 30px) scale(0.95); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+
+/* Animated State */
+.animated .ellipseGroup {
+  animation: float 15s ease-in-out infinite;
+}
+
+.animated .ellipseGroup:nth-child(2) {
+  animation-delay: -5s;
+  animation-duration: 18s;
+}
+
+/* Expanded State (Larger, more visible on mobile) */
+.expanded .leftAbstract {
+  width: 800px;
+  height: 800px;
+  left: -200px;
+  top: -100px;
+}
+
+.expanded .rightAbstract {
+  width: 800px;
+  height: 800px;
+  right: -200px;
+  top: -100px;
+}
+
+.expanded .ellipseGroup {
+  width: 100%;
+  height: 100%;
+  filter: blur(140px);
+  opacity: 0.7; /* Keep high opacity */
+}
+
+.expanded .ellipse {
+  width: 60%;
+  height: 60%;
+}
+
 /* ==================== 响应式设计 ==================== */
-/* 
- * 小屏幕下：
- * 1. 栅格线变淡 - 因为每条线相对变宽，视觉上更突出
- * 2. 噪点变淡 - 避免在小屏幕上显得杂乱
- * 3. 光效缩小 - 适应屏幕尺寸
- */
 
 /* 平板端 */
 @media (max-width: 900px) {
   .gridLine {
-    /* 降低栅格线渐变透明度 */
     background: linear-gradient(270deg, rgba(242, 240, 238, 0.12) 0%, rgba(242, 240, 238, 0) 100%);
   }
 
   .gridLine::after {
-    /* 降低边框透明度 */
     background-color: rgba(255, 255, 255, 0.06);
   }
 
   .noise {
-    /* 降低噪点透明度 */
     opacity: 0.5;
   }
 
+  /* Default shrinking (overridden by .expanded) */
   .ellipseGroup {
-    /* 缩小光效尺寸 */
     width: 300px;
     height: 450px;
     filter: blur(100px);
     opacity: 0.8;
   }
 
-  .ellipseGroup:nth-child(2) {
-    filter: blur(80px);
-    opacity: 0.8;
-  }
-
-  .ellipse {
-    width: 160px;
-    height: 160px;
+  /* Expanded override */
+  .expanded .ellipseGroup {
+    width: 100%;
+    height: 100%;
+    filter: blur(120px);
+    opacity: 0.7; /* Maintain visibility */
   }
 }
 
 /* 移动端 */
 @media (max-width: 600px) {
   .background {
-    /* 减少左右扩展 */
     left: -60px;
     right: -60px;
   }
 
   .gridLine {
-    /* 进一步降低栅格线渐变透明度 */
     background: linear-gradient(270deg, rgba(242, 240, 238, 0.06) 0%, rgba(242, 240, 238, 0) 100%);
   }
 
   .gridLine::after {
-    /* 进一步降低边框透明度，几乎不可见 */
     background-color: rgba(255, 255, 255, 0.03);
   }
 
   .noise {
-    /* 大幅降低噪点透明度 */
     opacity: 0.25;
-    /* 减小噪点图案尺寸 */
     background-size: 150px;
   }
 
+  /* Default shrinking */
   .leftAbstract,
   .rightAbstract {
     width: 250px;
     height: 400px;
   }
 
-  .leftAbstract {
-    left: -100px;
-  }
-
-  .rightAbstract {
-    right: -100px;
-  }
+  .leftAbstract { left: -100px; }
+  .rightAbstract { right: -100px; }
 
   .ellipseGroup {
     width: 250px;
     height: 400px;
     filter: blur(80px);
-    opacity: 0.6;
-  }
-
-  .ellipseGroup:nth-child(2) {
-    filter: blur(60px);
     opacity: 0.6;
   }
 
@@ -247,22 +272,46 @@
   .bgGradientTop {
     height: 300px;
   }
+
+  /* Expanded override for Mobile - Crucial for "Visible on Mobile" */
+  .expanded .leftAbstract,
+  .expanded .rightAbstract {
+    width: 100%;
+    height: 60vh; /* Cover significant height */
+    top: -50px;
+    left: 0;
+    right: 0;
+  }
+  
+  .expanded .rightAbstract {
+    top: auto;
+    bottom: -100px; /* Put one at bottom? */
+  }
+
+  .expanded .ellipseGroup {
+    width: 100%;
+    height: 100%;
+    filter: blur(100px); /* Slightly less blur to keep color intensity */
+    opacity: 0.6; /* Visible enough */
+  }
+  
+  .expanded .ellipse {
+    width: 80%; /* Huge blobs */
+    height: 80%;
+  }
 }
 
 /* 超小屏幕 */
 @media (max-width: 400px) {
   .gridLine {
-    /* 栅格线几乎不可见 */
     background: linear-gradient(270deg, rgba(242, 240, 238, 0.03) 0%, rgba(242, 240, 238, 0) 100%);
   }
 
   .gridLine::after {
-    /* 边框完全不可见 */
     background-color: rgba(255, 255, 255, 0.01);
   }
 
   .noise {
-    /* 噪点非常淡 */
     opacity: 0.15;
   }
 
@@ -270,9 +319,9 @@
     opacity: 0.4;
     filter: blur(60px);
   }
-
-  .ellipseGroup:nth-child(2) {
-    opacity: 0.4;
-    filter: blur(50px);
+  
+  /* Keep expanded visible even here */
+  .expanded .ellipseGroup {
+    opacity: 0.55;
   }
 }

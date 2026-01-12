@@ -3,12 +3,13 @@ import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Check, ArrowUp, ArrowDown, Gift } from '@phosphor-icons/react'
 import { useAuth } from '../context/AuthContext'
-import { useToast, Card } from '../components/common'
+import { useToast, Card, LoadingSpinner, LoadingOverlay } from '../components/common' // Import Loading
 import Button from '../components/Button'
 import Tag from '../components/Tag'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
-import { mockPackages, mockTransactions, fetchPointsData } from '../mock/points'
+import GradientBackground from '../components/GradientBackground'
+import { api } from '../services/api'
 import styles from './PointsPage.module.css'
 
 export default function PointsPage() {
@@ -17,6 +18,7 @@ export default function PointsPage() {
   const toast = useToast()
   const [balance, setBalance] = useState(0)
   const [transactions, setTransactions] = useState([])
+  const [packages, setPackages] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [purchasing, setPurchasing] = useState(null)
 
@@ -30,37 +32,35 @@ export default function PointsPage() {
   // 获取数据
   useEffect(() => {
     if (isLoggedIn) {
-      fetchPointsData().then(data => {
-        setBalance(user?.balance || data.balance)
-        setTransactions(data.transactions)
-        setIsLoading(false)
-      })
+      Promise.all([
+        api.get('/points'),
+        api.get('/points/packages')
+      ]).then(([pointsRes, packagesRes]) => {
+        setBalance(pointsRes.balance);
+        setTransactions(pointsRes.transactions);
+        setPackages(packagesRes.packages.map(pkg => ({
+          ...pkg,
+          price: pkg.price / 100,
+        })));
+        setIsLoading(false);
+      }).catch(err => {
+        console.error(err);
+        setIsLoading(false);
+      });
     }
   }, [isLoggedIn, user])
 
   const handlePurchase = async (pkg) => {
     setPurchasing(pkg.id)
     
-    // 模拟支付流程
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    
-    // 更新积分
-    const newBalance = balance + pkg.points
-    setBalance(newBalance)
-    updateUser({ balance: newBalance })
-    
-    // 添加交易记录
-    const newTransaction = {
-      id: `tx-${Date.now()}`,
-      type: 'recharge',
-      amount: pkg.points,
-      balance: newBalance,
-      description: `充值 - ${pkg.name}套餐`,
-      createdAt: new Date().toISOString(),
+    // Simulate purchase
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      toast.info('支付功能接入中...');
+    } catch (e) {
+      toast.error('支付失败');
     }
-    setTransactions([newTransaction, ...transactions])
     
-    toast.success(`充值成功！获得 ${pkg.points} 积分`)
     setPurchasing(null)
   }
 
@@ -75,14 +75,18 @@ export default function PointsPage() {
         return <ArrowUp size={18} weight="bold" />
       case 'consume':
         return <ArrowDown size={18} weight="bold" />
-      case 'bonus':
+      case 'gift':
         return <Gift size={18} weight="bold" />
       default:
         return null
     }
   }
 
-  if (authLoading || !isLoggedIn) {
+  if (authLoading) {
+    return <LoadingOverlay fixed />
+  }
+
+  if (!isLoggedIn) {
     return null
   }
 
@@ -90,6 +94,15 @@ export default function PointsPage() {
     <>
       <Navbar />
       <main className={styles.main}>
+        {/* Background - Gold/Orange for Wealth */}
+        <GradientBackground 
+          gridCount={0} 
+          glowColors={['rgba(239, 123, 22, 0.3)', 'rgba(255, 47, 47, 0.2)']} 
+          noiseOpacity={0.1}
+          animated
+          expanded
+        />
+
         <div className={styles.container}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -106,7 +119,7 @@ export default function PointsPage() {
             <Card variant="gradient" padding="large" className={styles.balanceCard}>
               <span className={styles.balanceLabel}>当前积分</span>
               <span className={styles.balanceValue}>
-                {isLoading ? '-' : balance.toLocaleString()}
+                {isLoading ? <LoadingSpinner size="large" /> : balance.toLocaleString()}
               </span>
               <span className={styles.balanceHint}>积分可用于命理分析服务</span>
             </Card>
@@ -115,7 +128,7 @@ export default function PointsPage() {
             <section className={styles.section}>
               <h2 className={styles.sectionTitle}>充值套餐</h2>
               <div className={styles.packagesGrid}>
-                {mockPackages.map((pkg, index) => (
+                {packages.map((pkg, index) => (
                   <motion.div
                     key={pkg.id}
                     initial={{ opacity: 0, y: 20 }}
@@ -139,7 +152,7 @@ export default function PointsPage() {
                         disabled={purchasing === pkg.id}
                         className={styles.packageButton}
                       >
-                        {purchasing === pkg.id ? '处理中...' : '购买'}
+                        {purchasing === pkg.id ? <LoadingSpinner size="small" color="white" /> : '购买'}
                       </Button>
                     </Card>
                   </motion.div>
@@ -152,7 +165,9 @@ export default function PointsPage() {
               <h2 className={styles.sectionTitle}>积分明细</h2>
               <Card padding="none" className={styles.transactionsCard}>
                 {isLoading ? (
-                  <div className={styles.loadingState}>加载中...</div>
+                  <div className={styles.loadingState}>
+                    <LoadingSpinner />
+                  </div>
                 ) : transactions.length === 0 ? (
                   <div className={styles.emptyState}>暂无积分记录</div>
                 ) : (

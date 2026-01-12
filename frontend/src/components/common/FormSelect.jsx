@@ -16,6 +16,8 @@ export default function FormSelect({
 }) {
   const [isOpen, setIsOpen] = useState(false)
   const selectRef = useRef(null)
+  const dropdownRef = useRef(null)
+  const selectedRef = useRef(null)
 
   // 点击外部关闭
   useEffect(() => {
@@ -27,6 +29,17 @@ export default function FormSelect({
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
+
+  // 打开时滚动到选中项
+  useEffect(() => {
+    if (isOpen && selectedRef.current && dropdownRef.current) {
+      const dropdown = dropdownRef.current
+      const selected = selectedRef.current
+      // 将选中项滚动到下拉框中间位置
+      const scrollTop = selected.offsetTop - dropdown.clientHeight / 2 + selected.clientHeight / 2
+      dropdown.scrollTop = Math.max(0, scrollTop)
+    }
+  }, [isOpen])
 
   const selectedOption = options.find(opt => opt.value === value)
 
@@ -54,10 +67,11 @@ export default function FormSelect({
       </div>
       
       {isOpen && !disabled && (
-        <div className={styles.dropdown}>
+        <div className={styles.dropdown} ref={dropdownRef}>
           {options.map((option) => (
             <div
               key={option.value}
+              ref={option.value === value ? selectedRef : null}
               className={`${styles.option} ${option.value === value ? styles.selected : ''}`}
               onClick={() => handleSelect(option.value)}
             >

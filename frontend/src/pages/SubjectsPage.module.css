@@ -1,7 +1,16 @@
+.main {
+  min-height: 100vh;
+  background: var(--light-95);
+  padding: 120px 40px 100px;
+  position: relative;
+  overflow-x: hidden;
+}
+
 .container {
   max-width: var(--max-width-lg);
   margin: 0 auto;
-  padding: var(--spacing-xl) var(--spacing-md);
+  position: relative;
+  z-index: 1;
 }
 
 .header {
@@ -44,4 +53,24 @@
   text-align: center;
   padding: var(--spacing-3xl) 0;
   color: var(--grey-50);
+}
+
+/* 响应式 */
+@media (max-width: 600px) {
+  .main {
+    padding: 100px 20px 80px;
+  }
+
+  .grid {
+    grid-template-columns: 1fr; /* 移动端单列 */
+  }
+  
+  .header {
+    flex-direction: row; /* Keep row unless title wraps */
+    align-items: center;
+  }
+  
+  .title {
+    font-size: 24px;
+  }
 }

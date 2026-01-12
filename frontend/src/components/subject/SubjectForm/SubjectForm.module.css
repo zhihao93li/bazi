@@ -6,9 +6,12 @@
 }
 
 .basicInfo {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+}
+
+.nameInput {
+  width: 100%;
 }
 
 .submitButton {

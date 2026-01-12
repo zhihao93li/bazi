@@ -2,6 +2,8 @@
   min-height: 400px;
   display: flex;
   flex-direction: column;
+  /* Prevent overflow */
+  max-width: 100%;
 }
 
 /* Header & Tabs */
@@ -13,6 +15,8 @@
   gap: var(--spacing-lg);
   overflow-x: auto;
   scrollbar-width: none; /* Firefox */
+  /* Ensure header doesn't overflow parent */
+  max-width: calc(100% + var(--spacing-md) * 2);
 }
 
 .header::-webkit-scrollbar {
@@ -28,6 +32,7 @@
   position: relative;
   transition: color 0.2s;
   white-space: nowrap;
+  flex-shrink: 0; /* Don't squash tabs */
 }
 
 .tab:hover {
@@ -56,6 +61,8 @@
   font-size: var(--text-small);
   line-height: 1.6;
   animation: fadeIn 0.3s ease-out;
+  overflow-wrap: break-word; /* Prevent long text overflow */
+  word-break: break-word;
 }
 
 /* Markdown Styles Simulation */

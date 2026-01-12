@@ -4,6 +4,8 @@
   /* Hide scrollbar for cleaner look */
   scrollbar-width: none;
   -ms-overflow-style: none;
+  width: 100%; /* Force width to fit parent */
+  max-width: 100%;
 }
 
 .container::-webkit-scrollbar {
@@ -15,7 +17,7 @@
   gap: var(--spacing-md);
   min-width: max-content;
   padding: 0 var(--spacing-xs);
-  position: relative; /* Fix: Ensure pseudo-element is contained */
+  position: relative;
 }
 
 .node {

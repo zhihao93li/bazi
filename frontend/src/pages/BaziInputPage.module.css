@@ -4,11 +4,15 @@
   padding: 120px 40px 100px;
   display: flex;
   justify-content: center;
+  position: relative;
+  overflow-x: hidden;
 }
 
 .container {
   width: 100%;
   max-width: 600px; /* Optimized width for form focus */
+  position: relative;
+  z-index: 1;
 }
 
 .header {

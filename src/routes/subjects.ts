@@ -19,6 +19,7 @@ import {
   updateSubject,
   deleteSubject,
   getSubjectReportCount,
+  isSubjectNameExists,
 } from '../lib/subject/index.js';
 import type { CreateSubjectInput, UpdateSubjectInput } from '../lib/subject/types.js';
 import type { BaziData } from '../lib/bazi/types.js';
@@ -61,6 +62,8 @@ subjectsRoutes.get('/', authRequired, async (c) => {
 /**
  * 创建测算对象
  * POST /api/subjects
+ * 
+ * 支持存储前端计算的 baziData，并检测名称重复
  */
 subjectsRoutes.post('/', authRequired, async (c) => {
   try {
@@ -81,6 +84,7 @@ subjectsRoutes.post('/', authRequired, async (c) => {
       birthMinute: body.birthMinute,
       isLeapMonth: body.isLeapMonth,
       location: body.location,
+      baziData: body.baziData, // 前端计算的完整八字数据
       relationship: body.relationship,
       note: body.note,
     };
@@ -88,6 +92,16 @@ subjectsRoutes.post('/', authRequired, async (c) => {
     // 基本验证
     if (!input.name || !input.gender || !input.location) {
       return c.json({ success: false, message: '请填写必要信息' }, 400);
+    }
+
+    // 检测名称重复（同一用户下）
+    const nameExists = await isSubjectNameExists(userId, input.name);
+    if (nameExists) {
+      return c.json({
+        success: false,
+        message: '名称已存在，请使用其他名称',
+        code: 'NAME_DUPLICATE',
+      }, 400);
     }
 
     const subject = await createSubject(userId, input);

@@ -1,12 +1,16 @@
 .main {
   min-height: 100vh;
-  background: var(--light-95);
+  background: var(--light-95); /* Keep base color */
   padding: 120px 40px 100px;
+  position: relative; /* For gradient background absolute positioning */
+  overflow-x: hidden;
 }
 
 .container {
   max-width: 1200px;
   margin: 0 auto;
+  position: relative; /* Ensure content is above background */
+  z-index: 1;
 }
 
 /* 顶部区域 */
@@ -30,13 +34,17 @@
   width: 40px;
   height: 40px;
   border-radius: var(--radius-full);
-  background: white;
+  background: rgba(255, 255, 255, 0.8); /* Semi-transparent */
   color: var(--dark-7);
   transition: all 0.2s;
+  backdrop-filter: blur(10px); /* Glass effect */
+  border: 1px solid rgba(255, 255, 255, 0.5);
 }
 
 .backButton:hover {
-  background: var(--light-90);
+  background: white;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
 }
 
 .title {
@@ -57,12 +65,14 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
+  min-width: 0; /* Critical for nested flex scrolling */
 }
 
 .rightCol {
   display: flex;
   flex-direction: column;
   gap: 24px;
+  min-width: 0; /* Critical for nested flex scrolling */
 }
 
 /* 粘性右侧栏 (桌面端) */

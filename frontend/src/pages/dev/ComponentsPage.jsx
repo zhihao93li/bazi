@@ -17,7 +17,7 @@ export default function ComponentsPage() {
   const [formData, setFormData] = useState({
     username: '',
     email: '',
-    gender: 'male',
+    gender: 'female',
     city: '',
     agree: false,
   })

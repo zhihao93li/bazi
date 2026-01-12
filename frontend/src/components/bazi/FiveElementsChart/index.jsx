@@ -5,14 +5,18 @@ import styles from './FiveElementsChart.module.css';
 export default function FiveElementsChart({ data, className = '' }) {
   if (!data) return null;
 
-  const total = Object.values(data).reduce((a, b) => a + b, 0);
+  // Use data.distribution instead of data directly
+  const distribution = data.distribution || data; 
+  // Fallback to data if it's the old structure (but it shouldn't be with new calculator)
+  
+  const total = Object.values(distribution).reduce((a, b) => a + b, 0);
   
   const elements = [
-    { key: 'metal', label: '金', value: data.metal },
-    { key: 'wood', label: '木', value: data.wood },
-    { key: 'water', label: '水', value: data.water },
-    { key: 'fire', label: '火', value: data.fire },
-    { key: 'earth', label: '土', value: data.earth },
+    { key: 'metal', label: '金', value: distribution.metal },
+    { key: 'wood', label: '木', value: distribution.wood },
+    { key: 'water', label: '水', value: distribution.water },
+    { key: 'fire', label: '火', value: distribution.fire },
+    { key: 'earth', label: '土', value: distribution.earth },
   ];
 
   return (

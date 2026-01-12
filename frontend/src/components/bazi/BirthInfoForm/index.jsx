@@ -2,7 +2,7 @@ import { useEffect, useMemo } from 'react';
 import FormInput from '../../common/FormInput';
 import FormSelect from '../../common/FormSelect';
 import ButtonGroup from '../../common/ButtonGroup';
-import Checkbox from '../../common/Checkbox'; // Assuming Checkbox exists or needs to be created
+import Checkbox from '../../common/Checkbox';
 import { PROVINCES, GENDER_OPTIONS, CALENDAR_OPTIONS } from '../../../utils/constants';
 import styles from './BirthInfoForm.module.css';
 
@@ -30,7 +30,7 @@ export default function BirthInfoForm({
   }, []);
 
   const days = useMemo(() => {
-    // Simple 31 days for now, could be improved with dynamic check based on month/year
+    // Simple 31 days for now
     return Array.from({ length: 31 }, (_, i) => ({
       value: i + 1,
       label: `${i + 1}日`
@@ -59,24 +59,38 @@ export default function BirthInfoForm({
     });
   };
 
-  // Province change -> reset city
+  // Province change -> reset city & district
   const handleProvinceChange = (e) => {
     const newProvince = e.target.value;
     onChange({
       ...value,
       location: {
         province: newProvince,
-        city: '' // Reset city when province changes
+        city: '',
+        district: ''
       }
     });
   };
 
+  // City change -> reset district
   const handleCityChange = (e) => {
+    const newCity = e.target.value;
     onChange({
       ...value,
       location: {
         ...value.location,
-        city: e.target.value
+        city: newCity,
+        district: ''
+      }
+    });
+  };
+
+  const handleDistrictChange = (e) => {
+    onChange({
+      ...value,
+      location: {
+        ...value.location,
+        district: e.target.value
       }
     });
   };
@@ -86,6 +100,12 @@ export default function BirthInfoForm({
     const province = PROVINCES.find(p => p.value === value.location?.province);
     return province ? province.cities : [];
   }, [value.location?.province]);
+
+  // Get districts for current city
+  const currentDistricts = useMemo(() => {
+    const city = currentCities.find(c => c.value === value.location?.city);
+    return city ? city.districts : [];
+  }, [value.location?.city, currentCities]);
 
   return (
     <div className={`${styles.formGrid} ${className}`}>
@@ -167,10 +187,10 @@ export default function BirthInfoForm({
         </div>
       </div>
 
-      {/* Location Selection */}
+      {/* Location Selection - 3 Levels */}
       <div>
-        <div className={styles.sectionTitle}>出生地点</div>
-        <div className={styles.row}>
+        <div className={styles.sectionTitle}>出生地点 (省/市/区)</div>
+        <div className={styles.locationRow}>
           <FormSelect
             placeholder="省份"
             options={PROVINCES}
@@ -188,14 +208,21 @@ export default function BirthInfoForm({
             disabled={!value.location?.province}
             error={errors.city}
           />
+          <FormSelect
+            placeholder="区县"
+            options={currentDistricts}
+            value={value.location?.district}
+            name="district"
+            onChange={handleDistrictChange}
+            disabled={!value.location?.city}
+            error={errors.district}
+          />
         </div>
       </div>
 
       {/* Lunar Leap Month Checkbox */}
       {value.calendarType === 'lunar' && (
         <div className={styles.row}>
-             {/* Assuming Checkbox component exists or using simple input for now if not */}
-             {/* Looking at file list, Checkbox.jsx exists */}
              <Checkbox 
                 label="闰月"
                 checked={value.isLeapMonth}
