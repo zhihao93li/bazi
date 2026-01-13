@@ -27,6 +27,25 @@ import type { BaziData } from '../bazi/types.js';
 let openaiClient: OpenAI | null = null;
 
 /**
+ * 判断模型是否需要使用 max_completion_tokens 参数
+ * GPT-5、O1 等新模型需要使用 max_completion_tokens 而不是 max_tokens
+ */
+function useMaxCompletionTokens(model: string): boolean {
+  const newModelPrefixes = ['gpt-5', 'o1', 'o3'];
+  return newModelPrefixes.some(prefix => model.toLowerCase().startsWith(prefix));
+}
+
+/**
+ * 构建 API 请求的 token 限制参数
+ */
+function buildTokenLimitParam(model: string, maxTokens: number): { max_tokens?: number; max_completion_tokens?: number } {
+  if (useMaxCompletionTokens(model)) {
+    return { max_completion_tokens: maxTokens };
+  }
+  return { max_tokens: maxTokens };
+}
+
+/**
  * 获取 OpenAI 客户端实例
  */
 function getOpenAIClient(): OpenAI {
@@ -92,7 +111,7 @@ export async function generateInitialAnalysis(
         },
       ],
       temperature: config.temperature,
-      max_tokens: config.maxTokens,
+      ...buildTokenLimitParam(config.model, config.maxTokens),
     });
 
     // 详细记录 API 响应
@@ -190,7 +209,7 @@ export async function generateThemeAnalysis(
         },
       ],
       temperature: config.temperature,
-      max_tokens: config.maxTokens,
+      ...buildTokenLimitParam(modelToUse, config.maxTokens),
     });
 
     const content = response.choices[0]?.message?.content;
@@ -241,7 +260,7 @@ export async function generateSectionAnalysis(
         },
       ],
       temperature: config.temperature,
-      max_tokens: config.maxTokens,
+      ...buildTokenLimitParam(config.model, config.maxTokens),
     });
 
     const content = response.choices[0]?.message?.content;
