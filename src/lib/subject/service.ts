@@ -26,14 +26,14 @@ export async function createSubject(
   input: CreateSubjectInput
 ): Promise<SubjectData> {
   // 安全地序列化 baziData
-  let serializedBaziData: unknown = undefined;
+  let serializedBaziData = undefined;
   if (input.baziData) {
     try {
       serializedBaziData = JSON.parse(JSON.stringify(input.baziData));
     } catch (e) {
       console.error('Failed to serialize baziData:', e);
       // 如果序列化失败，尝试提取核心数据
-      const bazi = input.baziData as Record<string, unknown>;
+      const bazi = input.baziData as unknown as Record<string, unknown>;
       serializedBaziData = {
         fourPillars: bazi.fourPillars,
         dayMaster: bazi.dayMaster,
@@ -56,7 +56,7 @@ export async function createSubject(
       birthMinute: input.birthMinute,
       isLeapMonth: input.isLeapMonth ?? false,
       location: input.location,
-      baziData: serializedBaziData,
+      baziData: serializedBaziData as Parameters<typeof prisma.subject.create>[0]['data']['baziData'],
       relationship: input.relationship,
       note: input.note,
     },

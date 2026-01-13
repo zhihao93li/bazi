@@ -53,15 +53,24 @@ export default function PointsPage() {
   const handlePurchase = async (pkg) => {
     setPurchasing(pkg.id)
     
-    // Simulate purchase
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      toast.info('支付功能接入中...');
+      // 调用后端创建 Stripe Checkout Session
+      const result = await api.post('/payment/create-checkout', {
+        packageId: pkg.id,
+      });
+
+      if (result.success && result.checkoutUrl) {
+        // 跳转到 Stripe 支付页面
+        window.location.href = result.checkoutUrl;
+      } else {
+        toast.error(result.message || '创建支付失败');
+        setPurchasing(null);
+      }
     } catch (e) {
-      toast.error('支付失败');
+      console.error('Payment error:', e);
+      toast.error(e.message || '支付失败，请稍后重试');
+      setPurchasing(null);
     }
-    
-    setPurchasing(null)
   }
 
   const formatDate = (dateStr) => {

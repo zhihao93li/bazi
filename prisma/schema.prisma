@@ -94,21 +94,23 @@ model PointsTransaction {
 }
 
 model PaymentOrder {
-  id            String    @id @default(cuid())
-  userId        String
-  orderNo       String    @unique
-  amount        Int       // 金额（分）
-  points        Int       // 对应积分
-  paymentMethod String    // wechat, alipay
-  status        String    @default("pending") // pending, paid, failed, refunded
-  transactionId String?
-  createdAt     DateTime  @default(now())
-  paidAt        DateTime?
+  id              String    @id @default(cuid())
+  userId          String
+  orderNo         String    @unique
+  amount          Int       // 金额（分）
+  points          Int       // 对应积分
+  paymentMethod   String    // stripe, alipay_qrcode, alipay_h5
+  status          String    @default("pending") // pending, paid, failed, refunded
+  transactionId   String?   // Stripe Payment Intent ID 或其他支付渠道交易号
+  stripeSessionId String?   // Stripe Checkout Session ID
+  createdAt       DateTime  @default(now())
+  paidAt          DateTime?
 
   user User @relation(fields: [userId], references: [id])
 
   @@index([userId, createdAt])
   @@index([orderNo])
+  @@index([stripeSessionId])
 }
 
 model PointsPackage {

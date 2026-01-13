@@ -2,14 +2,31 @@
  * 支付相关 API 路由
  * 
  * POST /create - 创建支付订单
+ * POST /create-checkout - 创建 Stripe Checkout Session
  * GET /status/:orderNo - 查询订单状态
  * POST /mock-confirm - Mock 支付确认（开发环境）
+ * POST /webhook - Stripe Webhook 回调
  */
 
 import { Hono } from 'hono';
+import type Stripe from 'stripe';
 import { authRequired, getCurrentUserId } from '../middleware/auth.js';
-import { createOrder, queryOrder, mockConfirmPayment } from '../lib/payment/service.js';
+import { 
+  createOrder, 
+  queryOrder, 
+  mockConfirmPayment,
+  getPackageById,
+  generateOrderNo,
+} from '../lib/payment/service.js';
 import { PaymentError, PaymentErrorCode } from '../lib/payment/types.js';
+import { 
+  createCheckoutSession, 
+  verifyWebhookSignature,
+  extractSessionInfo,
+  stripe,
+} from '../lib/payment/stripe.js';
+import prisma from '../lib/prisma.js';
+import { addPoints } from '../lib/points/service.js';
 
 export const paymentRoutes = new Hono();
 
@@ -170,6 +187,208 @@ paymentRoutes.post('/mock-confirm', async (c) => {
       { success: false, error: { code: 'INTERNAL_ERROR', message: '服务器内部错误' } },
       500
     );
+  }
+});
+
+/**
+ * 创建 Stripe Checkout Session
+ * POST /api/payment/create-checkout
+ */
+paymentRoutes.post('/create-checkout', authRequired, async (c) => {
+  try {
+    const userId = getCurrentUserId(c);
+    if (!userId) {
+      return c.json({ success: false, message: '请先登录' }, 401);
+    }
+
+    if (!stripe) {
+      return c.json({ success: false, message: 'Stripe 支付未配置' }, 503);
+    }
+
+    const body = await c.req.json();
+    const { packageId } = body;
+
+    if (!packageId) {
+      return c.json({ success: false, message: '请选择充值套餐' }, 400);
+    }
+
+    // 获取套餐信息
+    const pkg = await getPackageById(packageId);
+    if (!pkg) {
+      return c.json({ success: false, message: '套餐不存在' }, 404);
+    }
+    if (!pkg.isActive) {
+      return c.json({ success: false, message: '该套餐已下架' }, 400);
+    }
+
+    // 生成订单号
+    const orderNo = generateOrderNo();
+
+    // 创建订单记录
+    await prisma.paymentOrder.create({
+      data: {
+        userId,
+        orderNo,
+        amount: pkg.price,
+        points: pkg.points,
+        paymentMethod: 'stripe',
+        status: 'pending',
+      },
+    });
+
+    // 构建回调 URL
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const successUrl = `${frontendUrl}/payment/success?order_no=${orderNo}`;
+    const cancelUrl = `${frontendUrl}/payment/cancel?order_no=${orderNo}`;
+
+    // 创建 Stripe Checkout Session
+    const session = await createCheckoutSession({
+      orderNo,
+      packageName: pkg.name,
+      amount: pkg.price,
+      points: pkg.points,
+      successUrl,
+      cancelUrl,
+    });
+
+    // 更新订单的 stripeSessionId
+    await prisma.paymentOrder.update({
+      where: { orderNo },
+      data: { stripeSessionId: session.sessionId },
+    });
+
+    return c.json({
+      success: true,
+      orderNo,
+      checkoutUrl: session.checkoutUrl,
+    });
+  } catch (error) {
+    console.error('Create checkout session error:', error);
+    
+    if (error instanceof PaymentError) {
+      return c.json(
+        { success: false, message: error.message, code: error.code },
+        400
+      );
+    }
+
+    return c.json({ success: false, message: '创建支付会话失败' }, 500);
+  }
+});
+
+/**
+ * Stripe Webhook 回调
+ * POST /api/payment/webhook
+ * 
+ * 注意：此端点需要原始请求体来验证签名
+ */
+paymentRoutes.post('/webhook', async (c) => {
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+  
+  if (!webhookSecret) {
+    console.error('STRIPE_WEBHOOK_SECRET is not configured');
+    return c.json({ error: 'Webhook not configured' }, 500);
+  }
+
+  if (!stripe) {
+    console.error('Stripe is not configured');
+    return c.json({ error: 'Stripe not configured' }, 500);
+  }
+
+  try {
+    // 获取原始请求体和签名
+    const rawBody = await c.req.text();
+    const signature = c.req.header('stripe-signature');
+
+    if (!signature) {
+      console.error('Missing stripe-signature header');
+      return c.json({ error: 'Missing signature' }, 400);
+    }
+
+    // 验证签名并解析事件
+    let event: Stripe.Event;
+    try {
+      event = verifyWebhookSignature(rawBody, signature, webhookSecret);
+    } catch (err) {
+      console.error('Webhook signature verification failed:', err);
+      return c.json({ error: 'Invalid signature' }, 400);
+    }
+
+    // 处理事件
+    switch (event.type) {
+      case 'checkout.session.completed': {
+        const session = event.data.object as Stripe.Checkout.Session;
+        const sessionInfo = extractSessionInfo(session);
+
+        console.log('Checkout session completed:', sessionInfo);
+
+        if (!sessionInfo.orderNo) {
+          console.error('Missing orderNo in session metadata');
+          break;
+        }
+
+        // 查询订单
+        const order = await prisma.paymentOrder.findUnique({
+          where: { orderNo: sessionInfo.orderNo },
+        });
+
+        if (!order) {
+          console.error('Order not found:', sessionInfo.orderNo);
+          break;
+        }
+
+        // 幂等处理：已支付的订单跳过
+        if (order.status === 'paid') {
+          console.log('Order already paid:', sessionInfo.orderNo);
+          break;
+        }
+
+        // 更新订单状态
+        await prisma.paymentOrder.update({
+          where: { orderNo: sessionInfo.orderNo },
+          data: {
+            status: 'paid',
+            transactionId: sessionInfo.paymentIntentId,
+            paidAt: new Date(),
+          },
+        });
+
+        // 增加用户积分
+        await addPoints({
+          userId: order.userId,
+          amount: order.points,
+          type: 'recharge',
+          description: `充值套餐 - 订单号: ${sessionInfo.orderNo}`,
+          orderId: order.id,
+        });
+
+        console.log('Payment processed successfully:', sessionInfo.orderNo);
+        break;
+      }
+
+      case 'checkout.session.expired': {
+        const session = event.data.object as Stripe.Checkout.Session;
+        const orderNo = session.metadata?.orderNo;
+
+        if (orderNo) {
+          // 更新订单状态为失败
+          await prisma.paymentOrder.update({
+            where: { orderNo },
+            data: { status: 'failed' },
+          });
+          console.log('Checkout session expired:', orderNo);
+        }
+        break;
+      }
+
+      default:
+        console.log('Unhandled event type:', event.type);
+    }
+
+    return c.json({ received: true });
+  } catch (error) {
+    console.error('Webhook processing error:', error);
+    return c.json({ error: 'Webhook processing failed' }, 500);
   }
 });
 

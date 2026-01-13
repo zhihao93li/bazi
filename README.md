@@ -40,6 +40,11 @@ ALIYUN_SMS_ACCESS_KEY_SECRET=""
 ALIYUN_SMS_SIGN_NAME=""
 ALIYUN_SMS_TEMPLATE_CODE=""
 
+# Stripe 支付配置
+STRIPE_SECRET_KEY="sk_test_xxx"      # Stripe 密钥 (测试用 sk_test_, 生产用 sk_live_)
+STRIPE_WEBHOOK_SECRET="whsec_xxx"    # Stripe Webhook 签名密钥
+FRONTEND_URL="http://localhost:5173" # 前端地址（用于支付回调）
+
 # 其他配置
 PORT=3000
 CORS_ORIGIN="*"  # 或指定前端域名
@@ -109,8 +114,10 @@ npm start
 
 | 方法 | 路径 | 说明 |
 |------|------|------|
-| POST | `/api/payment/create` | 创建支付订单 |
+| POST | `/api/payment/create` | 创建支付订单（旧接口） |
+| POST | `/api/payment/create-checkout` | 创建 Stripe Checkout Session |
 | GET | `/api/payment/status/:orderNo` | 查询订单状态 |
+| POST | `/api/payment/webhook` | Stripe Webhook 回调 |
 | POST | `/api/payment/mock-confirm` | Mock 支付确认（仅开发环境） |
 
 ### 测算对象
@@ -207,6 +214,9 @@ src/
 | `JWT_SECRET` | JWT 密钥（用 `openssl rand -base64 32` 生成） |
 | `OPENAI_API_KEY` | OpenAI API 密钥 |
 | `OPENAI_BASE_URL` | OpenAI API 地址（可选） |
+| `STRIPE_SECRET_KEY` | Stripe 密钥 (`sk_live_xxx`) |
+| `STRIPE_WEBHOOK_SECRET` | Stripe Webhook 签名密钥 |
+| `FRONTEND_URL` | 前端域名（用于支付回调） |
 | `NODE_ENV` | `production` |
 | `CORS_ORIGIN` | 前端域名（部署后填入） |
 | `INITIAL_GIFT_POINTS` | 新用户赠送积分，如 `100` |

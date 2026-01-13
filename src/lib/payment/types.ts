@@ -5,7 +5,7 @@
 /**
  * 支付方式
  */
-export type PaymentMethod = 'alipay_qrcode' | 'alipay_h5';
+export type PaymentMethod = 'alipay_qrcode' | 'alipay_h5' | 'stripe';
 
 /**
  * 订单状态

@@ -98,6 +98,38 @@
   transform: translateY(-1px);
 }
 
+/* User Actions Container */
+.userActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Points Badge - Gold style */
+.pointsBadge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: linear-gradient(135deg, #FFF8E6 0%, #FFEFCC 100%);
+  color: #B8860B;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  border: 1px solid rgba(184, 134, 11, 0.2);
+  transition: all 0.2s ease;
+}
+
+.pointsBadge:hover {
+  background: linear-gradient(135deg, #FFEFCC 0%, #FFE4B3 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(184, 134, 11, 0.15);
+}
+
+.pointsBadge svg {
+  color: #DAA520;
+}
+
 /* Profile Button - Also Black Pill to match style */
 .profileBtn {
   display: flex;
@@ -152,6 +184,24 @@
 .mobileLink:hover {
   background-color: var(--light-94);
   color: var(--accent-red); /* Match mobile too */
+}
+
+/* Mobile Points Badge */
+.mobilePointsBadge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, #FFF8E6 0%, #FFEFCC 100%);
+  color: #B8860B;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(184, 134, 11, 0.2);
+}
+
+.mobilePointsBadge svg {
+  color: #DAA520;
 }
 
 .mobileCta {

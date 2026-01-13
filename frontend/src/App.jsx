@@ -12,6 +12,8 @@ import NotFoundPage from './pages/NotFoundPage'
 import LoginPage from './pages/LoginPage'
 import ProfilePage from './pages/ProfilePage'
 import PointsPage from './pages/PointsPage'
+import PaymentSuccessPage from './pages/PaymentSuccessPage'
+import PaymentCancelPage from './pages/PaymentCancelPage'
 import SubjectsPage from './pages/SubjectsPage'
 import BaziInputPage from './pages/BaziInputPage'
 import BaziResultPage from './pages/BaziResultPage'
@@ -52,6 +54,22 @@ function App() {
             element={
               <ProtectedRoute>
                 <PointsPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/payment/success" 
+            element={
+              <ProtectedRoute>
+                <PaymentSuccessPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/payment/cancel" 
+            element={
+              <ProtectedRoute>
+                <PaymentCancelPage />
               </ProtectedRoute>
             } 
           />

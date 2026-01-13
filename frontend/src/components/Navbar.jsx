@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { List, X, User } from '@phosphor-icons/react'
+import { List, X, User, Coins } from '@phosphor-icons/react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
 import styles from './Navbar.module.css'
@@ -61,10 +61,16 @@ export default function Navbar() {
           </ul>
           
           {isLoggedIn ? (
-            <Link to="/profile" className={styles.profileBtn}>
-              <User weight="bold" size={18} />
-              <span>{user?.username || '我的'}</span>
-            </Link>
+            <div className={styles.userActions}>
+              <Link to="/points" className={styles.pointsBadge}>
+                <Coins weight="fill" size={16} />
+                <span>{user?.balance?.toLocaleString() || 0}</span>
+              </Link>
+              <Link to="/profile" className={styles.profileBtn}>
+                <User weight="bold" size={18} />
+                <span>{user?.username || '我的'}</span>
+              </Link>
+            </div>
           ) : (
             <Link to="/login" className={styles.ctaButton}>
               登录 / 注册
@@ -104,6 +110,18 @@ export default function Navbar() {
                   </Link>
                 </li>
               ))}
+              {isLoggedIn && (
+                <li>
+                  <Link 
+                    to="/points" 
+                    className={styles.mobilePointsBadge}
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <Coins weight="fill" size={18} />
+                    <span>积分余额: {user?.balance?.toLocaleString() || 0}</span>
+                  </Link>
+                </li>
+              )}
               <li>
                 {isLoggedIn ? (
                   <Link 
