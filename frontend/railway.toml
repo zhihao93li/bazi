@@ -1,0 +1,7 @@
+# 前端静态服务配置
+[build]
+builder = "nixpacks"
+buildCommand = "npm ci && npm run build"
+
+[deploy]
+startCommand = "npx serve dist -s -l $PORT"
