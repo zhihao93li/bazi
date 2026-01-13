@@ -51,7 +51,8 @@ export async function createCheckoutSession(
   const { orderNo, packageName, amount, points, successUrl, cancelUrl } = params;
 
   const session = await stripe.checkout.sessions.create({
-    payment_method_types: ['card'],
+    // 不指定 payment_method_types，让 Stripe 自动显示 Dashboard 中启用的所有支付方式
+    // 包括：银行卡、支付宝、微信支付、Apple Pay、Google Pay 等
     mode: 'payment',
     line_items: [
       {
