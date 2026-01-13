@@ -28,6 +28,7 @@
   cursor: pointer;
   transition: all 0.2s;
   font-family: inherit;
+  color: var(--dark-7);
 }
 
 .pill:hover {
@@ -82,19 +83,19 @@
   align-items: center;
   gap: 6px;
   padding: 10px 18px;
-  background: transparent;
-  border: 1px dashed var(--grey-50);
+  background: rgba(255, 255, 255, 0.4);
+  border: 1px dashed var(--grey-30);
   border-radius: var(--radius-full);
   cursor: pointer;
   transition: all 0.2s;
   font-family: inherit;
   font-size: 15px;
   font-weight: 500;
-  color: var(--grey-50);
+  color: var(--grey-30);
 }
 
 .addPill:hover {
-  background: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.8);
   border-color: var(--dark-7);
   color: var(--dark-7);
 }

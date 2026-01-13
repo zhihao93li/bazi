@@ -14,6 +14,7 @@ import type {
   NewPromptTemplates,
   ThemePromptTemplates,
   AnalysisTheme,
+  PromptTemplate,
 } from './types.js';
 import { DEFAULT_AI_CONFIG } from './types.js';
 
@@ -32,14 +33,35 @@ const DEFAULT_NEW_AI_CONFIG: NewAIConfig = {
   temperature: 0.7,
   maxTokens: 2000,
   prompts: {
-    initial: '请对此八字进行全面的初步解读。',
+    initial: {
+      system: '你是一位资深的中国传统命理分析师，精通八字命理学。请对用户的八字进行全面深入的初步解读，作为后续分主题深度分析的参考基础。分析要专业、全面、有条理。',
+      user: '请对此八字进行全面的初步解读。',
+    },
     themes: {
-      life_color: '请分析此人的生命底色。',
-      relationship: '请分析此人的亲密关系运势。',
-      career_wealth: '请分析此人的事业财富运势。',
-      health: '请分析此人的身心健康状况。',
-      life_lesson: '请分析此人的人生课题。',
-      yearly_fortune: '请分析此人的当年运势。',
+      life_color: {
+        system: '你是一位资深的命理分析师，专注于解读人的生命底色与核心特质。',
+        user: '请分析此人的生命底色。',
+      },
+      relationship: {
+        system: '你是一位资深的命理分析师，专注于亲密关系与情感运势分析。',
+        user: '请分析此人的亲密关系运势。',
+      },
+      career_wealth: {
+        system: '你是一位资深的命理分析师，专注于事业发展与财富运势分析。',
+        user: '请分析此人的事业财富运势。',
+      },
+      health: {
+        system: '你是一位资深的命理分析师，专注于身心健康分析。',
+        user: '请分析此人的身心健康状况。',
+      },
+      life_lesson: {
+        system: '你是一位资深的命理分析师，专注于人生课题与成长方向分析。',
+        user: '请分析此人的人生课题。',
+      },
+      yearly_fortune: {
+        system: '你是一位资深的命理分析师，专注于流年运势分析。',
+        user: '请分析此人的当年运势。',
+      },
     },
   },
 };
@@ -67,6 +89,17 @@ function validateLegacyPrompts(prompts: unknown): prompts is PromptTemplates {
 }
 
 /**
+ * 验证单个 PromptTemplate 结构
+ */
+function validatePromptTemplate(template: unknown): template is PromptTemplate {
+  if (!template || typeof template !== 'object') {
+    return false;
+  }
+  const t = template as Record<string, unknown>;
+  return typeof t.system === 'string' && typeof t.user === 'string';
+}
+
+/**
  * 验证新版主题 prompt 模板是否完整
  */
 function validateThemePrompts(themes: unknown): themes is ThemePromptTemplates {
@@ -84,7 +117,7 @@ function validateThemePrompts(themes: unknown): themes is ThemePromptTemplates {
   ];
 
   return requiredKeys.every(
-    (key) => key in themes && typeof (themes as Record<string, unknown>)[key] === 'string'
+    (key) => key in themes && validatePromptTemplate((themes as Record<string, unknown>)[key])
   );
 }
 
@@ -98,7 +131,7 @@ function validateNewPrompts(prompts: unknown): prompts is NewPromptTemplates {
 
   const p = prompts as Record<string, unknown>;
   
-  if (typeof p.initial !== 'string') {
+  if (!validatePromptTemplate(p.initial)) {
     return false;
   }
 
@@ -309,7 +342,7 @@ export function getPromptTemplate(section: keyof PromptTemplates): string {
 /**
  * 获取初步解读的 prompt 模板
  */
-export function getInitialPromptTemplate(): string {
+export function getInitialPromptTemplate(): PromptTemplate {
   const config = loadNewAIConfig();
   return config.prompts.initial;
 }
@@ -317,7 +350,7 @@ export function getInitialPromptTemplate(): string {
 /**
  * 获取分主题解读的 prompt 模板
  */
-export function getThemePromptTemplate(theme: AnalysisTheme): string {
+export function getThemePromptTemplate(theme: AnalysisTheme): PromptTemplate {
   const config = loadNewAIConfig();
   return config.prompts.themes[theme];
 }

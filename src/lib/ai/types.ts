@@ -142,23 +142,31 @@ export interface InitialAnalysis {
 // ============================================
 
 /**
+ * 单个提示词模板（支持 System + User 分离）
+ */
+export interface PromptTemplate {
+  system: string;  // System Prompt
+  user: string;    // User Prompt
+}
+
+/**
  * 主题提示词模板
  */
 export interface ThemePromptTemplates {
-  life_color: string;
-  relationship: string;
-  career_wealth: string;
-  health: string;
-  life_lesson: string;
-  yearly_fortune: string;
+  life_color: PromptTemplate;
+  relationship: PromptTemplate;
+  career_wealth: PromptTemplate;
+  health: PromptTemplate;
+  life_lesson: PromptTemplate;
+  yearly_fortune: PromptTemplate;
 }
 
 /**
  * 新版提示词模板结构
  */
 export interface NewPromptTemplates {
-  initial: string;           // 初步解读提示词
-  themes: ThemePromptTemplates; // 分主题提示词
+  initial: PromptTemplate;           // 初步解读提示词
+  themes: ThemePromptTemplates;      // 分主题提示词
 }
 
 /**

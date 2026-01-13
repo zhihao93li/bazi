@@ -68,10 +68,13 @@ export async function generateInitialAnalysis(
   const config = loadNewAIConfig();
   const client = getOpenAIClient();
 
-  // 获取初步解读模板并替换变量
-  const template = getInitialPromptTemplate();
+  // 获取初步解读模板（包含 system 和 user）
+  const promptTemplate = getInitialPromptTemplate();
   const context: TemplateContext = { baziData, gender };
-  const prompt = replaceTemplateVariables(template, context);
+  
+  // 替换模板变量
+  const systemPrompt = replaceTemplateVariables(promptTemplate.system, context);
+  const userPrompt = replaceTemplateVariables(promptTemplate.user, context);
 
   console.log('[AI Service] Generating initial analysis (Round 1)...');
 
@@ -81,11 +84,11 @@ export async function generateInitialAnalysis(
       messages: [
         {
           role: 'system',
-          content: '你是一位资深的中国传统命理分析师，精通八字命理学。请对用户的八字进行全面深入的初步解读，作为后续分主题深度分析的参考基础。分析要专业、全面、有条理。',
+          content: systemPrompt,
         },
         {
           role: 'user',
-          content: prompt,
+          content: userPrompt,
         },
       ],
       temperature: config.temperature,
@@ -125,15 +128,18 @@ export async function generateThemeAnalysis(
   const config = loadNewAIConfig();
   const client = getOpenAIClient();
 
-  // 获取主题模板并替换变量
-  const template = getThemePromptTemplate(theme);
+  // 获取主题模板（包含 system 和 user）
+  const promptTemplate = getThemePromptTemplate(theme);
   const context: TemplateContext = { 
     baziData, 
     gender,
     initialAnalysis,
     currentYear: new Date().getFullYear(),
   };
-  const prompt = replaceTemplateVariables(template, context);
+  
+  // 替换模板变量
+  const systemPrompt = replaceTemplateVariables(promptTemplate.system, context);
+  const userPrompt = replaceTemplateVariables(promptTemplate.user, context);
 
   console.log(`[AI Service] Generating theme analysis (Round 2): ${theme}...`);
 
@@ -143,11 +149,11 @@ export async function generateThemeAnalysis(
       messages: [
         {
           role: 'system',
-          content: getSystemPromptForTheme(theme),
+          content: systemPrompt,
         },
         {
           role: 'user',
-          content: prompt,
+          content: userPrompt,
         },
       ],
       temperature: config.temperature,
@@ -165,22 +171,6 @@ export async function generateThemeAnalysis(
     console.error(`[AI Service] Error generating ${theme} analysis:`, error);
     throw error;
   }
-}
-
-/**
- * 根据主题获取系统提示词
- */
-function getSystemPromptForTheme(theme: AnalysisTheme): string {
-  const themePrompts: Record<AnalysisTheme, string> = {
-    life_color: '你是一位资深的命理分析师，专注于解读人的生命底色与核心特质。请基于八字信息和初步解读，深入分析用户的生命本质、天赋潜能和人生底蕴。语言要专业但易懂，富有洞察力。',
-    relationship: '你是一位资深的命理分析师，专注于亲密关系与情感运势分析。请基于八字信息和初步解读，深入分析用户的情感模式、婚恋运势和人际关系特点。语言要专业但易懂，给出实用建议。',
-    career_wealth: '你是一位资深的命理分析师，专注于事业发展与财富运势分析。请基于八字信息和初步解读，深入分析用户的事业方向、财运格局和发展机遇。语言要专业但易懂，给出实用建议。',
-    health: '你是一位资深的命理分析师，专注于身心健康分析。请基于八字信息和初步解读，分析用户的健康倾向、需要注意的方面和养生建议。语言要专业但易懂，注意提醒这是命理参考，不能替代医学诊断。',
-    life_lesson: '你是一位资深的命理分析师，专注于人生课题与成长方向分析。请基于八字信息和初步解读，深入解读用户的人生使命、成长课题和需要突破的方向。语言要专业但富有启发性。',
-    yearly_fortune: '你是一位资深的命理分析师，专注于流年运势分析。请基于八字信息和初步解读，详细分析用户当年的整体运势、各方面运程和趋吉避凶建议。语言要专业但易懂，给出实用的时间节点提醒。',
-  };
-
-  return themePrompts[theme];
 }
 
 // ============================================
