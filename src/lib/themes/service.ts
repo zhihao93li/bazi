@@ -254,8 +254,9 @@ export async function unlockTheme(
     });
     return {
       success: true,
+      theme,
       content: existing.content as string,
-      pointsCost: 0,
+      pointsDeducted: 0,
       remainingBalance: account?.balance || 0,
     };
   }
@@ -339,8 +340,9 @@ export async function unlockTheme(
           });
           return {
             success: true,
+            theme,
             content: existingAnalysis?.content as string || content,
-            pointsCost: 0, // 不扣积分
+            pointsDeducted: 0, // 不扣积分
             remainingBalance: account?.balance || 0,
           };
         }
