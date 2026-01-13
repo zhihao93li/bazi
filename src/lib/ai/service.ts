@@ -96,18 +96,31 @@ export async function generateInitialAnalysis(
     });
 
     // 详细记录 API 响应
-    console.log(`[AI Service] API response received, choices count: ${response.choices?.length || 0}`);
+    const finishReason = response.choices[0]?.finish_reason;
+    console.log(`[AI Service] API response received, choices count: ${response.choices?.length || 0}, finish_reason: ${finishReason}`);
     
     const content = response.choices[0]?.message?.content;
+    
+    // 如果因为长度截断但有内容，仍然返回（虽然不完整）
     if (!content) {
       // 记录更多调试信息
       console.error('[AI Service] Empty response details:', {
         model: config.model,
-        finishReason: response.choices[0]?.finish_reason,
+        finishReason,
         usage: response.usage,
         responseId: response.id,
       });
-      throw new Error(`AI response is empty for initial analysis (model: ${config.model}, finish_reason: ${response.choices[0]?.finish_reason})`);
+      
+      // 如果是因为长度限制，给出更明确的错误提示
+      if (finishReason === 'length') {
+        throw new Error(`AI response truncated due to max_tokens limit (${config.maxTokens}). Please increase maxTokens in config.`);
+      }
+      throw new Error(`AI response is empty for initial analysis (model: ${config.model}, finish_reason: ${finishReason})`);
+    }
+    
+    // 如果内容被截断，记录警告但仍返回
+    if (finishReason === 'length') {
+      console.warn(`[AI Service] Warning: Initial analysis was truncated (max_tokens: ${config.maxTokens}). Consider increasing the limit.`);
     }
 
     console.log('[AI Service] Initial analysis generated successfully');
