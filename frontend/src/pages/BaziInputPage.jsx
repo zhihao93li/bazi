@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { useAuth } from '../context/AuthContext';
 import { useToast, Card } from '../components/common';
 import Button from '../components/Button';
 import Navbar from '../components/Navbar';
@@ -10,7 +9,6 @@ import GradientBackground from '../components/GradientBackground';
 import BirthInfoForm from '../components/bazi/BirthInfoForm';
 import FormInput from '../components/common/FormInput';
 import { calculateBazi } from '../utils/bazi/calculator';
-import { api } from '../services/api';
 import styles from './BaziInputPage.module.css';
 
 const LOCAL_SUBJECTS_KEY = 'bazi_local_subjects';
@@ -63,7 +61,6 @@ export const deleteLocalSubject = (id) => {
 export default function BaziInputPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { isLoggedIn } = useAuth();
   const toast = useToast();
   
   const [formData, setFormData] = useState(INITIAL_FORM);
@@ -123,64 +120,32 @@ export default function BaziInputPage() {
       
       const baziData = calculateBazi(birthData);
       
-      // 2. 自动保存
-      if (isLoggedIn) {
-        // 已登录：保存到后端
-        try {
-          const res = await api.post('/subjects', {
-            name: formData.name,
-            gender: formData.gender,
-            calendarType: formData.calendarType,
-            birthYear: formData.birthYear,
-            birthMonth: formData.birthMonth,
-            birthDay: formData.birthDay,
-            birthHour: formData.birthHour,
-            birthMinute: formData.birthMinute,
-            isLeapMonth: formData.isLeapMonth,
-            location: `${formData.location.province}/${formData.location.city}/${formData.location.district}`,
-            baziData,
-          });
-          
-          // 跳转到结果页，带上 subjectId
-          navigate(`/bazi?subjectId=${res.subject.id}`);
-        } catch (error) {
-          if (error.code === 'NAME_DUPLICATE') {
-            toast.error('该称呼已存在，请使用其他称呼');
-          } else {
-            console.error('Create subject error:', error);
-            toast.error(error.message || '保存失败，请重试');
-          }
-          setIsSubmitting(false);
-          return;
-        }
-      } else {
-        // 未登录：保存到本地
-        const localSubject = {
-          id: generateLocalId(),
-          name: formData.name,
-          gender: formData.gender,
-          calendarType: formData.calendarType,
-          birthYear: formData.birthYear,
-          birthMonth: formData.birthMonth,
-          birthDay: formData.birthDay,
-          birthHour: formData.birthHour,
-          birthMinute: formData.birthMinute,
-          isLeapMonth: formData.isLeapMonth,
-          location: `${formData.location.province}/${formData.location.city}/${formData.location.district}`,
-          baziData,
-          isLocal: true, // 标记为本地数据
-          createdAt: new Date().toISOString(),
-        };
-        
-        saveLocalSubject(localSubject);
-        
-        // 跳转到结果页，带上本地 ID
-        navigate(`/bazi?localId=${localSubject.id}`);
-      }
+      // 2. 统一保存到本地，立即跳转（后台异步同步到云端）
+      // 这样可以避免等待网络请求，提升用户体验
+      const localSubject = {
+        id: generateLocalId(),
+        name: formData.name,
+        gender: formData.gender,
+        calendarType: formData.calendarType,
+        birthYear: formData.birthYear,
+        birthMonth: formData.birthMonth,
+        birthDay: formData.birthDay,
+        birthHour: formData.birthHour,
+        birthMinute: formData.birthMinute,
+        isLeapMonth: formData.isLeapMonth,
+        location: `${formData.location.province}/${formData.location.city}/${formData.location.district}`,
+        baziData,
+        isLocal: true,
+        createdAt: new Date().toISOString(),
+      };
+      
+      saveLocalSubject(localSubject);
+      
+      // 立即跳转到结果页（如果已登录，结果页会自动同步到云端）
+      navigate(`/bazi?localId=${localSubject.id}`);
     } catch (error) {
       console.error(error);
       toast.error('排盘计算失败，请检查输入');
-    } finally {
       setIsSubmitting(false);
     }
   };

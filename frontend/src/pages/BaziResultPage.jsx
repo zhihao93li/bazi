@@ -166,6 +166,9 @@ export default function BaziResultPage() {
     }
   }, [isLoggedIn]);
 
+  // 同步状态：防止重复同步
+  const [isSyncing, setIsSyncing] = useState(false);
+
   // 1. 初始化：只在首次加载或登录状态变化时获取所有命盘列表
   useEffect(() => {
     const loadSubjectsList = async () => {
@@ -191,6 +194,68 @@ export default function BaziResultPage() {
     
     loadSubjectsList();
   }, [isLoggedIn]); // 只在登录状态变化时重新加载列表
+
+  // 1.5 登录后自动同步当前本地命盘到后端
+  useEffect(() => {
+    const localId = searchParams.get('localId');
+    
+    // 条件：已登录 + 当前是本地命盘 + 列表已加载 + 未在同步中
+    if (!isLoggedIn || !localId || !subjectsLoaded || isSyncing) return;
+    
+    const syncLocalSubject = async () => {
+      const localSubjects = getLocalSubjects();
+      const localSubject = localSubjects.find(s => s.id === localId);
+      
+      if (!localSubject) return;
+      
+      setIsSyncing(true);
+      
+      try {
+        // 调用 API 保存到后端
+        const res = await api.post('/subjects', {
+          name: localSubject.name,
+          gender: localSubject.gender,
+          calendarType: localSubject.calendarType,
+          birthYear: localSubject.birthYear,
+          birthMonth: localSubject.birthMonth,
+          birthDay: localSubject.birthDay,
+          birthHour: localSubject.birthHour,
+          birthMinute: localSubject.birthMinute,
+          isLeapMonth: localSubject.isLeapMonth,
+          location: localSubject.location,
+          baziData: localSubject.baziData,
+        });
+        
+        const newSubject = res.subject;
+        
+        // 删除本地存储中的命盘
+        deleteLocalSubject(localId);
+        
+        // 更新 subjects 列表：移除本地的，添加后端的
+        setSubjects(prev => {
+          const filtered = prev.filter(s => s.id !== localId);
+          return [newSubject, ...filtered];
+        });
+        
+        // 更新 URL 参数为 subjectId（不触发导航，只替换参数）
+        setSearchParams({ subjectId: newSubject.id }, { replace: true });
+        
+        toast.success('命盘已同步到云端');
+      } catch (error) {
+        if (error.code === 'NAME_DUPLICATE') {
+          // 名称重复，提示用户
+          toast.error('该称呼已存在，本地命盘未同步');
+        } else {
+          console.error('Sync local subject error:', error);
+          // 同步失败不阻塞用户操作，静默处理
+        }
+      } finally {
+        setIsSyncing(false);
+      }
+    };
+    
+    syncLocalSubject();
+  }, [isLoggedIn, searchParams, subjectsLoaded, isSyncing, setSearchParams, toast]);
 
   // 2. 处理当前显示的命盘（URL 参数变化时）
   useEffect(() => {

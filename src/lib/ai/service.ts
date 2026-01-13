@@ -76,7 +76,7 @@ export async function generateInitialAnalysis(
   const systemPrompt = replaceTemplateVariables(promptTemplate.system, context);
   const userPrompt = replaceTemplateVariables(promptTemplate.user, context);
 
-  console.log('[AI Service] Generating initial analysis (Round 1)...');
+  console.log(`[AI Service] Generating initial analysis (Round 1), model: ${config.model}...`);
 
   try {
     const response = await client.chat.completions.create({
@@ -95,15 +95,32 @@ export async function generateInitialAnalysis(
       max_tokens: config.maxTokens,
     });
 
+    // 详细记录 API 响应
+    console.log(`[AI Service] API response received, choices count: ${response.choices?.length || 0}`);
+    
     const content = response.choices[0]?.message?.content;
     if (!content) {
-      throw new Error('AI response is empty for initial analysis');
+      // 记录更多调试信息
+      console.error('[AI Service] Empty response details:', {
+        model: config.model,
+        finishReason: response.choices[0]?.finish_reason,
+        usage: response.usage,
+        responseId: response.id,
+      });
+      throw new Error(`AI response is empty for initial analysis (model: ${config.model}, finish_reason: ${response.choices[0]?.finish_reason})`);
     }
 
     console.log('[AI Service] Initial analysis generated successfully');
     return content;
   } catch (error) {
     console.error('[AI Service] Error generating initial analysis:', error);
+    // 如果是 OpenAI API 错误，记录更多信息
+    if (error && typeof error === 'object' && 'status' in error) {
+      console.error('[AI Service] API error details:', {
+        status: (error as { status?: number }).status,
+        message: (error as { message?: string }).message,
+      });
+    }
     throw error;
   }
 }
