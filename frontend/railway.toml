@@ -1,7 +1,7 @@
 # 前端静态服务配置
 [build]
 builder = "nixpacks"
-buildCommand = "npm ci && npm run build"
+buildCommand = "rm -rf node_modules/.cache && npm ci --cache /tmp/.npm && npm run build"
 
 [deploy]
 startCommand = "npx serve dist -s -l $PORT"
