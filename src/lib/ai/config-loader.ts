@@ -1,24 +1,53 @@
 /**
  * AI 配置加载器
  * 从 YAML 文件加载 AI 配置，支持错误回退到默认值
+ * 支持新版两轮 LLM 配置结构
  */
 
 import * as fs from 'fs';
 import * as path from 'path';
 import { parse as parseYaml } from 'yaml';
-import { AIConfig, DEFAULT_AI_CONFIG, PromptTemplates } from './types.js';
+import type { 
+  AIConfig, 
+  PromptTemplates,
+  NewAIConfig,
+  NewPromptTemplates,
+  ThemePromptTemplates,
+  AnalysisTheme,
+} from './types.js';
+import { DEFAULT_AI_CONFIG } from './types.js';
 
 // 配置文件路径
 const CONFIG_FILE_PATH = path.join(process.cwd(), 'config', 'ai-prompts.yaml');
 
 // 缓存配置和文件修改时间
 let cachedConfig: AIConfig | null = null;
+let cachedNewConfig: NewAIConfig | null = null;
 let lastModifiedTime: number = 0;
 
+// 默认新版配置
+const DEFAULT_NEW_AI_CONFIG: NewAIConfig = {
+  provider: 'aihubmix',
+  model: 'gpt-4o',
+  temperature: 0.7,
+  maxTokens: 2000,
+  prompts: {
+    initial: '请对此八字进行全面的初步解读。',
+    themes: {
+      life_color: '请分析此人的生命底色。',
+      relationship: '请分析此人的亲密关系运势。',
+      career_wealth: '请分析此人的事业财富运势。',
+      health: '请分析此人的身心健康状况。',
+      life_lesson: '请分析此人的人生课题。',
+      yearly_fortune: '请分析此人的当年运势。',
+    },
+  },
+};
+
 /**
- * 验证 prompt 模板是否完整
+ * 验证旧版 prompt 模板是否完整
  */
-function validatePrompts(prompts: unknown): prompts is PromptTemplates {
+function validateLegacyPrompts(prompts: unknown): prompts is PromptTemplates {
   if (!prompts || typeof prompts !== 'object') {
     return false;
   }
@@ -38,9 +67,48 @@ function validatePrompts(prompts: unknown): prompts is PromptTemplates {
 }
 
 /**
- * 验证并解析 AI 配置
+ * 验证新版主题 prompt 模板是否完整
  */
-function parseAndValidateConfig(rawConfig: unknown): AIConfig {
+function validateThemePrompts(themes: unknown): themes is ThemePromptTemplates {
+  if (!themes || typeof themes !== 'object') {
+    return false;
+  }
+
+  const requiredKeys: (keyof ThemePromptTemplates)[] = [
+    'life_color',
+    'relationship',
+    'career_wealth',
+    'health',
+    'life_lesson',
+    'yearly_fortune',
+  ];
+
+  return requiredKeys.every(
+    (key) => key in themes && typeof (themes as Record<string, unknown>)[key] === 'string'
+  );
+}
+
+/**
+ * 验证新版 prompt 结构
+ */
+function validateNewPrompts(prompts: unknown): prompts is NewPromptTemplates {
+  if (!prompts || typeof prompts !== 'object') {
+    return false;
+  }
+
+  const p = prompts as Record<string, unknown>;
+  
+  if (typeof p.initial !== 'string') {
+    return false;
+  }
+
+  return validateThemePrompts(p.themes);
+}
+
+/**
+ * 验证并解析旧版 AI 配置
+ */
+function parseAndValidateLegacyConfig(rawConfig: unknown): AIConfig {
   if (!rawConfig || typeof rawConfig !== 'object') {
     console.warn('[AI Config] Invalid config format, using defaults');
     return DEFAULT_AI_CONFIG;
@@ -64,13 +132,60 @@ function parseAndValidateConfig(rawConfig: unknown): AIConfig {
       ? config.maxTokens
       : DEFAULT_AI_CONFIG.maxTokens;
 
-  // 验证 prompts
+  // 验证 prompts - 优先使用 legacy_prompts，回退到 prompts
   let prompts: PromptTemplates;
-  if (validatePrompts(config.prompts)) {
+  if (validateLegacyPrompts(config.legacy_prompts)) {
+    prompts = config.legacy_prompts;
+  } else if (validateLegacyPrompts(config.prompts)) {
     prompts = config.prompts;
   } else {
     console.warn('[AI Config] Invalid prompts format, using defaults');
     prompts = DEFAULT_AI_CONFIG.prompts;
+  }
+
+  return {
+    provider,
+    model,
+    temperature,
+    maxTokens,
+    prompts,
+  };
+}
+
+/**
+ * 验证并解析新版 AI 配置
+ */
+function parseAndValidateNewConfig(rawConfig: unknown): NewAIConfig {
+  if (!rawConfig || typeof rawConfig !== 'object') {
+    console.warn('[AI Config] Invalid config format, using defaults');
+    return DEFAULT_NEW_AI_CONFIG;
+  }
+
+  const config = rawConfig as Record<string, unknown>;
+
+  // 验证并提取各字段
+  const provider =
+    typeof config.provider === 'string' ? config.provider : DEFAULT_NEW_AI_CONFIG.provider;
+
+  const model = typeof config.model === 'string' ? config.model : DEFAULT_NEW_AI_CONFIG.model;
+
+  const temperature =
+    typeof config.temperature === 'number' && config.temperature >= 0 && config.temperature <= 2
+      ? config.temperature
+      : DEFAULT_NEW_AI_CONFIG.temperature;
+
+  const maxTokens =
+    typeof config.maxTokens === 'number' && config.maxTokens > 0
+      ? config.maxTokens
+      : DEFAULT_NEW_AI_CONFIG.maxTokens;
+
+  // 验证新版 prompts 结构
+  let prompts: NewPromptTemplates;
+  if (validateNewPrompts(config.prompts)) {
+    prompts = config.prompts;
+  } else {
+    console.warn('[AI Config] Invalid new prompts format, using defaults');
+    prompts = DEFAULT_NEW_AI_CONFIG.prompts;
   }
 
   return {
@@ -95,7 +210,26 @@ function isConfigFileUpdated(): boolean {
 }
 
 /**
- * 加载 AI 配置
+ * 读取并解析配置文件
+ */
+function readConfigFile(): unknown {
+  if (!fs.existsSync(CONFIG_FILE_PATH)) {
+    console.warn(`[AI Config] Config file not found at ${CONFIG_FILE_PATH}`);
+    return null;
+  }
+
+  const fileContent = fs.readFileSync(CONFIG_FILE_PATH, 'utf-8');
+  const rawConfig = parseYaml(fileContent);
+
+  // 更新修改时间
+  const stats = fs.statSync(CONFIG_FILE_PATH);
+  lastModifiedTime = stats.mtimeMs;
+
+  return rawConfig;
+}
+
+/**
+ * 加载旧版 AI 配置（向后兼容）
  * 支持热加载：当配置文件更新时自动重新加载
  * 配置错误时回退到默认值
  */
@@ -106,26 +240,16 @@ export function loadAIConfig(): AIConfig {
   }
 
   try {
-    // 检查文件是否存在
-    if (!fs.existsSync(CONFIG_FILE_PATH)) {
-      console.warn(`[AI Config] Config file not found at ${CONFIG_FILE_PATH}, using defaults`);
+    const rawConfig = readConfigFile();
+    if (!rawConfig) {
       cachedConfig = DEFAULT_AI_CONFIG;
       return DEFAULT_AI_CONFIG;
     }
 
-    // 读取并解析 YAML 文件
-    const fileContent = fs.readFileSync(CONFIG_FILE_PATH, 'utf-8');
-    const rawConfig = parseYaml(fileContent);
-
-    // 验证并解析配置
-    const config = parseAndValidateConfig(rawConfig);
-
-    // 更新缓存和修改时间
-    const stats = fs.statSync(CONFIG_FILE_PATH);
-    lastModifiedTime = stats.mtimeMs;
+    const config = parseAndValidateLegacyConfig(rawConfig);
     cachedConfig = config;
 
-    console.log('[AI Config] Configuration loaded successfully');
+    console.log('[AI Config] Legacy configuration loaded successfully');
     return config;
   } catch (error) {
     console.error('[AI Config] Error loading config:', error);
@@ -136,16 +260,46 @@ export function loadAIConfig(): AIConfig {
 }
 
 /**
+ * 加载新版 AI 配置（两轮 LLM 架构）
+ */
+export function loadNewAIConfig(): NewAIConfig {
+  // 如果有缓存且文件未更新，返回缓存
+  if (cachedNewConfig && !isConfigFileUpdated()) {
+    return cachedNewConfig;
+  }
+
+  try {
+    const rawConfig = readConfigFile();
+    if (!rawConfig) {
+      cachedNewConfig = DEFAULT_NEW_AI_CONFIG;
+      return DEFAULT_NEW_AI_CONFIG;
+    }
+
+    const config = parseAndValidateNewConfig(rawConfig);
+    cachedNewConfig = config;
+
+    console.log('[AI Config] New configuration loaded successfully');
+    return config;
+  } catch (error) {
+    console.error('[AI Config] Error loading new config:', error);
+    console.warn('[AI Config] Using default new configuration');
+    cachedNewConfig = DEFAULT_NEW_AI_CONFIG;
+    return DEFAULT_NEW_AI_CONFIG;
+  }
+}
+
+/**
  * 强制重新加载配置（用于测试或手动刷新）
  */
 export function reloadAIConfig(): AIConfig {
   cachedConfig = null;
+  cachedNewConfig = null;
   lastModifiedTime = 0;
   return loadAIConfig();
 }
 
 /**
- * 获取特定模块的 prompt 模板
+ * 获取特定模块的 prompt 模板（旧版）
  */
 export function getPromptTemplate(section: keyof PromptTemplates): string {
   const config = loadAIConfig();
@@ -153,9 +307,26 @@ export function getPromptTemplate(section: keyof PromptTemplates): string {
 }
 
 /**
+ * 获取初步解读的 prompt 模板
+ */
+export function getInitialPromptTemplate(): string {
+  const config = loadNewAIConfig();
+  return config.prompts.initial;
+}
+
+/**
+ * 获取分主题解读的 prompt 模板
+ */
+export function getThemePromptTemplate(theme: AnalysisTheme): string {
+  const config = loadNewAIConfig();
+  return config.prompts.themes[theme];
+}
+
+/**
  * 清除配置缓存（用于测试）
  */
 export function clearConfigCache(): void {
   cachedConfig = null;
+  cachedNewConfig = null;
   lastModifiedTime = 0;
 }

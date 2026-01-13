@@ -24,6 +24,7 @@ model User {
   subjects          Subject[]
   reports           FortuneReport[]
   verificationCodes VerificationCode[]
+  themeAnalyses     ThemeAnalysis[]
 }
 
 // 测算对象（用户可以为自己或他人创建）
@@ -46,8 +47,13 @@ model Subject {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  user    User            @relation(fields: [userId], references: [id])
-  reports FortuneReport[]
+  // AI 解读相关字段
+  initialAnalysis   Json?     // 初步解读结果（后台参考资料，不展示给用户）
+  initialAnalyzedAt DateTime? // 初步解读时间
+
+  user           User            @relation(fields: [userId], references: [id])
+  reports        FortuneReport[]
+  themeAnalyses  ThemeAnalysis[]
 
   @@index([userId, createdAt])
 }
@@ -138,4 +144,32 @@ model FortuneReport {
 
   @@index([userId, createdAt])
   @@index([subjectId, createdAt])
+}
+
+// 主题解读记录（按主题付费解锁）
+model ThemeAnalysis {
+  id         String   @id @default(cuid())
+  userId     String   // 付费用户
+  subjectId  String   // 测算对象
+  theme      String   // 主题标识：life_color, relationship, career_wealth, health, life_lesson, yearly_fortune
+  content    Json     // 解读内容
+  pointsCost Int      // 消耗积分
+  createdAt  DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id])
+  subject Subject @relation(fields: [subjectId], references: [id])
+
+  @@unique([subjectId, theme]) // 一个对象一个主题只有一条记录（永久解锁）
+  @@index([userId, subjectId])
+}
+
+// 主题价格配置
+model ThemePricing {
+  id          String  @id @default(cuid())
+  theme       String  @unique // 主题标识
+  name        String          // 显示名称
+  description String?         // 主题描述
+  price       Int             // 积分价格
+  isActive    Boolean @default(true)
+  sortOrder   Int     @default(0)
 }

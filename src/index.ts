@@ -18,6 +18,7 @@ import { paymentRoutes } from './routes/payment.js';
 import { pointsRoutes } from './routes/points.js';
 import { reportsRoutes } from './routes/reports.js';
 import { subjectsRoutes } from './routes/subjects.js';
+import { themesRoutes } from './routes/themes.js';
 
 const app = new Hono();
 
@@ -48,6 +49,7 @@ app.route('/api/payment', paymentRoutes);
 app.route('/api/points', pointsRoutes);
 app.route('/api/reports', reportsRoutes);
 app.route('/api/subjects', subjectsRoutes);
+app.route('/api/themes', themesRoutes);
 
 // 404 处理
 app.notFound((c) => {

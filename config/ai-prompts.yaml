@@ -1,15 +1,158 @@
-# AI 配置文件 - 八字命理分析
+# AI 配置文件 - 八字命理分析（重构版）
 # 此文件定义了 AI 分析服务的 prompt 模板和模型参数
+# 采用两轮 LLM 架构：初步解读 + 分主题解读
 
+# ============================================
 # AI 服务提供商配置
+# ============================================
 provider: aihubmix
 model: gpt-4o
 temperature: 0.7
 maxTokens: 2000
 
-# 各分析模块的 Prompt 模板
+# ============================================
+# 提示词模板
+# ============================================
 prompts:
-  # 性格分析模块
+  # ------------------------------------------
+  # 第一轮：初步解读（后台参考资料，不展示给用户）
+  # 用户点击任意主题解读时触发，结果存储在 Subject 中
+  # ------------------------------------------
+  initial: |
+    # TODO: 用户填写初步解读提示词
+    # 此提示词用于生成八字的全面初步解读，作为后续分主题解读的参考基础
+    # 
+    # 可用模板变量：
+    # {{yearPillar.*}}, {{monthPillar.*}}, {{dayPillar.*}}, {{hourPillar.*}} - 四柱信息
+    # {{dayMaster}}, {{dayMasterElement}}, {{dayMasterStrength}}, {{dayMasterCharacteristics}} - 日主信息
+    # {{fiveElements.*}} - 五行分布
+    # {{favorableElements}}, {{unfavorableElements}} - 喜忌神
+    # {{tenGods}} - 十神关系
+    # {{daYun}}, {{daYunDetailed}} - 大运信息
+    # {{currentLiuNian}} - 当前流年
+    # {{shengXiao}}, {{taiYuan}}, {{mingGong}}, {{shenGong}}, {{xunKong}} - 命理要素
+    # {{shenSha}} - 神煞信息
+    # {{gender}} - 性别
+    # {{lunarDateStr}} - 农历日期
+    # {{directions}} - 吉神方位
+    # {{jieQi}} - 节气信息
+    # {{xingXiu}} - 星宿信息
+
+  # ------------------------------------------
+  # 第二轮：分主题解读
+  # 用户解锁某个主题时触发，传入初步解读结果 + 八字数据
+  # ------------------------------------------
+  themes:
+    # 生命底色（独立卡片）
+    life_color: |
+      # TODO: 用户填写生命底色提示词
+      # 探索生命本质与核心特质
+      #
+      # 额外可用变量：
+      # {{initialAnalysis}} - 初步解读结果
+
+    # 亲密关系（专项分析 Tab 1）
+    relationship: |
+      # TODO: 用户填写亲密关系提示词
+      # 解读情感模式与亲密关系运势
+      #
+      # 额外可用变量：
+      # {{initialAnalysis}} - 初步解读结果
+
+    # 事业财富（专项分析 Tab 2）
+    career_wealth: |
+      # TODO: 用户填写事业财富提示词
+      # 分析事业发展与财富机遇
+      #
+      # 额外可用变量：
+      # {{initialAnalysis}} - 初步解读结果
+
+    # 身心健康（专项分析 Tab 3）
+    health: |
+      # TODO: 用户填写身心健康提示词
+      # 关注身体健康与心理平衡
+      #
+      # 额外可用变量：
+      # {{initialAnalysis}} - 初步解读结果
+
+    # 人生课题（专项分析 Tab 4）
+    life_lesson: |
+      # TODO: 用户填写人生课题提示词
+      # 洞察生命成长与人生使命
+      #
+      # 额外可用变量：
+      # {{initialAnalysis}} - 初步解读结果
+
+    # 流年解读（独立卡片）
+    yearly_fortune: |
+      # TODO: 用户填写流年解读提示词
+      # 当年运势分析与趋吉避凶
+      #
+      # 额外可用变量：
+      # {{initialAnalysis}} - 初步解读结果
+      # {{currentYear}} - 当前年份（如 2026）
+
+# ============================================
+# 可用的模板变量参考
+# ============================================
+# 
+# 【四柱信息】
+# {{yearPillar.heavenlyStem}} - 年柱天干
+# {{yearPillar.earthlyBranch}} - 年柱地支
+# {{yearPillar.naYin}} - 年柱纳音
+# {{yearPillar.hiddenStems}} - 年柱藏干
+# （月柱、日柱、时柱同理）
+#
+# 【日主信息】
+# {{dayMaster}} - 日主天干
+# {{dayMasterElement}} - 日主五行
+# {{dayMasterStrength}} - 身强弱
+# {{dayMasterCharacteristics}} - 日主特征
+#
+# 【五行分布】
+# {{fiveElements.metal}} - 金
+# {{fiveElements.wood}} - 木
+# {{fiveElements.water}} - 水
+# {{fiveElements.fire}} - 火
+# {{fiveElements.earth}} - 土
+# {{fiveElements.strongest}} - 最强五行
+# {{fiveElements.weakest}} - 最弱五行
+#
+# 【喜忌神】
+# {{favorableElements}} - 喜用神
+# {{unfavorableElements}} - 忌神
+#
+# 【十神关系】
+# {{tenGods}} - 十神配置
+#
+# 【命理要素】
+# {{shengXiao}} - 生肖
+# {{taiYuan}} - 胎元
+# {{mingGong}} - 命宫
+# {{shenGong}} - 身宫
+# {{xunKong}} - 旬空
+#
+# 【大运流年】
+# {{daYun}} - 大运简要
+# {{daYunDetailed}} - 大运详细
+# {{currentLiuNian}} - 当前流年
+#
+# 【其他信息】
+# {{gender}} - 性别（male/female）
+# {{lunarDateStr}} - 农历日期字符串
+# {{shenSha}} - 神煞信息
+# {{directions}} - 吉神方位
+# {{jieQi}} - 节气信息
+# {{xingXiu}} - 星宿信息
+#
+# 【第二轮专用】
+# {{initialAnalysis}} - 初步解读结果
+# {{currentYear}} - 当前年份
+
+# ============================================
+# 旧版提示词（保留向后兼容，将逐步废弃）
+# ============================================
+legacy_prompts:
   personality: |
     你是一位资深的命理分析师，精通中国传统八字命理学。请根据以下八字信息分析此人的性格特点：
 
@@ -51,7 +194,6 @@ prompts:
 
     请用专业但易懂的语言进行分析，避免过于晦涩的术语。
 
-  # 事业运势模块
   career: |
     你是一位资深的命理分析师，精通中国传统八字命理学。请根据以下八字信息分析此人的事业运势：
 
@@ -90,7 +232,6 @@ prompts:
 
     请用专业但易懂的语言进行分析。
 
-  # 财运分析模块
   wealth: |
     你是一位资深的命理分析师，精通中国传统八字命理学。请根据以下八字信息分析此人的财运：
 
@@ -129,7 +270,6 @@ prompts:
 
     请用专业但易懂的语言进行分析。
 
-  # 感情运势模块
   relationship: |
     你是一位资深的命理分析师，精通中国传统八字命理学。请根据以下八字信息分析此人的感情运势：
 
@@ -174,7 +314,6 @@ prompts:
 
     请用专业但易懂的语言进行分析。
 
-  # 健康建议模块
   health: |
     你是一位资深的命理分析师，精通中国传统八字命理学。请根据以下八字信息分析此人的健康状况：
 
@@ -211,7 +350,6 @@ prompts:
 
     请用专业但易懂的语言进行分析，注意这只是命理参考，不能替代医学诊断。
 
-  # 综合分析模块
   overall: |
     你是一位资深的命理分析师，精通中国传统八字命理学。请根据以下八字信息进行综合分析和建议：
 

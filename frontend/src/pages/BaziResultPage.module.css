@@ -51,7 +51,14 @@
   min-width: 0;
 }
 
-/* 右侧卡片容器 - 高度填满 */
+/* 主题卡片容器 */
+.themeCardsWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* 右侧卡片容器 - 高度填满 (保留旧样式兼容) */
 .stickyWrapper {
   display: flex;
   flex-direction: column;

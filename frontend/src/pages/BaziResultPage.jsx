@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
@@ -11,10 +11,19 @@ import { getLocalSubjects, deleteLocalSubject } from './BaziInputPage';
 
 // 核心业务组件
 import BaziChartCard from '../components/bazi/BaziChartCard';
-import AnalysisCard from '../components/bazi/AnalysisCard';
 import SubjectSwitcher from '../components/bazi/SubjectSwitcher';
 
+// 新版主题解读组件
+import LifeColorCard from '../components/bazi/LifeColorCard';
+import SpecialAnalysisCard from '../components/bazi/SpecialAnalysisCard';
+import YearlyFortuneCard from '../components/bazi/YearlyFortuneCard';
+
 import styles from './BaziResultPage.module.css';
+
+/**
+ * 专项分析的主题列表
+ */
+const SPECIAL_THEMES = ['relationship', 'career_wealth', 'health', 'life_lesson'];
 
 export default function BaziResultPage() {
   const navigate = useNavigate();
@@ -23,12 +32,100 @@ export default function BaziResultPage() {
   const { isLoggedIn, updateUser } = useAuth();
   const toast = useToast();
 
+  // 基础状态
   const [currentSubject, setCurrentSubject] = useState(null);
   const [subjects, setSubjects] = useState([]);
-  
-  const [analysisData, setAnalysisData] = useState(null);
-  const [isAnalysisLoading, setIsAnalysisLoading] = useState(false);
   const [baziResult, setBaziResult] = useState(null);
+
+  // 主题相关状态
+  const [themePricing, setThemePricing] = useState({});
+  const [themesData, setThemesData] = useState({
+    life_color: { isUnlocked: false, content: null, price: 0 },
+    relationship: { isUnlocked: false, content: null, price: 0 },
+    career_wealth: { isUnlocked: false, content: null, price: 0 },
+    health: { isUnlocked: false, content: null, price: 0 },
+    life_lesson: { isUnlocked: false, content: null, price: 0 },
+    yearly_fortune: { isUnlocked: false, content: null, price: 0 },
+  });
+  const [loadingTheme, setLoadingTheme] = useState(null);
+
+  // 获取 subjectId
+  const getSubjectId = useCallback(() => {
+    return searchParams.get('subjectId');
+  }, [searchParams]);
+
+  // 加载主题价格配置
+  const loadThemePricing = useCallback(async () => {
+    try {
+      const res = await api.get('/themes/pricing');
+      const pricing = {};
+      (res.pricing || []).forEach(p => {
+        pricing[p.theme] = p;
+      });
+      setThemePricing(pricing);
+      
+      // 更新各主题的价格
+      setThemesData(prev => {
+        const updated = { ...prev };
+        Object.keys(updated).forEach(theme => {
+          if (pricing[theme]) {
+            updated[theme] = { ...updated[theme], price: pricing[theme].price };
+          }
+        });
+        return updated;
+      });
+    } catch (error) {
+      console.error('Failed to load theme pricing:', error);
+    }
+  }, []);
+
+  // 加载主题解锁状态
+  const loadThemeStatus = useCallback(async (subjectId) => {
+    if (!subjectId || !isLoggedIn) return;
+    
+    try {
+      const res = await api.get(`/themes/status/${subjectId}`);
+      const status = res.status || [];
+      
+      setThemesData(prev => {
+        const updated = { ...prev };
+        status.forEach(s => {
+          if (updated[s.theme]) {
+            updated[s.theme] = {
+              ...updated[s.theme],
+              isUnlocked: s.isUnlocked,
+            };
+          }
+        });
+        return updated;
+      });
+
+      // 如果有已解锁的主题，加载它们的内容
+      const unlockedThemes = status.filter(s => s.isUnlocked);
+      if (unlockedThemes.length > 0) {
+        const batchRes = await api.post('/themes/batch', {
+          subjectId,
+          themes: unlockedThemes.map(s => s.theme),
+        });
+        
+        setThemesData(prev => {
+          const updated = { ...prev };
+          (batchRes.themes || []).forEach(t => {
+            if (updated[t.theme]) {
+              updated[t.theme] = {
+                ...updated[t.theme],
+                isUnlocked: t.isUnlocked,
+                content: t.content,
+              };
+            }
+          });
+          return updated;
+        });
+      }
+    } catch (error) {
+      console.error('Failed to load theme status:', error);
+    }
+  }, [isLoggedIn]);
 
   // 1. 初始化数据
   useEffect(() => {
@@ -62,6 +159,8 @@ export default function BaziResultPage() {
           const res = await api.get(`/subjects/${subjectId}`);
           setCurrentSubject(res.subject);
           setBaziResult(res.subject.baziData);
+          // 加载主题状态
+          loadThemeStatus(subjectId);
         } catch {
           toast.error('获取命盘失败');
           navigate('/bazi/input');
@@ -93,12 +192,16 @@ export default function BaziResultPage() {
     };
     
     loadAndInit();
-  }, [searchParams, isLoggedIn, navigate, toast, setSearchParams]);
+  }, [searchParams, isLoggedIn, navigate, toast, setSearchParams, loadThemeStatus]);
 
-  // 2. 处理分析逻辑
-  const handleStartAnalysis = async () => {
-    const subjectId = searchParams.get('subjectId');
-    const localId = searchParams.get('localId');
+  // 2. 加载主题价格
+  useEffect(() => {
+    loadThemePricing();
+  }, [loadThemePricing]);
+
+  // 3. 处理主题解锁
+  const handleUnlockTheme = async (theme) => {
+    const subjectId = getSubjectId();
     
     if (!isLoggedIn) {
       toast.info('请先登录以使用 AI 解读');
@@ -106,42 +209,60 @@ export default function BaziResultPage() {
       return;
     }
     
-    // 如果是本地命盘，需要先同步到后端
-    if (localId && !subjectId) {
-      toast.info('本地命盘需要先同步到云端才能使用 AI 解读');
-      // TODO: 实现同步逻辑
-      return;
-    }
-    
     if (!subjectId) {
-      toast.error('无法进行 AI 解读');
+      // 本地命盘需要先同步
+      toast.info('本地命盘需要先同步到云端才能使用 AI 解读');
       return;
     }
     
-    setIsAnalysisLoading(true);
+    setLoadingTheme(theme);
     
     try {
-      const res = await api.post('/fortune/analyze', {
+      const res = await api.post('/themes/unlock', {
         subjectId,
+        theme,
       });
       
-      setAnalysisData(res.analysis);
+      // 更新主题数据
+      setThemesData(prev => ({
+        ...prev,
+        [theme]: {
+          ...prev[theme],
+          isUnlocked: true,
+          content: res.content,
+        },
+      }));
+      
+      // 更新用户余额
       updateUser({ balance: res.remainingBalance });
-      toast.success('AI 解读完成');
+      toast.success(`「${themePricing[theme]?.name || theme}」解锁成功`);
     } catch (error) {
       if (error.code === 'INSUFFICIENT_POINTS') {
-        toast.error(`积分不足，当前余额: ${error.currentBalance}`);
+        toast.error('积分不足，请先充值');
+        navigate('/points');
+      } else if (error.code === 'ALREADY_UNLOCKED') {
+        // 已解锁，重新加载内容
+        loadThemeStatus(subjectId);
       } else {
-        toast.error(error.message);
+        toast.error(error.message || '解锁失败');
       }
     } finally {
-      setIsAnalysisLoading(false);
+      setLoadingTheme(null);
     }
   };
 
-  // 3. 处理命盘切换
+  // 4. 处理命盘切换
   const handleSwitchSubject = (subject) => {
-    setAnalysisData(null);
+    // 重置主题数据
+    setThemesData({
+      life_color: { isUnlocked: false, content: null, price: themePricing.life_color?.price || 0 },
+      relationship: { isUnlocked: false, content: null, price: themePricing.relationship?.price || 0 },
+      career_wealth: { isUnlocked: false, content: null, price: themePricing.career_wealth?.price || 0 },
+      health: { isUnlocked: false, content: null, price: themePricing.health?.price || 0 },
+      life_lesson: { isUnlocked: false, content: null, price: themePricing.life_lesson?.price || 0 },
+      yearly_fortune: { isUnlocked: false, content: null, price: themePricing.yearly_fortune?.price || 0 },
+    });
+    
     if (subject.isLocal) {
       setSearchParams({ localId: subject.id });
     } else {
@@ -149,17 +270,15 @@ export default function BaziResultPage() {
     }
   };
 
-  // 4. 处理删除命盘
+  // 5. 处理删除命盘
   const handleDeleteSubject = async (id) => {
     const subject = subjects.find(s => s.id === id);
     
     if (subject?.isLocal) {
-      // 删除本地命盘
       deleteLocalSubject(id);
       setSubjects(prev => prev.filter(s => s.id !== id));
       toast.success('删除成功');
     } else {
-      // 删除后端命盘
       try {
         await api.delete(`/subjects/${id}`);
         setSubjects(prev => prev.filter(s => s.id !== id));
@@ -170,11 +289,16 @@ export default function BaziResultPage() {
       }
     }
     
-    // 如果删除的是当前命盘，跳转到输入页
     if (currentSubject?.id === id) {
       navigate('/bazi/input');
     }
   };
+
+  // 构建专项分析的数据
+  const specialAnalysisData = {};
+  SPECIAL_THEMES.forEach(theme => {
+    specialAnalysisData[theme] = themesData[theme];
+  });
 
   const baziGlowColors = [
     'rgba(138, 67, 225, 0.5)',
@@ -236,19 +360,37 @@ export default function BaziResultPage() {
               />
             </motion.div>
 
-            {/* 右侧：AI 分析卡片 */}
+            {/* 右侧：AI 解读卡片（三个并列） */}
             <motion.div 
               className={styles.rightCol}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
             >
-              <div className={styles.stickyWrapper}>
-                <AnalysisCard 
-                  data={analysisData} 
-                  isLoading={isAnalysisLoading}
-                  onStartAnalysis={handleStartAnalysis}
-                  isLocalSubject={currentSubject?.isLocal}
+              <div className={styles.themeCardsWrapper}>
+                {/* 生命底色 */}
+                <LifeColorCard
+                  isUnlocked={themesData.life_color.isUnlocked}
+                  content={themesData.life_color.content}
+                  price={themesData.life_color.price}
+                  isLoading={loadingTheme === 'life_color'}
+                  onUnlock={handleUnlockTheme}
+                />
+
+                {/* 专项分析（4个tab） */}
+                <SpecialAnalysisCard
+                  themesData={specialAnalysisData}
+                  loadingTheme={loadingTheme}
+                  onUnlock={handleUnlockTheme}
+                />
+
+                {/* 流年解读 */}
+                <YearlyFortuneCard
+                  isUnlocked={themesData.yearly_fortune.isUnlocked}
+                  content={themesData.yearly_fortune.content}
+                  price={themesData.yearly_fortune.price}
+                  isLoading={loadingTheme === 'yearly_fortune'}
+                  onUnlock={handleUnlockTheme}
                 />
               </div>
             </motion.div>

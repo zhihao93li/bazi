@@ -12,6 +12,10 @@ import { FIVE_ELEMENTS_CHINESE } from '../bazi/constants.js';
 export interface TemplateContext {
   baziData: BaziData;
   gender?: string;
+  /** 初步解读结果（第二轮 LLM 调用时传入） */
+  initialAnalysis?: string;
+  /** 当前年份（流年解读专用） */
+  currentYear?: number;
 }
 
 /**
@@ -406,7 +410,7 @@ function valueToString(value: unknown): string {
  * 构建模板变量映射 - 包含所有八字信息
  */
 function buildVariableMap(context: TemplateContext): Record<string, unknown> {
-  const { baziData, gender } = context;
+  const { baziData, gender, initialAnalysis, currentYear } = context;
   const dist = baziData.fiveElements.distribution;
 
   return {
@@ -542,6 +546,12 @@ function buildVariableMap(context: TemplateContext): Record<string, unknown> {
 
     // ==================== 完整八字数据（JSON格式，供高级分析使用）====================
     fullBaziJson: JSON.stringify(baziData, null, 2),
+
+    // ==================== 第二轮 LLM 专用变量 ====================
+    /** 初步解读结果（由第一轮 LLM 生成，第二轮分主题解读时使用） */
+    initialAnalysis: initialAnalysis || '',
+    /** 当前年份（流年解读专用） */
+    currentYear: currentYear || new Date().getFullYear(),
   };
 }
 

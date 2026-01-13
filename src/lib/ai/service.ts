@@ -1,13 +1,26 @@
 /**
  * AI 服务调用层
  * 集成 aihubmix API（OpenAI 兼容接口）
- * 实现分模块生成命理分析内容
+ * 
+ * 新版架构：两轮 LLM 调用
+ * - 第一轮：初步解读（生成后台参考资料）
+ * - 第二轮：分主题解读（基于初步解读生成具体主题内容）
  */
 
 import OpenAI from 'openai';
-import { loadAIConfig, getPromptTemplate } from './config-loader.js';
+import { 
+  loadAIConfig, 
+  loadNewAIConfig, 
+  getPromptTemplate,
+  getInitialPromptTemplate,
+  getThemePromptTemplate,
+} from './config-loader.js';
 import { replaceTemplateVariables, TemplateContext } from './template-engine.js';
-import type { AnalysisSection, FortuneAnalysis } from './types.js';
+import type { 
+  AnalysisSection, 
+  FortuneAnalysis,
+  AnalysisTheme,
+} from './types.js';
 import type { BaziData } from '../bazi/types.js';
 
 // AI 服务单例
@@ -34,12 +47,149 @@ function getOpenAIClient(): OpenAI {
   return openaiClient;
 }
 
+// ============================================
+// 新版 AI 服务（两轮 LLM 架构）
+// ============================================
+
 /**
- * 调用 AI 生成单个模块的分析内容
- *
- * @param section - 分析模块类型
+ * 生成初步解读（第一轮 LLM）
+ * 
+ * 用于生成后台参考资料，不直接展示给用户
+ * 结果存储在 Subject.initialAnalysis 中
+ * 
  * @param baziData - 八字排盘结果
- * @returns 生成的分析内容
+ * @param gender - 性别
+ * @returns 初步解读内容
+ */
+export async function generateInitialAnalysis(
+  baziData: BaziData,
+  gender?: string
+): Promise<string> {
+  const config = loadNewAIConfig();
+  const client = getOpenAIClient();
+
+  // 获取初步解读模板并替换变量
+  const template = getInitialPromptTemplate();
+  const context: TemplateContext = { baziData, gender };
+  const prompt = replaceTemplateVariables(template, context);
+
+  console.log('[AI Service] Generating initial analysis (Round 1)...');
+
+  try {
+    const response = await client.chat.completions.create({
+      model: config.model,
+      messages: [
+        {
+          role: 'system',
+          content: '你是一位资深的中国传统命理分析师，精通八字命理学。请对用户的八字进行全面深入的初步解读，作为后续分主题深度分析的参考基础。分析要专业、全面、有条理。',
+        },
+        {
+          role: 'user',
+          content: prompt,
+        },
+      ],
+      temperature: config.temperature,
+      max_tokens: config.maxTokens,
+    });
+
+    const content = response.choices[0]?.message?.content;
+    if (!content) {
+      throw new Error('AI response is empty for initial analysis');
+    }
+
+    console.log('[AI Service] Initial analysis generated successfully');
+    return content;
+  } catch (error) {
+    console.error('[AI Service] Error generating initial analysis:', error);
+    throw error;
+  }
+}
+
+/**
+ * 生成分主题解读（第二轮 LLM）
+ * 
+ * 基于初步解读结果，生成特定主题的深度分析
+ * 
+ * @param theme - 主题类型
+ * @param baziData - 八字排盘结果
+ * @param initialAnalysis - 初步解读结果
+ * @param gender - 性别
+ * @returns 主题解读内容
+ */
+export async function generateThemeAnalysis(
+  theme: AnalysisTheme,
+  baziData: BaziData,
+  initialAnalysis: string,
+  gender?: string
+): Promise<string> {
+  const config = loadNewAIConfig();
+  const client = getOpenAIClient();
+
+  // 获取主题模板并替换变量
+  const template = getThemePromptTemplate(theme);
+  const context: TemplateContext = { 
+    baziData, 
+    gender,
+    initialAnalysis,
+    currentYear: new Date().getFullYear(),
+  };
+  const prompt = replaceTemplateVariables(template, context);
+
+  console.log(`[AI Service] Generating theme analysis (Round 2): ${theme}...`);
+
+  try {
+    const response = await client.chat.completions.create({
+      model: config.model,
+      messages: [
+        {
+          role: 'system',
+          content: getSystemPromptForTheme(theme),
+        },
+        {
+          role: 'user',
+          content: prompt,
+        },
+      ],
+      temperature: config.temperature,
+      max_tokens: config.maxTokens,
+    });
+
+    const content = response.choices[0]?.message?.content;
+    if (!content) {
+      throw new Error(`AI response is empty for theme: ${theme}`);
+    }
+
+    console.log(`[AI Service] Theme analysis generated successfully: ${theme}`);
+    return content;
+  } catch (error) {
+    console.error(`[AI Service] Error generating ${theme} analysis:`, error);
+    throw error;
+  }
+}
+
+/**
+ * 根据主题获取系统提示词
+ */
+function getSystemPromptForTheme(theme: AnalysisTheme): string {
+  const themePrompts: Record<AnalysisTheme, string> = {
+    life_color: '你是一位资深的命理分析师，专注于解读人的生命底色与核心特质。请基于八字信息和初步解读，深入分析用户的生命本质、天赋潜能和人生底蕴。语言要专业但易懂，富有洞察力。',
+    relationship: '你是一位资深的命理分析师，专注于亲密关系与情感运势分析。请基于八字信息和初步解读，深入分析用户的情感模式、婚恋运势和人际关系特点。语言要专业但易懂，给出实用建议。',
+    career_wealth: '你是一位资深的命理分析师，专注于事业发展与财富运势分析。请基于八字信息和初步解读，深入分析用户的事业方向、财运格局和发展机遇。语言要专业但易懂，给出实用建议。',
+    health: '你是一位资深的命理分析师，专注于身心健康分析。请基于八字信息和初步解读，分析用户的健康倾向、需要注意的方面和养生建议。语言要专业但易懂，注意提醒这是命理参考，不能替代医学诊断。',
+    life_lesson: '你是一位资深的命理分析师，专注于人生课题与成长方向分析。请基于八字信息和初步解读，深入解读用户的人生使命、成长课题和需要突破的方向。语言要专业但富有启发性。',
+    yearly_fortune: '你是一位资深的命理分析师，专注于流年运势分析。请基于八字信息和初步解读，详细分析用户当年的整体运势、各方面运程和趋吉避凶建议。语言要专业但易懂，给出实用的时间节点提醒。',
+  };
+
+  return themePrompts[theme];
+}
+
+// ============================================
+// 旧版 AI 服务（保留向后兼容）
+// ============================================
+
+/**
+ * @deprecated 使用 generateThemeAnalysis 替代
+ * 调用 AI 生成单个模块的分析内容
  */
 export async function generateSectionAnalysis(
   section: AnalysisSection,
@@ -122,11 +272,8 @@ function extractSuggestions(analysis: Partial<FortuneAnalysis>): string[] {
 }
 
 /**
+ * @deprecated 使用新版两轮 LLM 架构替代
  * 生成完整的命理分析报告
- *
- * @param baziData - 八字排盘结果
- * @param sections - 要生成的模块列表（可选，默认全部）
- * @returns 完整的分析结果
  */
 export async function generateFullAnalysis(
   baziData: BaziData,

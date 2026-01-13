@@ -1,0 +1,149 @@
+.container {
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  max-width: 100%;
+}
+
+/* 标题 */
+.title {
+  font-size: var(--heading-5);
+  font-weight: 600;
+  color: var(--dark-7);
+  margin-bottom: var(--spacing-md);
+  padding-bottom: var(--spacing-md);
+  border-bottom: 1px solid var(--light-90);
+}
+
+/* 内容区域 */
+.content {
+  flex: 1;
+  color: var(--dark-12);
+  font-size: var(--text-small);
+  line-height: 1.7;
+  animation: fadeIn 0.3s ease-out;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.content h3 {
+  font-size: var(--heading-5);
+  font-weight: 600;
+  margin-bottom: var(--spacing-md);
+  color: var(--dark-7);
+}
+
+.content p {
+  margin-bottom: var(--spacing-md);
+  color: var(--grey-30);
+}
+
+.content ul {
+  margin-bottom: var(--spacing-md);
+  padding-left: var(--spacing-lg);
+}
+
+.content li {
+  margin-bottom: var(--spacing-xs);
+  color: var(--grey-30);
+}
+
+.content strong {
+  color: var(--dark-7);
+  font-weight: 600;
+}
+
+/* 锁定状态 */
+.lockedContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg) 0;
+}
+
+.lockedIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--light-94);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--grey-50);
+  font-size: 20px;
+}
+
+.unlockButton {
+  background: var(--dark-7);
+  color: white;
+  padding: 10px 24px;
+  border-radius: var(--radius-full);
+  font-weight: 500;
+  font-size: var(--text-small);
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.unlockButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.unlockButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.unlockPrice {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+  opacity: 0.9;
+}
+
+/* 加载状态 */
+.loadingContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-md);
+  color: var(--grey-50);
+  padding: var(--spacing-lg) 0;
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--light-90);
+  border-top-color: var(--dark-7);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.loadingText {
+  font-size: var(--text-small);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* 动画 */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
