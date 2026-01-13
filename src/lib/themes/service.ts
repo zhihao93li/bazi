@@ -133,16 +133,23 @@ export async function getThemeContent(
   };
 }
 
+// 内存锁：防止同一个 subject 的 initial analysis 被并发生成
+const initialAnalysisLocks = new Map<string, Promise<string>>();
+
+// 内存锁：防止同一个 subject + theme 被并发解锁
+const themeUnlockLocks = new Map<string, Promise<ThemeUnlockResult>>();
+
 /**
  * 检查并生成初步解读
  * 如果已存在则直接返回，否则生成新的
+ * 使用内存锁防止并发请求重复生成
  */
 async function ensureInitialAnalysis(
   subjectId: string,
   baziData: BaziData,
   gender?: string
 ): Promise<string> {
-  // 检查是否已有初步解读
+  // 检查是否已有初步解读（数据库）
   const subject = await prisma.subject.findUnique({
     where: { id: subjectId },
     select: { initialAnalysis: true },
@@ -153,20 +160,49 @@ async function ensureInitialAnalysis(
     return subject.initialAnalysis as string;
   }
 
-  // 生成新的初步解读
-  console.log(`[Theme Service] Generating new initial analysis for subject: ${subjectId}`);
-  const initialAnalysis = await generateInitialAnalysis(baziData, gender);
+  // 检查是否有正在进行的生成任务（内存锁）
+  const existingTask = initialAnalysisLocks.get(subjectId);
+  if (existingTask) {
+    console.log(`[Theme Service] Waiting for existing initial analysis task: ${subjectId}`);
+    return existingTask;
+  }
 
-  // 存储初步解读
-  await prisma.subject.update({
-    where: { id: subjectId },
-    data: {
-      initialAnalysis,
-      initialAnalyzedAt: new Date(),
-    },
-  });
+  // 创建生成任务并加锁
+  const generateTask = (async () => {
+    try {
+      // 再次检查数据库（双重检查，防止在等待锁时已完成）
+      const subjectCheck = await prisma.subject.findUnique({
+        where: { id: subjectId },
+        select: { initialAnalysis: true },
+      });
+      if (subjectCheck?.initialAnalysis) {
+        return subjectCheck.initialAnalysis as string;
+      }
 
-  return initialAnalysis;
+      // 生成新的初步解读
+      console.log(`[Theme Service] Generating new initial analysis for subject: ${subjectId}`);
+      const initialAnalysis = await generateInitialAnalysis(baziData, gender);
+
+      // 存储初步解读
+      await prisma.subject.update({
+        where: { id: subjectId },
+        data: {
+          initialAnalysis,
+          initialAnalyzedAt: new Date(),
+        },
+      });
+
+      return initialAnalysis;
+    } finally {
+      // 任务完成后释放锁
+      initialAnalysisLocks.delete(subjectId);
+    }
+  })();
+
+  // 注册锁
+  initialAnalysisLocks.set(subjectId, generateTask);
+
+  return generateTask;
 }
 
 /**
@@ -185,6 +221,15 @@ export async function unlockTheme(
   subjectId: string,
   theme: AnalysisTheme
 ): Promise<ThemeUnlockResult> {
+  const lockKey = `${subjectId}_${theme}`;
+
+  // 0. 检查是否有正在进行的解锁任务（防止并发重复解锁）
+  const existingTask = themeUnlockLocks.get(lockKey);
+  if (existingTask) {
+    console.log(`[Theme Service] Waiting for existing unlock task: ${lockKey}`);
+    return existingTask;
+  }
+
   // 1. 获取主题价格
   const price = await getThemePrice(theme);
   if (price === null) {
@@ -202,86 +247,133 @@ export async function unlockTheme(
   });
 
   if (existing) {
-    throw new Error(`Theme ${theme} is already unlocked for this subject`);
+    // 如果已解锁，直接返回已有内容
+    const account = await prisma.pointsAccount.findUnique({
+      where: { userId },
+      select: { balance: true },
+    });
+    return {
+      success: true,
+      content: existing.content as string,
+      pointsCost: 0,
+      remainingBalance: account?.balance || 0,
+    };
   }
 
-  // 3. 检查积分是否充足
-  const { sufficient, currentBalance } = await checkSufficientBalance(userId, price);
-  if (!sufficient) {
-    throw new PointsError(
-      PointsErrorCode.INSUFFICIENT_BALANCE,
-      `积分不足，当前余额: ${currentBalance}，需要: ${price}`
-    );
-  }
+  // 创建解锁任务并加锁（防止并发重复调用 AI）
+  const unlockTask = (async (): Promise<ThemeUnlockResult> => {
+    try {
+      // 3. 检查积分是否充足
+      const { sufficient, currentBalance } = await checkSufficientBalance(userId, price);
+      if (!sufficient) {
+        throw new PointsError(
+          PointsErrorCode.INSUFFICIENT_BALANCE,
+          `积分不足，当前余额: ${currentBalance}，需要: ${price}`
+        );
+      }
 
-  // 4. 获取测算对象信息
-  const subject = await prisma.subject.findUnique({
-    where: { id: subjectId },
-    select: {
-      userId: true,
-      baziData: true,
-      gender: true,
-    },
-  });
+      // 4. 获取测算对象信息
+      const subject = await prisma.subject.findUnique({
+        where: { id: subjectId },
+        select: {
+          userId: true,
+          baziData: true,
+          gender: true,
+        },
+      });
 
-  if (!subject) {
-    throw new Error('Subject not found');
-  }
+      if (!subject) {
+        throw new Error('Subject not found');
+      }
 
-  if (subject.userId !== userId) {
-    throw new Error('Unauthorized access to subject');
-  }
+      if (subject.userId !== userId) {
+        throw new Error('Unauthorized access to subject');
+      }
 
-  if (!subject.baziData) {
-    throw new Error('Subject has no bazi data');
-  }
+      if (!subject.baziData) {
+        throw new Error('Subject has no bazi data');
+      }
 
-  const baziData = subject.baziData as unknown as BaziData;
+      const baziData = subject.baziData as unknown as BaziData;
 
-  // 5. 确保初步解读已生成
-  const initialAnalysis = await ensureInitialAnalysis(
-    subjectId,
-    baziData,
-    subject.gender
-  );
+      // 5. 确保初步解读已生成
+      const initialAnalysis = await ensureInitialAnalysis(
+        subjectId,
+        baziData,
+        subject.gender
+      );
 
-  // 6. 生成分主题解读
-  console.log(`[Theme Service] Generating theme analysis: ${theme}`);
-  const content = await generateThemeAnalysis(
-    theme,
-    baziData,
-    initialAnalysis,
-    subject.gender
-  );
+      // 6. 生成分主题解读
+      console.log(`[Theme Service] Generating theme analysis: ${theme}`);
+      const content = await generateThemeAnalysis(
+        theme,
+        baziData,
+        initialAnalysis,
+        subject.gender
+      );
 
-  // 7. 存储解读结果
-  await prisma.themeAnalysis.create({
-    data: {
-      userId,
-      subjectId,
-      theme,
-      content,
-      pointsCost: price,
-    },
-  });
+      // 7. 存储解读结果
+      try {
+        await prisma.themeAnalysis.create({
+          data: {
+            userId,
+            subjectId,
+            theme,
+            content,
+            pointsCost: price,
+          },
+        });
+      } catch (error) {
+        // 捕获唯一约束冲突（并发请求导致）
+        if (error && typeof error === 'object' && 'code' in error && error.code === 'P2002') {
+          console.log(`[Theme Service] Theme already unlocked (concurrent request): ${theme}`);
+          // 查询已有记录
+          const existingAnalysis = await prisma.themeAnalysis.findUnique({
+            where: {
+              subjectId_theme: { subjectId, theme },
+            },
+          });
+          const account = await prisma.pointsAccount.findUnique({
+            where: { userId },
+            select: { balance: true },
+          });
+          return {
+            success: true,
+            content: existingAnalysis?.content as string || content,
+            pointsCost: 0, // 不扣积分
+            remainingBalance: account?.balance || 0,
+          };
+        }
+        throw error;
+      }
 
-  // 8. 扣除积分
-  const deductResult = await deductPoints({
-    userId,
-    amount: price,
-    description: `解锁主题解读 - ${theme}`,
-    orderId: `theme_${subjectId}_${theme}`,
-  });
+      // 8. 扣除积分
+      const deductResult = await deductPoints({
+        userId,
+        amount: price,
+        description: `解锁主题解读 - ${theme}`,
+        orderId: `theme_${subjectId}_${theme}`,
+      });
 
-  console.log(`[Theme Service] Theme unlocked successfully: ${theme}`);
+      console.log(`[Theme Service] Theme unlocked successfully: ${theme}`);
 
-  return {
-    success: true,
-    theme,
-    content,
-    pointsDeducted: price,
-    remainingBalance: deductResult.balance ?? 0,
-  };
+      return {
+        success: true,
+        theme,
+        content,
+        pointsDeducted: price,
+        remainingBalance: deductResult.balance ?? 0,
+      };
+    } finally {
+      // 任务完成后释放锁
+      themeUnlockLocks.delete(lockKey);
+    }
+  })();
+
+  // 注册锁
+  themeUnlockLocks.set(lockKey, unlockTask);
+
+  return unlockTask;
 }
 
 /**

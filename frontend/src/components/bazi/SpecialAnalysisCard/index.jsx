@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Lock, Sparkle, Coins } from '@phosphor-icons/react';
 import Card from '../../common/Card';
 import styles from './SpecialAnalysisCard.module.css';
@@ -39,6 +39,29 @@ export default function SpecialAnalysisCard({
 }) {
   const [activeTab, setActiveTab] = useState(SPECIAL_THEMES[0].id);
   const [displayContent, setDisplayContent] = useState('');
+  const [isClicking, setIsClicking] = useState(false);
+  const clickTimeoutRef = useRef(null);
+
+  // 清理定时器
+  useEffect(() => {
+    return () => {
+      if (clickTimeoutRef.current) {
+        clearTimeout(clickTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // 带防抖的点击处理
+  const handleUnlockClick = useCallback(() => {
+    if (isClicking || loadingTheme) return;
+    
+    setIsClicking(true);
+    onUnlock?.(activeTab);
+    
+    clickTimeoutRef.current = setTimeout(() => {
+      setIsClicking(false);
+    }, 3000);
+  }, [isClicking, loadingTheme, onUnlock, activeTab]);
 
   useEffect(() => {
     const data = themesData[activeTab];
@@ -101,10 +124,11 @@ export default function SpecialAnalysisCard({
           </div>
           <button 
             className={styles.unlockButton}
-            onClick={() => onUnlock?.(activeTab)}
+            onClick={handleUnlockClick}
+            disabled={isClicking || !!loadingTheme}
           >
             <Sparkle weight="fill" size={16} />
-            <span>解锁「{activeTheme?.name}」</span>
+            <span>{isClicking ? '请求中...' : `解锁「${activeTheme?.name}」`}</span>
             <span className={styles.unlockPrice}>
               <Coins weight="fill" size={14} />
               {price}

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Lock, Sparkle, Coins } from '@phosphor-icons/react';
 import Card from '../../common/Card';
 import styles from './ThemeCard.module.css';
@@ -32,6 +32,31 @@ export default function ThemeCard({
   className = '',
 }) {
   const [displayContent, setDisplayContent] = useState('');
+  const [isClicking, setIsClicking] = useState(false);
+  const clickTimeoutRef = useRef(null);
+
+  // 清理定时器
+  useEffect(() => {
+    return () => {
+      if (clickTimeoutRef.current) {
+        clearTimeout(clickTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // 带防抖的点击处理
+  const handleUnlockClick = useCallback(() => {
+    // 防止重复点击
+    if (isClicking || isLoading) return;
+    
+    setIsClicking(true);
+    onUnlock?.(theme);
+    
+    // 3秒后重置点击状态（作为兜底，正常情况下 isLoading 会变为 true）
+    clickTimeoutRef.current = setTimeout(() => {
+      setIsClicking(false);
+    }, 3000);
+  }, [isClicking, isLoading, onUnlock, theme]);
 
   useEffect(() => {
     if (content) {
@@ -54,6 +79,8 @@ export default function ThemeCard({
 
   // 渲染锁定状态
   if (!isUnlocked) {
+    const isDisabled = isClicking || isLoading;
+    
     return (
       <Card className={`${styles.container} ${className}`}>
         <h3 className={styles.title}>{title}</h3>
@@ -63,10 +90,11 @@ export default function ThemeCard({
           </div>
           <button 
             className={styles.unlockButton}
-            onClick={() => onUnlock?.(theme)}
+            onClick={handleUnlockClick}
+            disabled={isDisabled}
           >
             <Sparkle weight="fill" size={16} />
-            <span>解锁解读</span>
+            <span>{isClicking ? '请求中...' : '解锁解读'}</span>
             <span className={styles.unlockPrice}>
               <Coins weight="fill" size={14} />
               {price}
