@@ -31,14 +31,10 @@ function parseSimpleMarkdown(text) {
 /**
  * 专项分析卡片组件
  * 
- * 优化点：
- * 1. 移除了内部的 isClicking 状态，由父组件通过 loadingTheme 控制
- * 2. 添加了其他主题的加载状态指示
- * 3. 简化了点击处理逻辑
+ * 支持并行解锁：每个主题独立显示自己的 loading 状态
  */
 export default function SpecialAnalysisCard({
   themesData = {},
-  loadingTheme,
   onUnlock,
   className = '',
 }) {
@@ -57,21 +53,23 @@ export default function SpecialAnalysisCard({
 
   // 计算当前 tab 的状态
   const activeData = themesData[activeTab] || {};
-  const isCurrentTabLoading = loadingTheme === activeTab;
-  const isAnyLoading = !!loadingTheme;
+  const isCurrentTabLoading = activeData.isLoading || false;
   const isUnlocked = activeData.isUnlocked || false;
   const price = activeData.price || 0;
   const activeTheme = SPECIAL_THEMES.find(t => t.id === activeTab);
 
-  // 计算正在加载的其他主题（用于显示提示）
-  const loadingOtherTheme = useMemo(() => {
-    if (!loadingTheme || loadingTheme === activeTab) return null;
-    return SPECIAL_THEMES.find(t => t.id === loadingTheme);
-  }, [loadingTheme, activeTab]);
+  // 计算正在加载的主题列表（用于显示提示）
+  const loadingThemes = useMemo(() => {
+    return SPECIAL_THEMES.filter(t => {
+      const data = themesData[t.id];
+      return data?.isLoading && t.id !== activeTab;
+    });
+  }, [themesData, activeTab]);
 
   // 处理解锁点击
   const handleUnlockClick = () => {
-    if (isAnyLoading) return;
+    // 只检查当前主题是否在加载，允许并行解锁其他主题
+    if (isCurrentTabLoading) return;
     onUnlock?.(activeTab);
   };
 
@@ -86,7 +84,7 @@ export default function SpecialAnalysisCard({
           const data = themesData[theme.id] || {};
           const isActive = activeTab === theme.id;
           const themeUnlocked = data.isUnlocked || false;
-          const isThemeLoading = loadingTheme === theme.id;
+          const isThemeLoading = data.isLoading || false;
           
           return (
             <div
@@ -126,7 +124,7 @@ export default function SpecialAnalysisCard({
           <button 
             className={styles.unlockButton}
             onClick={handleUnlockClick}
-            disabled={isAnyLoading}
+            disabled={isCurrentTabLoading}
           >
             <Sparkle weight="fill" size={16} />
             <span>解锁「{activeTheme?.name}」</span>
@@ -136,10 +134,15 @@ export default function SpecialAnalysisCard({
             </span>
           </button>
           {/* 显示其他主题正在加载的提示 */}
-          {loadingOtherTheme && (
+          {loadingThemes.length > 0 && (
             <div className={styles.otherLoadingHint}>
               <Spinner size={14} />
-              <span>正在解锁「{loadingOtherTheme.name}」...</span>
+              <span>
+                {loadingThemes.length === 1 
+                  ? `正在解锁「${loadingThemes[0].name}」...`
+                  : `正在解锁 ${loadingThemes.length} 个主题...`
+                }
+              </span>
             </div>
           )}
         </div>

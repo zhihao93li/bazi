@@ -192,14 +192,13 @@ export default function BaziResultPage() {
       return;
     }
 
-    // 检查是否有正在进行的解锁任务
-    if (unlockThemeMutation.isPending) {
-      toast.info('请等待当前解锁完成');
-      return;
+    // 检查该主题是否已经在加载中
+    if (themesDataWithPricing[theme]?.isLoading) {
+      return; // 静默忽略，该主题已在加载
     }
     
     unlockThemeMutation.mutate({ subjectId, theme });
-  }, [isLoggedIn, subjectId, unlockThemeMutation, toast, navigate, location]);
+  }, [isLoggedIn, subjectId, unlockThemeMutation, themesDataWithPricing, toast, navigate, location]);
 
   // 处理命盘切换
   const handleSwitchSubject = useCallback((subject) => {
@@ -241,17 +240,6 @@ export default function BaziResultPage() {
     });
     return data;
   }, [themesDataWithPricing]);
-
-  // 获取正在解锁的主题（只有当前命盘的解锁任务才显示加载状态）
-  const loadingTheme = useMemo(() => {
-    if (!unlockThemeMutation.isPending) return null;
-    const mutationSubjectId = unlockThemeMutation.variables?.subjectId;
-    // 只有当解锁的是当前命盘时才显示加载状态
-    if (mutationSubjectId === subjectId) {
-      return unlockThemeMutation.variables?.theme;
-    }
-    return null;
-  }, [unlockThemeMutation.isPending, unlockThemeMutation.variables, subjectId]);
 
   // 八字数据
   const baziResult = currentSubject?.baziData;
@@ -332,15 +320,13 @@ export default function BaziResultPage() {
                   isUnlocked={themesDataWithPricing.life_color.isUnlocked}
                   content={themesDataWithPricing.life_color.content}
                   price={themesDataWithPricing.life_color.price}
-                  isLoading={loadingTheme === 'life_color'}
-                  isOtherLoading={!!loadingTheme && loadingTheme !== 'life_color'}
+                  isLoading={themesDataWithPricing.life_color.isLoading}
                   onUnlock={handleUnlockTheme}
                 />
 
                 {/* 专项分析（4个tab） */}
                 <SpecialAnalysisCard
                   themesData={specialAnalysisData}
-                  loadingTheme={loadingTheme}
                   onUnlock={handleUnlockTheme}
                 />
 
@@ -349,8 +335,7 @@ export default function BaziResultPage() {
                   isUnlocked={themesDataWithPricing.yearly_fortune.isUnlocked}
                   content={themesDataWithPricing.yearly_fortune.content}
                   price={themesDataWithPricing.yearly_fortune.price}
-                  isLoading={loadingTheme === 'yearly_fortune'}
-                  isOtherLoading={!!loadingTheme && loadingTheme !== 'yearly_fortune'}
+                  isLoading={themesDataWithPricing.yearly_fortune.isLoading}
                   onUnlock={handleUnlockTheme}
                 />
               </div>

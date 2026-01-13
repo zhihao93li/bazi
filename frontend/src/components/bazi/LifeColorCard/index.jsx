@@ -8,7 +8,6 @@ export default function LifeColorCard({
   content,
   price = 0,
   isLoading = false,
-  isOtherLoading = false,
   onUnlock,
   className = '',
 }) {
@@ -20,7 +19,6 @@ export default function LifeColorCard({
       isUnlocked={isUnlocked}
       content={content}
       isLoading={isLoading}
-      isOtherLoading={isOtherLoading}
       onUnlock={onUnlock}
       className={className}
     />

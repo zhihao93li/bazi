@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo } from 'react';
-import { Lock, Sparkle, Coins, Spinner } from '@phosphor-icons/react';
+import { useState, useEffect } from 'react';
+import { Lock, Sparkle, Coins } from '@phosphor-icons/react';
 import Card from '../../common/Card';
 import styles from './ThemeCard.module.css';
 
@@ -21,10 +21,7 @@ function parseSimpleMarkdown(text) {
 /**
  * 通用主题卡片组件
  * 
- * 优化点：
- * 1. 移除了内部的 isClicking 状态和定时器，由父组件控制 isLoading
- * 2. 简化了点击处理逻辑，避免了竞态条件
- * 3. 添加了加载时间提示
+ * 支持并行解锁：每个主题独立显示自己的 loading 状态
  */
 export default function ThemeCard({
   theme,
@@ -33,7 +30,6 @@ export default function ThemeCard({
   isUnlocked = false,
   content,
   isLoading = false,
-  isOtherLoading = false, // 是否有其他主题正在加载
   onUnlock,
   className = '',
 }) {
@@ -48,12 +44,9 @@ export default function ThemeCard({
 
   // 处理解锁点击
   const handleUnlockClick = () => {
-    if (isLoading || isOtherLoading) return;
+    if (isLoading) return;
     onUnlock?.(theme);
   };
-
-  // 按钮是否禁用
-  const isDisabled = isLoading || isOtherLoading;
 
   // 渲染加载状态
   if (isLoading) {
@@ -81,7 +74,7 @@ export default function ThemeCard({
           <button 
             className={styles.unlockButton}
             onClick={handleUnlockClick}
-            disabled={isDisabled}
+            disabled={isLoading}
           >
             <Sparkle weight="fill" size={16} />
             <span>解锁解读</span>
@@ -90,13 +83,6 @@ export default function ThemeCard({
               {price}
             </span>
           </button>
-          {/* 显示其他主题正在加载的提示 */}
-          {isOtherLoading && (
-            <div className={styles.otherLoadingHint}>
-              <Spinner size={14} />
-              <span>请等待当前解锁完成</span>
-            </div>
-          )}
         </div>
       </Card>
     );
