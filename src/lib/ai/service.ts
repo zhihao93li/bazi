@@ -128,7 +128,7 @@ export async function generateThemeAnalysis(
   const config = loadNewAIConfig();
   const client = getOpenAIClient();
 
-  // 获取主题模板（包含 system 和 user）
+  // 获取主题模板（包含 system 和 user，可能有专属 model）
   const promptTemplate = getThemePromptTemplate(theme);
   const context: TemplateContext = { 
     baziData, 
@@ -141,11 +141,14 @@ export async function generateThemeAnalysis(
   const systemPrompt = replaceTemplateVariables(promptTemplate.system, context);
   const userPrompt = replaceTemplateVariables(promptTemplate.user, context);
 
-  console.log(`[AI Service] Generating theme analysis (Round 2): ${theme}...`);
+  // 使用主题专属模型（如果有），否则使用全局配置
+  const modelToUse = promptTemplate.model || config.model;
+
+  console.log(`[AI Service] Generating theme analysis (Round 2): ${theme}, model: ${modelToUse}...`);
 
   try {
     const response = await client.chat.completions.create({
-      model: config.model,
+      model: modelToUse,
       messages: [
         {
           role: 'system',

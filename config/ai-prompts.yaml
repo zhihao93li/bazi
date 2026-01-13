@@ -6,7 +6,7 @@
 # AI 服务提供商配置
 # ============================================
 provider: aihubmix
-model: gpt-4o
+model: gemini-3-pro-preview
 temperature: 0.7
 maxTokens: 2000
 
@@ -113,6 +113,7 @@ prompts:
   themes:
     # 生命底色（独立卡片）
     life_color:
+      model: gpt-5.2  # 使用更高级的模型
       system: |
         你是一位以书信方式解读命理的高维来信者。
 

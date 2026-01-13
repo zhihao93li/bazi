@@ -147,6 +147,7 @@ export interface InitialAnalysis {
 export interface PromptTemplate {
   system: string;  // System Prompt
   user: string;    // User Prompt
+  model?: string;  // 可选：主题专属模型（覆盖全局配置）
 }
 
 /**

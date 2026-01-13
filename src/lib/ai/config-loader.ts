@@ -29,7 +29,7 @@ let lastModifiedTime: number = 0;
 // 默认新版配置
 const DEFAULT_NEW_AI_CONFIG: NewAIConfig = {
   provider: 'aihubmix',
-  model: 'gpt-4o',
+  model: 'gemini-3-pro-preview',
   temperature: 0.7,
   maxTokens: 2000,
   prompts: {
@@ -96,7 +96,10 @@ function validatePromptTemplate(template: unknown): template is PromptTemplate {
     return false;
   }
   const t = template as Record<string, unknown>;
-  return typeof t.system === 'string' && typeof t.user === 'string';
+  // system 和 user 必须是字符串，model 是可选的字符串
+  const hasRequiredFields = typeof t.system === 'string' && typeof t.user === 'string';
+  const hasValidModel = t.model === undefined || typeof t.model === 'string';
+  return hasRequiredFields && hasValidModel;
 }
 
 /**
