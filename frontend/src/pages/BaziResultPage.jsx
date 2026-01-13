@@ -242,10 +242,16 @@ export default function BaziResultPage() {
     return data;
   }, [themesDataWithPricing]);
 
-  // 获取正在解锁的主题
-  const loadingTheme = unlockThemeMutation.isPending 
-    ? unlockThemeMutation.variables?.theme 
-    : null;
+  // 获取正在解锁的主题（只有当前命盘的解锁任务才显示加载状态）
+  const loadingTheme = useMemo(() => {
+    if (!unlockThemeMutation.isPending) return null;
+    const mutationSubjectId = unlockThemeMutation.variables?.subjectId;
+    // 只有当解锁的是当前命盘时才显示加载状态
+    if (mutationSubjectId === subjectId) {
+      return unlockThemeMutation.variables?.theme;
+    }
+    return null;
+  }, [unlockThemeMutation.isPending, unlockThemeMutation.variables, subjectId]);
 
   // 八字数据
   const baziResult = currentSubject?.baziData;
