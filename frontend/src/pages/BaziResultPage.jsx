@@ -8,6 +8,11 @@ import Footer from '../components/Footer';
 import GradientBackground from '../components/GradientBackground';
 import { api } from '../services/api';
 import { getLocalSubjects, deleteLocalSubject } from './BaziInputPage';
+import { 
+  getSubjectThemeCache, 
+  setThemeCache, 
+  setThemeCacheBatch 
+} from '../utils/themeCache';
 
 // 核心业务组件
 import BaziChartCard from '../components/bazi/BaziChartCard';
@@ -35,6 +40,7 @@ export default function BaziResultPage() {
   // 基础状态
   const [currentSubject, setCurrentSubject] = useState(null);
   const [subjects, setSubjects] = useState([]);
+  const [subjectsLoaded, setSubjectsLoaded] = useState(false); // 追踪列表是否已加载
   const [baziResult, setBaziResult] = useState(null);
 
   // 主题相关状态
@@ -79,14 +85,41 @@ export default function BaziResultPage() {
     }
   }, []);
 
-  // 加载主题解锁状态
+  // 加载主题解锁状态（优先使用本地缓存）
   const loadThemeStatus = useCallback(async (subjectId) => {
     if (!subjectId || !isLoggedIn) return;
     
+    // 1. 先检查本地缓存
+    const cachedThemes = getSubjectThemeCache(subjectId);
+    const cachedThemeKeys = Object.keys(cachedThemes);
+    
+    if (cachedThemeKeys.length > 0) {
+      // 有缓存，先使用缓存数据
+      setThemesData(prev => {
+        const updated = { ...prev };
+        cachedThemeKeys.forEach(theme => {
+          if (updated[theme]) {
+            updated[theme] = {
+              ...updated[theme],
+              isUnlocked: true,
+              content: cachedThemes[theme].content,
+            };
+          }
+        });
+        return updated;
+      });
+    }
+    
+    // 2. 请求后端获取最新状态（用于同步新解锁的主题）
     try {
       const res = await api.get(`/themes/status/${subjectId}`);
       const status = res.status || [];
       
+      // 找出已解锁但本地缓存没有的主题
+      const unlockedThemes = status.filter(s => s.isUnlocked);
+      const themesNeedFetch = unlockedThemes.filter(s => !cachedThemes[s.theme]);
+      
+      // 更新解锁状态
       setThemesData(prev => {
         const updated = { ...prev };
         status.forEach(s => {
@@ -100,17 +133,19 @@ export default function BaziResultPage() {
         return updated;
       });
 
-      // 如果有已解锁的主题，加载它们的内容
-      const unlockedThemes = status.filter(s => s.isUnlocked);
-      if (unlockedThemes.length > 0) {
+      // 3. 只请求缓存中没有的主题内容
+      if (themesNeedFetch.length > 0) {
         const batchRes = await api.post('/themes/batch', {
           subjectId,
-          themes: unlockedThemes.map(s => s.theme),
+          themes: themesNeedFetch.map(s => s.theme),
         });
         
+        const newThemes = batchRes.themes || [];
+        
+        // 更新状态
         setThemesData(prev => {
           const updated = { ...prev };
-          (batchRes.themes || []).forEach(t => {
+          newThemes.forEach(t => {
             if (updated[t.theme]) {
               updated[t.theme] = {
                 ...updated[t.theme],
@@ -121,19 +156,19 @@ export default function BaziResultPage() {
           });
           return updated;
         });
+        
+        // 保存到本地缓存
+        setThemeCacheBatch(subjectId, newThemes.filter(t => t.content));
       }
     } catch (error) {
       console.error('Failed to load theme status:', error);
+      // 即使后端请求失败，本地缓存数据仍然可用
     }
   }, [isLoggedIn]);
 
-  // 1. 初始化数据
+  // 1. 初始化：只在首次加载或登录状态变化时获取所有命盘列表
   useEffect(() => {
-    const subjectId = searchParams.get('subjectId');
-    const localId = searchParams.get('localId');
-
-    // 加载所有命盘并处理当前显示
-    const loadAndInit = async () => {
+    const loadSubjectsList = async () => {
       let allSubjects = [];
       
       // 加载本地命盘
@@ -151,22 +186,44 @@ export default function BaziResultPage() {
       }
       
       setSubjects(allSubjects);
+      setSubjectsLoaded(true);
+    };
+    
+    loadSubjectsList();
+  }, [isLoggedIn]); // 只在登录状态变化时重新加载列表
 
-      // 加载当前命盘数据
+  // 2. 处理当前显示的命盘（URL 参数变化时）
+  useEffect(() => {
+    // 等待命盘列表加载完成
+    if (!subjectsLoaded) return;
+
+    const subjectId = searchParams.get('subjectId');
+    const localId = searchParams.get('localId');
+    const localSubjects = getLocalSubjects();
+
+    const loadCurrentSubject = async () => {
       if (subjectId) {
-        // 后端命盘
-        try {
-          const res = await api.get(`/subjects/${subjectId}`);
-          setCurrentSubject(res.subject);
-          setBaziResult(res.subject.baziData);
-          // 加载主题状态
+        // 后端命盘：先尝试从已加载的 subjects 中查找
+        const existingSubject = subjects.find(s => s.id === subjectId && !s.isLocal);
+        if (existingSubject && existingSubject.baziData) {
+          // 已有完整数据，直接使用（无需网络请求）
+          setCurrentSubject(existingSubject);
+          setBaziResult(existingSubject.baziData);
           loadThemeStatus(subjectId);
-        } catch {
-          toast.error('获取命盘失败');
-          navigate('/bazi/input');
+        } else {
+          // 列表中没有完整数据，请求后端获取详情
+          try {
+            const res = await api.get(`/subjects/${subjectId}`);
+            setCurrentSubject(res.subject);
+            setBaziResult(res.subject.baziData);
+            loadThemeStatus(subjectId);
+          } catch {
+            toast.error('获取命盘失败');
+            navigate('/bazi/input');
+          }
         }
       } else if (localId) {
-        // 本地命盘
+        // 本地命盘：直接从本地存储获取
         const localSubject = localSubjects.find(s => s.id === localId);
         if (localSubject) {
           setCurrentSubject(localSubject);
@@ -177,8 +234,8 @@ export default function BaziResultPage() {
         }
       } else {
         // 没有参数：自动加载第一个命盘，或跳转到输入页
-        if (allSubjects.length > 0) {
-          const firstSubject = allSubjects[0];
+        if (subjects.length > 0) {
+          const firstSubject = subjects[0];
           if (firstSubject.isLocal) {
             setSearchParams({ localId: firstSubject.id }, { replace: true });
           } else {
@@ -191,8 +248,8 @@ export default function BaziResultPage() {
       }
     };
     
-    loadAndInit();
-  }, [searchParams, isLoggedIn, navigate, toast, setSearchParams, loadThemeStatus]);
+    loadCurrentSubject();
+  }, [searchParams, subjects, subjectsLoaded, navigate, toast, setSearchParams, loadThemeStatus]);
 
   // 2. 加载主题价格
   useEffect(() => {
@@ -232,6 +289,11 @@ export default function BaziResultPage() {
           content: res.content,
         },
       }));
+      
+      // 保存到本地缓存
+      if (res.content) {
+        setThemeCache(subjectId, theme, res.content);
+      }
       
       // 更新用户余额
       updateUser({ balance: res.remainingBalance });
