@@ -9,5 +9,4 @@ cmds = ["npm install"]
 [phases.build]
 cmds = ["npm run build"]
 
-[start]
-cmd = "npm run start"
+# Railway 会自动检测 dist 目录并使用 Caddy 托管静态文件
