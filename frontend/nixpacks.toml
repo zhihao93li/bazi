@@ -1,14 +1,13 @@
 # Nixpacks 配置 - 前端静态服务
 
 [phases.setup]
-nixPkgs = ["nodejs_20"]
+nixPkgs = ["nodejs_22"]
+
+[phases.install]
+cmds = ["rm -rf node_modules/.cache || true", "npm ci --cache /tmp/.npm"]
 
 [phases.build]
-cmds = [
-  "npm ci",
-  "npm run build",
-  "npm install -g serve"
-]
+cmds = ["npm run build"]
 
 [start]
-cmd = "serve dist -s -l $PORT"
+cmd = "npx serve dist -s -l $PORT"
