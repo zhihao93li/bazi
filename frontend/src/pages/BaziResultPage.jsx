@@ -11,9 +11,7 @@ import GradientBackground from '../components/GradientBackground';
 import { api } from '../services/api'; // Import API
 
 // 核心业务组件
-import FourPillarsCard from '../components/bazi/FourPillarsCard';
-import FiveElementsChart from '../components/bazi/FiveElementsChart';
-import DaYunTimeline from '../components/bazi/DaYunTimeline';
+import BaziChartCard from '../components/bazi/BaziChartCard';
 import AnalysisCard from '../components/bazi/AnalysisCard';
 import SubjectSwitcher from '../components/bazi/SubjectSwitcher';
 
@@ -224,31 +222,35 @@ export default function BaziResultPage() {
           {/* 核心内容网格 */}
           <div className={styles.contentGrid}>
             
-            {/* 左侧：命盘主信息 */}
+            {/* 左侧：命盘卡片 */}
             <motion.div 
               className={styles.leftCol}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              {/* 四柱卡片 */}
-              <FourPillarsCard data={baziResult.fourPillars} />
-              
-              {/* 五行分布 */}
-              <FiveElementsChart data={baziResult.fiveElements} />
-              
-              {/* 大运时间轴 */}
-              <DaYunTimeline data={baziResult.yun} /> {/* Changed from daYun to yun */}
-              
-              {/* AI 分析卡片 */}
-              <AnalysisCard 
-                data={analysisData} 
-                isLoading={isAnalysisLoading}
-                onStartAnalysis={handleStartAnalysis}
+              <BaziChartCard 
+                data={baziResult}
+                subject={currentSubject}
+                isSaved={!!searchParams.get('subjectId')}
               />
             </motion.div>
 
-            
+            {/* 右侧：AI 分析卡片 */}
+            <motion.div 
+              className={styles.rightCol}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+            >
+              <div className={styles.stickyWrapper}>
+                <AnalysisCard 
+                  data={analysisData} 
+                  isLoading={isAnalysisLoading}
+                  onStartAnalysis={handleStartAnalysis}
+                />
+              </div>
+            </motion.div>
           </div>
         </div>
       </main>

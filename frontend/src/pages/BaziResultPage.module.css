@@ -54,37 +54,45 @@
   margin: 0;
 }
 
-/* 核心网格布局 */
+/* 核心网格布局 - 大屏幕水平并排 */
 .contentGrid {
   display: grid;
-  grid-template-columns: 2fr 1fr; /* 2:1 布局 */
+  grid-template-columns: 3fr 2fr; /* 命盘 : AI解读 = 3:2 */
   gap: 24px;
+  align-items: start;
 }
 
 .leftCol {
   display: flex;
   flex-direction: column;
   gap: 24px;
-  min-width: 0; /* Critical for nested flex scrolling */
+  min-width: 0;
 }
 
 .rightCol {
   display: flex;
   flex-direction: column;
   gap: 24px;
-  min-width: 0; /* Critical for nested flex scrolling */
+  min-width: 0;
 }
 
 /* 粘性右侧栏 (桌面端) */
 .stickyWrapper {
   position: sticky;
-  top: 100px; /* 导航栏高度 + 间距 */
+  top: 100px;
   display: flex;
   flex-direction: column;
   gap: 24px;
 }
 
-/* 移动端响应式 */
+/* 平板响应式 */
+@media (max-width: 1100px) {
+  .contentGrid {
+    grid-template-columns: 1fr 1fr; /* 1:1 布局 */
+  }
+}
+
+/* 小屏幕响应式 */
 @media (max-width: 900px) {
   .contentGrid {
     grid-template-columns: 1fr;
@@ -92,10 +100,6 @@
   
   .stickyWrapper {
     position: static;
-  }
-  
-  .rightCol {
-    order: -1; /* 移动端先展示基本信息 */
   }
 }
 

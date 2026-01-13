@@ -1,0 +1,607 @@
+/* BaziChartCard - 命盘卡片整合样式 */
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
+}
+
+/* ===== 顶部基础信息区 ===== */
+.headerSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  padding-bottom: var(--spacing-md);
+  border-bottom: 1px solid var(--light-90);
+}
+
+.cardTitle {
+  font-size: 12px;
+  color: var(--grey-50);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.nameRow {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+.subjectName {
+  font-size: var(--heading-5);
+  font-weight: 600;
+  color: var(--dark-7);
+}
+
+.genderLabel {
+  font-size: 14px;
+  color: var(--grey-50);
+  padding: 2px 8px;
+  background: var(--light-96);
+  border-radius: var(--radius-sm);
+}
+
+.savedBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--accent-green);
+  padding: 2px 8px;
+  background: rgba(39, 179, 44, 0.1);
+  border-radius: var(--radius-sm);
+}
+
+.birthInfoRow {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.infoItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--grey-30);
+}
+
+.infoIcon {
+  color: var(--grey-50);
+}
+
+/* ===== 六柱容器 ===== */
+.pillarsContainer {
+  display: flex;
+  align-items: stretch;
+  gap: var(--spacing-md);
+  overflow-x: auto;
+  padding: var(--spacing-sm) 0;
+}
+
+.fourPillarsArea {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacing-sm);
+  flex: 4;
+  min-width: 0;
+}
+
+.divider {
+  width: 1px;
+  background: linear-gradient(to bottom, transparent 0%, var(--light-85) 20%, var(--light-85) 80%, transparent 100%);
+  margin: 0 var(--spacing-xs);
+  flex-shrink: 0;
+}
+
+.fortuneArea {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-sm);
+  flex: 2;
+  min-width: 0;
+}
+
+/* ===== 单柱样式 ===== */
+.pillarColumn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: var(--spacing-sm);
+  background-color: var(--light-96);
+  border-radius: var(--radius-md);
+  transition: transform 0.2s, background-color 0.2s;
+  min-width: 60px;
+}
+
+.pillarColumn:hover {
+  transform: translateY(-2px);
+  background-color: var(--light-94);
+}
+
+.pillarTitle {
+  font-size: 12px;
+  color: var(--grey-50);
+  font-weight: 500;
+}
+
+.shiShenTag {
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  background: var(--light-94);
+  color: var(--grey-30);
+  white-space: nowrap;
+}
+
+.biJian, .jieCai { background: rgba(128, 128, 128, 0.15); color: var(--grey-30); }
+.shiShen, .shangGuan { background: rgba(39, 179, 44, 0.12); color: var(--accent-green); }
+.pianCai, .zhengCai { background: rgba(239, 123, 22, 0.12); color: var(--accent-orange); }
+.qiSha, .zhengGuan { background: rgba(94, 106, 210, 0.12); color: var(--accent-blue); }
+.pianYin, .zhengYin { background: rgba(138, 67, 225, 0.12); color: var(--accent-purple); }
+.riYuan { background: rgba(255, 47, 47, 0.12); color: var(--accent-red); }
+
+.ganBox {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  background: var(--absolute-white);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.zhiWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.zhiBox {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  background: var(--absolute-white);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.kongWangMark {
+  position: absolute;
+  right: -14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 9px;
+  color: var(--accent-red);
+  line-height: 1;
+  font-weight: 500;
+}
+
+.hiddenStemsArea {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 54px;
+  justify-content: flex-start;
+}
+
+.hiddenStemRow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+}
+
+.hiddenStemChar {
+  font-weight: 500;
+  min-width: 14px;
+  text-align: center;
+}
+
+.hiddenStemShiShen {
+  font-size: 10px;
+  color: var(--grey-50);
+  padding: 1px 4px;
+  border-radius: 3px;
+  background: var(--light-94);
+}
+
+.naYinTag {
+  font-size: 10px;
+  color: var(--grey-50);
+  padding: 2px 6px;
+  background: var(--light-94);
+  border-radius: var(--radius-sm);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.emptyPillar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  background-color: var(--light-96);
+  border-radius: var(--radius-md);
+  min-height: 200px;
+}
+
+.emptyText {
+  font-size: 14px;
+  color: var(--grey-50);
+}
+
+/* ===== 分区标题 ===== */
+.sectionTitle {
+  font-size: 12px;
+  color: var(--grey-50);
+  font-weight: 500;
+  margin-bottom: var(--spacing-sm);
+}
+
+/* ===== 五行分布区域 ===== */
+.fiveElementsSection {
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--light-90);
+}
+
+.fiveElementsContent {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xl);
+}
+
+.ringChart {
+  flex-shrink: 0;
+}
+
+.ringLabel {
+  font-size: 10px;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.fiveElementsLegend {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.legendDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.legendLabel {
+  min-width: 16px;
+  color: var(--dark-7);
+  font-weight: 500;
+}
+
+.legendValue {
+  color: var(--grey-50);
+  font-weight: 500;
+}
+
+.favorableRow {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-sm);
+}
+
+.favorableTag {
+  font-size: 12px;
+  color: var(--accent-green);
+  padding: 2px 8px;
+  background: rgba(39, 179, 44, 0.1);
+  border-radius: var(--radius-sm);
+  font-weight: 500;
+}
+
+.unfavorableTag {
+  font-size: 12px;
+  color: var(--accent-red);
+  padding: 2px 8px;
+  background: rgba(255, 47, 47, 0.1);
+  border-radius: var(--radius-sm);
+  font-weight: 500;
+}
+
+/* ===== 十步大运区域 ===== */
+.daYunSection {
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--light-90);
+}
+
+.daYunTimeline {
+  display: flex;
+  justify-content: space-between;
+  overflow-x: auto;
+  gap: 0;
+  padding: var(--spacing-sm) 0;
+}
+
+.daYunNode {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+  padding: 0 2px;
+  position: relative;
+}
+
+.daYunNode::after {
+  content: '';
+  position: absolute;
+  top: 26px;
+  left: 50%;
+  width: calc(100% + 8px);
+  height: 1px;
+  background: var(--light-85);
+  z-index: 0;
+}
+
+.daYunNode:last-child::after {
+  display: none;
+}
+
+.daYunAge {
+  font-size: 11px;
+  color: var(--grey-50);
+}
+
+.daYunCircle {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--light-85);
+  z-index: 1;
+  transition: all 0.2s;
+}
+
+.daYunActive .daYunCircle {
+  width: 10px;
+  height: 10px;
+  background: var(--dark-7);
+}
+
+.daYunGanZhi {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--dark-7);
+}
+
+.daYunActive .daYunGanZhi {
+  font-weight: 600;
+}
+
+.daYunYear {
+  font-size: 11px;
+  color: var(--grey-50);
+}
+
+/* ===== 响应式设计 ===== */
+@media (max-width: 768px) {
+  .card {
+    padding: var(--spacing-md);
+    gap: var(--spacing-sm);
+  }
+  
+  .headerSection {
+    padding-bottom: var(--spacing-sm);
+  }
+  
+  .nameRow {
+    gap: 6px;
+  }
+  
+  .subjectName {
+    font-size: 18px;
+  }
+  
+  .birthInfoRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  
+  /* 小屏幕：六柱横向滚动，运年需滑动查看 */
+  .pillarsContainer {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: var(--spacing-sm);
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: var(--spacing-sm);
+  }
+  
+  /* 显示滚动条提示可滑动 */
+  .pillarsContainer::-webkit-scrollbar {
+    height: 3px;
+  }
+  
+  .pillarsContainer::-webkit-scrollbar-track {
+    background: var(--light-94);
+    border-radius: 2px;
+  }
+  
+  .pillarsContainer::-webkit-scrollbar-thumb {
+    background: var(--grey-50);
+    border-radius: 2px;
+  }
+  
+  .fourPillarsArea {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--spacing-sm);
+    flex-shrink: 0;
+    min-width: calc(100% - 8px);
+    scroll-snap-align: start;
+  }
+  
+  .divider {
+    width: 1px;
+    align-self: stretch;
+    background: var(--light-85);
+    margin: 0 4px;
+    flex-shrink: 0;
+  }
+  
+  .fortuneArea {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-sm);
+    flex-shrink: 0;
+    min-width: 160px;
+    scroll-snap-align: start;
+  }
+  
+  .pillarColumn {
+    min-width: 0;
+    flex-shrink: 0;
+  }
+  
+  .pillarColumn {
+    padding: 8px 4px;
+    gap: 4px;
+  }
+  
+  .ganBox, .zhiBox {
+    width: 36px;
+    height: 36px;
+    font-size: 20px;
+  }
+  
+  .shiShenTag {
+    font-size: 10px;
+    padding: 1px 4px;
+  }
+  
+  .hiddenStemsArea {
+    min-height: 48px;
+  }
+  
+  .hiddenStemRow {
+    font-size: 10px;
+  }
+  
+  .naYinTag {
+    font-size: 9px;
+    padding: 1px 4px;
+  }
+  
+  .fiveElementsContent {
+    flex-direction: column;
+    gap: var(--spacing-md);
+  }
+  
+  .fiveElementsLegend {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px var(--spacing-md);
+  }
+  
+  .daYunGanZhi {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .card {
+    padding: var(--spacing-sm);
+  }
+  
+  .subjectName {
+    font-size: 16px;
+  }
+  
+  .genderLabel {
+    font-size: 12px;
+    padding: 1px 6px;
+  }
+  
+  .infoItem {
+    font-size: 12px;
+  }
+  
+  .fourPillarsArea {
+    gap: 6px;
+  }
+  
+  .fortuneArea {
+    gap: 6px;
+  }
+  
+  .pillarColumn {
+    padding: 6px 4px;
+    min-width: 60px;
+  }
+  
+  .pillarTitle {
+    font-size: 11px;
+  }
+  
+  .ganBox, .zhiBox {
+    width: 32px;
+    height: 32px;
+    font-size: 18px;
+  }
+  
+  .hiddenStemRow {
+    font-size: 9px;
+    gap: 2px;
+  }
+  
+  .hiddenStemChar {
+    min-width: 12px;
+  }
+  
+  .hiddenStemShiShen {
+    font-size: 9px;
+    padding: 0 3px;
+  }
+  
+  .kongWangMark {
+    right: -12px;
+    font-size: 8px;
+  }
+  
+  .daYunAge, .daYunYear {
+    font-size: 10px;
+  }
+  
+  .daYunGanZhi {
+    font-size: 12px;
+  }
+}

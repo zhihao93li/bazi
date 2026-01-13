@@ -223,7 +223,7 @@ export function calculateBazi(birthData) {
   try {
     const yunObj = eightChar.getYun(gender, 1);
     const daYunList = [];
-    const daYunArr = yunObj.getDaYun(10);
+    const daYunArr = yunObj.getDaYun(12); // 第一个是起运前，所以要 12 才能获取足够的大运
     
     for (let i = 0; i < daYunArr.length; i++) {
       const dy = daYunArr[i];
@@ -301,19 +301,22 @@ export function calculateBazi(birthData) {
         // 忽略流年获取错误
       }
       
-      daYunList.push({
-        index: dy.getIndex?.() ?? i,
-        startAge: dy.getStartAge?.() ?? 0,
-        endAge: dy.getEndAge?.() ?? 0,
-        startYear: dy.getStartYear?.() ?? 0,
-        endYear: dy.getEndYear?.() ?? 0,
-        ganZhi,
-        gan: ganZhi.charAt(0) || '',
-        zhi: ganZhi.charAt(1) || '',
-        xun: xunValue,
-        xunKong: xunKongValue,
-        liuNian: liuNianList,
-      });
+      // 只保留有效的大运（ganZhi 非空），过滤掉起运前的空元素，最多 10 步
+      if (ganZhi && daYunList.length < 10) {
+        daYunList.push({
+          index: dy.getIndex?.() ?? i,
+          startAge: dy.getStartAge?.() ?? 0,
+          endAge: dy.getEndAge?.() ?? 0,
+          startYear: dy.getStartYear?.() ?? 0,
+          endYear: dy.getEndYear?.() ?? 0,
+          ganZhi,
+          gan: ganZhi.charAt(0) || '',
+          zhi: ganZhi.charAt(1) || '',
+          xun: xunValue,
+          xunKong: xunKongValue,
+          liuNian: liuNianList,
+        });
+      }
     }
 
     const startSolar = yunObj.getStartSolar();

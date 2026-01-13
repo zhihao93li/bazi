@@ -11,37 +11,182 @@
   text-align: center;
 }
 
-.chart {
+/* 主内容区：大屏幕时左右布局 */
+.mainContent {
   display: flex;
-  height: 12px;
-  width: 100%;
-  border-radius: var(--radius-full);
-  overflow: hidden;
-  margin: var(--spacing-sm) 0;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xl);
+}
+
+/* 环状图容器 */
+.chartWrapper {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.ringChart {
+  display: block;
 }
 
 .segment {
-  height: 100%;
-  transition: width 0.5s ease;
+  transition: stroke-dashoffset 0.6s ease, stroke-dasharray 0.6s ease;
 }
 
-.legend {
+/* 扇区内标签 */
+.segmentLabel {
+  font-size: 11px;
+  font-weight: 600;
+  pointer-events: none;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+/* 右侧图例 */
+.legendSide {
   display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: var(--spacing-sm);
 }
 
 .legendItem {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 12px;
+  gap: 8px;
+  font-size: 14px;
   color: var(--grey-30);
 }
 
 .dot {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.legendLabel {
+  font-weight: 500;
+  min-width: 16px;
+  color: var(--dark-7);
+}
+
+.legendValue {
+  color: var(--dark-7);
+  font-weight: 600;
+  min-width: 20px;
+  text-align: right;
+}
+
+.legendPercent {
+  color: var(--grey-50);
+  font-size: 12px;
+  min-width: 32px;
+}
+
+/* 喜忌信息 */
+.favorableInfo {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-lg);
+  padding-top: var(--spacing-sm);
+  border-top: 1px solid var(--light-94);
+  margin-top: var(--spacing-xs);
+}
+
+.favorableItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.favorableLabel {
+  color: var(--accent-green);
+  font-weight: 500;
+  padding: 2px 6px;
+  background: rgba(39, 179, 44, 0.1);
+  border-radius: var(--radius-sm);
+}
+
+.unfavorableLabel {
+  color: var(--accent-red);
+  font-weight: 500;
+  padding: 2px 6px;
+  background: rgba(255, 47, 47, 0.1);
+  border-radius: var(--radius-sm);
+}
+
+.favorableValue,
+.unfavorableValue {
+  color: var(--dark-7);
+  font-weight: 500;
+  letter-spacing: 2px;
+}
+
+/* 响应式：小屏幕时图例移到下方 */
+@media (max-width: 520px) {
+  .mainContent {
+    flex-direction: column;
+    gap: var(--spacing-md);
+  }
+  
+  .legendSide {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px var(--spacing-md);
+  }
+  
+  .legendItem {
+    font-size: 13px;
+    gap: 4px;
+  }
+  
+  .dot {
+    width: 8px;
+    height: 8px;
+  }
+  
+  .legendValue {
+    min-width: 16px;
+  }
+  
+  .legendPercent {
+    min-width: 28px;
+  }
+}
+
+@media (max-width: 480px) {
+  .chartWrapper {
+    padding: var(--spacing-xs) 0;
+  }
+  
+  .ringChart {
+    width: 140px;
+    height: 140px;
+  }
+  
+  .segmentLabel {
+    font-size: 11px;
+  }
+  
+  .centerValue {
+    font-size: 24px;
+  }
+  
+  .legendItem {
+    font-size: 12px;
+  }
+  
+  .favorableInfo {
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-sm);
+  }
+  
+  .favorableItem {
+    font-size: 12px;
+  }
 }
