@@ -3,5 +3,5 @@
 builder = "nixpacks"
 buildCommand = "npm install && npm run build"
 
-[deploy]
-startCommand = "npx serve dist -s -l $PORT"
+# 不指定 startCommand，让 Railway 使用默认的 Caddy 静态服务器
+# Railway 会自动检测 dist 目录并托管静态文件
