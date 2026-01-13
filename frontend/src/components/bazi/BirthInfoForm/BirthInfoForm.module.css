@@ -15,9 +15,22 @@
 }
 
 .dateRow {
-  display: grid;
-  grid-template-columns: 1.2fr 0.9fr 0.9fr;
+  display: flex;
+  align-items: center;
   gap: var(--spacing-sm);
+}
+
+/* Date inputs take remaining space */
+.dateRow > div:not(.checkboxWrapper) {
+  flex: 1;
+}
+
+/* Checkbox stays compact */
+.checkboxWrapper {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  height: 48px; /* Match input height roughly */
 }
 
 .timeRow {
@@ -46,8 +59,11 @@
   }
   
   .dateRow {
-    grid-template-columns: 1fr;
-    gap: var(--spacing-md);
+    flex-wrap: wrap; /* Wrap on small screens */
+  }
+  
+  .dateRow > div {
+    min-width: 80px; /* Prevent too small */
   }
 
   .locationRow {

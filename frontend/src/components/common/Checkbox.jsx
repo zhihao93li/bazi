@@ -9,7 +9,11 @@ export default function Checkbox({
   disabled = false,
   className = '',
 }) {
-  const handleChange = () => {
+  const handleChange = (e) => {
+    // Prevent native label behavior (toggling input) to avoid double events or conflicts
+    e.preventDefault();
+    e.stopPropagation();
+    
     if (!disabled) {
       onChange({ target: { name, checked: !checked } })
     }
@@ -27,8 +31,8 @@ export default function Checkbox({
       <input
         type="checkbox"
         name={name}
-        checked={checked}
-        onChange={() => {}}
+        checked={!!checked}
+        onChange={() => {}} // Controlled component
         disabled={disabled}
         className={styles.input}
       />

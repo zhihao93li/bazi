@@ -161,6 +161,17 @@ export default function BirthInfoForm({
             onChange={(e) => handleChange('birthDay', e.target.value)}
             error={errors.birthDay}
           />
+          
+          {/* Lunar Leap Month Checkbox - Inside flex row */}
+          {value.calendarType === 'lunar' && (
+            <div className={styles.checkboxWrapper}>
+               <Checkbox 
+                  label="闰月"
+                  checked={value.isLeapMonth}
+                  onChange={(e) => handleChange('isLeapMonth', e.target.checked)}
+               />
+            </div>
+          )}
         </div>
       </div>
 
@@ -219,17 +230,6 @@ export default function BirthInfoForm({
           />
         </div>
       </div>
-
-      {/* Lunar Leap Month Checkbox */}
-      {value.calendarType === 'lunar' && (
-        <div className={styles.row}>
-             <Checkbox 
-                label="闰月"
-                checked={value.isLeapMonth}
-                onChange={(e) => handleChange('isLeapMonth', e.target.checked)}
-             />
-        </div>
-      )}
     </div>
   );
 }
