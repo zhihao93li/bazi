@@ -3,6 +3,10 @@ FROM node:22-alpine AS builder
 
 WORKDIR /app
 
+# 接收构建参数（需要在 Railway Variables 中设置 VITE_API_BASE）
+ARG VITE_API_BASE
+ENV VITE_API_BASE=$VITE_API_BASE
+
 # Install dependencies
 COPY package.json package-lock.json ./
 RUN npm ci
