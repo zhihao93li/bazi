@@ -4,7 +4,7 @@
 nixPkgs = ["nodejs_22", "openssl"]
 
 [phases.install]
-cmds = ["npm ci"]
+cmds = ["rm -rf node_modules/.cache || true", "npm ci --cache /tmp/.npm"]
 
 [phases.build]
 cmds = [
