@@ -8,6 +8,7 @@ export default function YearlyFortuneCard({
   content,
   price = 0,
   isLoading = false,
+  isOtherLoading = false,
   onUnlock,
   className = '',
 }) {
@@ -21,6 +22,7 @@ export default function YearlyFortuneCard({
       isUnlocked={isUnlocked}
       content={content}
       isLoading={isLoading}
+      isOtherLoading={isOtherLoading}
       onUnlock={onUnlock}
       className={className}
     />

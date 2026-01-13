@@ -133,6 +133,25 @@
   animation: pulse 1.5s ease-in-out infinite;
 }
 
+.loadingHint {
+  font-size: var(--text-caption);
+  color: var(--grey-60);
+}
+
+/* 其他主题加载提示 */
+.otherLoadingHint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--text-caption);
+  color: var(--grey-50);
+  margin-top: var(--spacing-sm);
+}
+
+.otherLoadingHint svg {
+  animation: spin 1s linear infinite;
+}
+
 /* 动画 */
 @keyframes spin {
   to { transform: rotate(360deg); }

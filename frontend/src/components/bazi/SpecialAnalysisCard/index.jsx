@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { Lock, Sparkle, Coins } from '@phosphor-icons/react';
+import { useState, useEffect, useMemo } from 'react';
+import { Lock, Sparkle, Coins, Spinner } from '@phosphor-icons/react';
 import Card from '../../common/Card';
 import styles from './SpecialAnalysisCard.module.css';
 
@@ -30,6 +30,11 @@ function parseSimpleMarkdown(text) {
 
 /**
  * 专项分析卡片组件
+ * 
+ * 优化点：
+ * 1. 移除了内部的 isClicking 状态，由父组件通过 loadingTheme 控制
+ * 2. 添加了其他主题的加载状态指示
+ * 3. 简化了点击处理逻辑
  */
 export default function SpecialAnalysisCard({
   themesData = {},
@@ -39,30 +44,8 @@ export default function SpecialAnalysisCard({
 }) {
   const [activeTab, setActiveTab] = useState(SPECIAL_THEMES[0].id);
   const [displayContent, setDisplayContent] = useState('');
-  const [isClicking, setIsClicking] = useState(false);
-  const clickTimeoutRef = useRef(null);
 
-  // 清理定时器
-  useEffect(() => {
-    return () => {
-      if (clickTimeoutRef.current) {
-        clearTimeout(clickTimeoutRef.current);
-      }
-    };
-  }, []);
-
-  // 带防抖的点击处理
-  const handleUnlockClick = useCallback(() => {
-    if (isClicking || loadingTheme) return;
-    
-    setIsClicking(true);
-    onUnlock?.(activeTab);
-    
-    clickTimeoutRef.current = setTimeout(() => {
-      setIsClicking(false);
-    }, 3000);
-  }, [isClicking, loadingTheme, onUnlock, activeTab]);
-
+  // 当 themesData 变化时更新显示内容
   useEffect(() => {
     const data = themesData[activeTab];
     if (data?.content) {
@@ -72,11 +55,25 @@ export default function SpecialAnalysisCard({
     }
   }, [activeTab, themesData]);
 
+  // 计算当前 tab 的状态
   const activeData = themesData[activeTab] || {};
-  const isLoading = loadingTheme === activeTab;
+  const isCurrentTabLoading = loadingTheme === activeTab;
+  const isAnyLoading = !!loadingTheme;
   const isUnlocked = activeData.isUnlocked || false;
   const price = activeData.price || 0;
   const activeTheme = SPECIAL_THEMES.find(t => t.id === activeTab);
+
+  // 计算正在加载的其他主题（用于显示提示）
+  const loadingOtherTheme = useMemo(() => {
+    if (!loadingTheme || loadingTheme === activeTab) return null;
+    return SPECIAL_THEMES.find(t => t.id === loadingTheme);
+  }, [loadingTheme, activeTab]);
+
+  // 处理解锁点击
+  const handleUnlockClick = () => {
+    if (isAnyLoading) return;
+    onUnlock?.(activeTab);
+  };
 
   return (
     <Card className={`${styles.container} ${className}`}>
@@ -89,6 +86,7 @@ export default function SpecialAnalysisCard({
           const data = themesData[theme.id] || {};
           const isActive = activeTab === theme.id;
           const themeUnlocked = data.isUnlocked || false;
+          const isThemeLoading = loadingTheme === theme.id;
           
           return (
             <div
@@ -97,19 +95,22 @@ export default function SpecialAnalysisCard({
               onClick={() => setActiveTab(theme.id)}
             >
               <span>{theme.name}</span>
-              {!themeUnlocked && (
+              {isThemeLoading ? (
+                <Spinner className={styles.tabSpinner} size={12} />
+              ) : !themeUnlocked ? (
                 <Lock className={styles.tabLockIcon} weight="fill" size={12} />
-              )}
+              ) : null}
             </div>
           );
         })}
       </div>
 
       {/* 内容区域 */}
-      {isLoading ? (
+      {isCurrentTabLoading ? (
         <div className={styles.loadingContainer}>
           <div className={styles.spinner} />
           <span className={styles.loadingText}>AI 正在解读「{activeTheme?.name}」...</span>
+          <span className={styles.loadingHint}>通常需要 10-30 秒</span>
         </div>
       ) : isUnlocked && displayContent ? (
         <div className={styles.content}>
@@ -125,15 +126,22 @@ export default function SpecialAnalysisCard({
           <button 
             className={styles.unlockButton}
             onClick={handleUnlockClick}
-            disabled={isClicking || !!loadingTheme}
+            disabled={isAnyLoading}
           >
             <Sparkle weight="fill" size={16} />
-            <span>{isClicking ? '请求中...' : `解锁「${activeTheme?.name}」`}</span>
+            <span>解锁「{activeTheme?.name}」</span>
             <span className={styles.unlockPrice}>
               <Coins weight="fill" size={14} />
               {price}
             </span>
           </button>
+          {/* 显示其他主题正在加载的提示 */}
+          {loadingOtherTheme && (
+            <div className={styles.otherLoadingHint}>
+              <Spinner size={14} />
+              <span>正在解锁「{loadingOtherTheme.name}」...</span>
+            </div>
+          )}
         </div>
       )}
     </Card>

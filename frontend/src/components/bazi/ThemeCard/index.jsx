@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { Lock, Sparkle, Coins } from '@phosphor-icons/react';
+import { useState, useEffect, useMemo } from 'react';
+import { Lock, Sparkle, Coins, Spinner } from '@phosphor-icons/react';
 import Card from '../../common/Card';
 import styles from './ThemeCard.module.css';
 
@@ -20,6 +20,11 @@ function parseSimpleMarkdown(text) {
 
 /**
  * 通用主题卡片组件
+ * 
+ * 优化点：
+ * 1. 移除了内部的 isClicking 状态和定时器，由父组件控制 isLoading
+ * 2. 简化了点击处理逻辑，避免了竞态条件
+ * 3. 添加了加载时间提示
  */
 export default function ThemeCard({
   theme,
@@ -28,41 +33,27 @@ export default function ThemeCard({
   isUnlocked = false,
   content,
   isLoading = false,
+  isOtherLoading = false, // 是否有其他主题正在加载
   onUnlock,
   className = '',
 }) {
   const [displayContent, setDisplayContent] = useState('');
-  const [isClicking, setIsClicking] = useState(false);
-  const clickTimeoutRef = useRef(null);
 
-  // 清理定时器
-  useEffect(() => {
-    return () => {
-      if (clickTimeoutRef.current) {
-        clearTimeout(clickTimeoutRef.current);
-      }
-    };
-  }, []);
-
-  // 带防抖的点击处理
-  const handleUnlockClick = useCallback(() => {
-    // 防止重复点击
-    if (isClicking || isLoading) return;
-    
-    setIsClicking(true);
-    onUnlock?.(theme);
-    
-    // 3秒后重置点击状态（作为兜底，正常情况下 isLoading 会变为 true）
-    clickTimeoutRef.current = setTimeout(() => {
-      setIsClicking(false);
-    }, 3000);
-  }, [isClicking, isLoading, onUnlock, theme]);
-
+  // 当 content 变化时更新显示内容
   useEffect(() => {
     if (content) {
       setDisplayContent(content);
     }
   }, [content]);
+
+  // 处理解锁点击
+  const handleUnlockClick = () => {
+    if (isLoading || isOtherLoading) return;
+    onUnlock?.(theme);
+  };
+
+  // 按钮是否禁用
+  const isDisabled = isLoading || isOtherLoading;
 
   // 渲染加载状态
   if (isLoading) {
@@ -72,6 +63,7 @@ export default function ThemeCard({
         <div className={styles.loadingContainer}>
           <div className={styles.spinner} />
           <span className={styles.loadingText}>AI 正在解读中，请稍候...</span>
+          <span className={styles.loadingHint}>通常需要 10-30 秒</span>
         </div>
       </Card>
     );
@@ -79,8 +71,6 @@ export default function ThemeCard({
 
   // 渲染锁定状态
   if (!isUnlocked) {
-    const isDisabled = isClicking || isLoading;
-    
     return (
       <Card className={`${styles.container} ${className}`}>
         <h3 className={styles.title}>{title}</h3>
@@ -94,12 +84,19 @@ export default function ThemeCard({
             disabled={isDisabled}
           >
             <Sparkle weight="fill" size={16} />
-            <span>{isClicking ? '请求中...' : '解锁解读'}</span>
+            <span>解锁解读</span>
             <span className={styles.unlockPrice}>
               <Coins weight="fill" size={14} />
               {price}
             </span>
           </button>
+          {/* 显示其他主题正在加载的提示 */}
+          {isOtherLoading && (
+            <div className={styles.otherLoadingHint}>
+              <Spinner size={14} />
+              <span>请等待当前解锁完成</span>
+            </div>
+          )}
         </div>
       </Card>
     );

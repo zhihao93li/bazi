@@ -71,6 +71,11 @@
   opacity: 0.6;
 }
 
+.tabSpinner {
+  animation: spin 1s linear infinite;
+  opacity: 0.8;
+}
+
 /* 内容区域 */
 .content {
   flex: 1;
@@ -187,6 +192,25 @@
 .loadingText {
   font-size: var(--text-small);
   animation: pulse 1.5s ease-in-out infinite;
+}
+
+.loadingHint {
+  font-size: var(--text-caption);
+  color: var(--grey-60);
+}
+
+/* 其他主题加载提示 */
+.otherLoadingHint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--text-caption);
+  color: var(--grey-50);
+  margin-top: var(--spacing-sm);
+}
+
+.otherLoadingHint svg {
+  animation: spin 1s linear infinite;
 }
 
 /* 动画 */
