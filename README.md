@@ -181,9 +181,62 @@ src/
 └── types/               # TypeScript 类型定义
 ```
 
+## 部署到 Railway
+
+本项目是前后端分离架构，需要在 Railway 部署两个服务。
+
+### 1. 创建 Railway 项目
+
+1. 登录 [Railway](https://railway.app/)
+2. 创建新项目
+
+### 2. 添加 PostgreSQL 数据库
+
+1. 点击 "Add Service" → "Database" → "PostgreSQL"
+2. Railway 会自动生成 `DATABASE_URL` 环境变量
+
+### 3. 部署后端服务
+
+1. 点击 "Add Service" → "GitHub Repo" → 选择本仓库
+2. 设置 **Root Directory** 为 `/`（留空或根目录）
+3. 配置环境变量：
+
+| 变量名 | 说明 |
+|--------|------|
+| `DATABASE_URL` | 引用 PostgreSQL 服务变量 |
+| `JWT_SECRET` | JWT 密钥（用 `openssl rand -base64 32` 生成） |
+| `OPENAI_API_KEY` | OpenAI API 密钥 |
+| `OPENAI_BASE_URL` | OpenAI API 地址（可选） |
+| `NODE_ENV` | `production` |
+| `CORS_ORIGIN` | 前端域名（部署后填入） |
+| `INITIAL_GIFT_POINTS` | 新用户赠送积分，如 `100` |
+| `SMS_PROVIDER` | `mock` 或 `aliyun` |
+
+### 4. 部署前端服务
+
+1. 点击 "Add Service" → "GitHub Repo" → 选择同一仓库
+2. 设置 **Root Directory** 为 `/frontend`
+3. 配置环境变量：
+
+| 变量名 | 说明 |
+|--------|------|
+| `VITE_API_BASE` | 后端 API 地址，如 `https://xxx.up.railway.app/api` |
+
+### 5. 配置域名和 CORS
+
+1. 为前端和后端服务各自生成域名
+2. 将前端域名添加到后端的 `CORS_ORIGIN` 环境变量
+
+### 部署注意事项
+
+- 后端会自动运行数据库迁移 (`prisma migrate deploy`)
+- 首次部署后可运行 `npx prisma db seed` 初始化积分套餐数据
+- 健康检查端点：`/health`
+
 ## License
 
 MIT
 
-# 等待优化的点
-1.现在用的是 2023 年更新的中国区县数据，可能会有因为实际更新导致的问题；
+## 待优化
+
+1. 现在用的是 2023 年更新的中国区县数据，可能会有因为实际更新导致的问题

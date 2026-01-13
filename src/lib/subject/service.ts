@@ -38,7 +38,7 @@ export async function createSubject(
       birthMinute: input.birthMinute,
       isLeapMonth: input.isLeapMonth ?? false,
       location: input.location,
-      baziData: input.baziData ?? undefined, // 存储前端计算的完整八字数据
+      baziData: input.baziData ? JSON.parse(JSON.stringify(input.baziData)) : undefined, // 存储前端计算的完整八字数据
       relationship: input.relationship,
       note: input.note,
     },

@@ -1,0 +1,14 @@
+# Nixpacks 配置 - 前端静态服务
+
+[phases.setup]
+nixPkgs = ["nodejs_20"]
+
+[phases.build]
+cmds = [
+  "npm ci",
+  "npm run build",
+  "npm install -g serve"
+]
+
+[start]
+cmd = "serve dist -s -l $PORT"
