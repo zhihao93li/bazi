@@ -1,7 +1,7 @@
 # Nixpacks 配置 - 前端静态服务
 
 [phases.setup]
-nixPkgs = ["nodejs_22", "caddy"]
+nixPkgs = ["nodejs_22"]
 
 [phases.install]
 cmds = ["npm install"]
