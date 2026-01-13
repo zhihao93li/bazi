@@ -25,6 +25,24 @@ export async function createSubject(
   userId: string,
   input: CreateSubjectInput
 ): Promise<SubjectData> {
+  // 安全地序列化 baziData
+  let serializedBaziData: unknown = undefined;
+  if (input.baziData) {
+    try {
+      serializedBaziData = JSON.parse(JSON.stringify(input.baziData));
+    } catch (e) {
+      console.error('Failed to serialize baziData:', e);
+      // 如果序列化失败，尝试提取核心数据
+      const bazi = input.baziData as Record<string, unknown>;
+      serializedBaziData = {
+        fourPillars: bazi.fourPillars,
+        dayMaster: bazi.dayMaster,
+        fiveElements: bazi.fiveElements,
+        lunarDate: bazi.lunarDate,
+      };
+    }
+  }
+
   const subject = await prisma.subject.create({
     data: {
       userId,
@@ -38,7 +56,7 @@ export async function createSubject(
       birthMinute: input.birthMinute,
       isLeapMonth: input.isLeapMonth ?? false,
       location: input.location,
-      baziData: input.baziData ? JSON.parse(JSON.stringify(input.baziData)) : undefined, // 存储前端计算的完整八字数据
+      baziData: serializedBaziData,
       relationship: input.relationship,
       note: input.note,
     },

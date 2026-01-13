@@ -24,7 +24,7 @@ export default function Navbar() {
 
   const navLinks = [
     { label: '首页', path: '/' },
-    { label: '八字排盘', path: '/bazi/input' },
+    { label: '命理解读', path: '/bazi' },
     { label: '历史记录', path: '/history' },
   ]
 

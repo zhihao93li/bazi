@@ -15,36 +15,7 @@
 
 /* 顶部区域 */
 .topBar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 32px;
-}
-
-.header {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.backButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-full);
-  background: rgba(255, 255, 255, 0.8); /* Semi-transparent */
-  color: var(--dark-7);
-  transition: all 0.2s;
-  backdrop-filter: blur(10px); /* Glass effect */
-  border: 1px solid rgba(255, 255, 255, 0.5);
-}
-
-.backButton:hover {
-  background: white;
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-sm);
+  margin-bottom: 24px;
 }
 
 .title {
@@ -59,30 +30,39 @@
   display: grid;
   grid-template-columns: 3fr 2fr; /* 命盘 : AI解读 = 3:2 */
   gap: 24px;
-  align-items: start;
+  align-items: stretch; /* 两列高度对齐 */
 }
 
 .leftCol {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 16px;
   min-width: 0;
+}
+
+/* 对象切换器栏 - 在 grid 上方 */
+.subjectSwitcherBar {
+  margin-bottom: 16px;
 }
 
 .rightCol {
   display: flex;
   flex-direction: column;
-  gap: 24px;
   min-width: 0;
 }
 
-/* 粘性右侧栏 (桌面端) */
+/* 右侧卡片容器 - 高度填满 */
 .stickyWrapper {
-  position: sticky;
-  top: 100px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  height: 100%;
+}
+
+/* 让 AI 卡片填满高度 */
+.stickyWrapper > * {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 /* 平板响应式 */

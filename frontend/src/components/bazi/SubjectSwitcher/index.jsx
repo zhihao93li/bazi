@@ -1,99 +1,93 @@
-import { useState, useRef, useEffect } from 'react';
-import { CaretDown, Plus, User } from '@phosphor-icons/react';
+import { useState } from 'react';
+import { Plus, X } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router-dom';
+import { Modal } from '../../common';
 import styles from './SubjectSwitcher.module.css';
 
-// 简单的首字母获取或显示前两个字
-const getAvatarText = (name) => name ? name.substring(0, 1) : '';
-
+/**
+ * SubjectSwitcher - 测算对象切换器（平铺胶囊按钮）
+ */
 export default function SubjectSwitcher({
   currentSubject,
   subjects = [],
   onSelect,
+  onDelete,
   className = ''
 }) {
-  const [isOpen, setIsOpen] = useState(false);
-  const containerRef = useRef(null);
   const navigate = useNavigate();
-
-  // Click outside to close
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (containerRef.current && !containerRef.current.contains(event.target)) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const handleSelect = (subject) => {
-    onSelect(subject);
-    setIsOpen(false);
-  };
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   const handleAddNew = () => {
-    setIsOpen(false);
-    navigate('/subjects'); // Jump to management page to add
+    navigate('/bazi/input');
   };
 
-  // If no current subject, show placeholder
-  const displaySubject = currentSubject || { name: '选择对象', relationship: '' };
+  const handleDeleteClick = (e, subject) => {
+    e.stopPropagation();
+    setDeleteTarget(subject);
+  };
+
+  const handleConfirmDelete = () => {
+    if (deleteTarget && onDelete) {
+      onDelete(deleteTarget.id);
+    }
+    setDeleteTarget(null);
+  };
 
   return (
-    <div className={`${styles.switcher} ${className}`} ref={containerRef}>
-      {/* Trigger Button */}
-      <div 
-        className={`${styles.trigger} ${isOpen ? styles.open : ''}`}
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        <div className={`${styles.avatar} ${displaySubject.relationship === 'self' ? styles.self : ''}`}>
-          {displaySubject.relationship === 'self' ? <User weight="fill" size={14} /> : getAvatarText(displaySubject.name)}
-        </div>
-        <div className={styles.info}>
-          <span className={styles.name}>{displaySubject.name}</span>
-          {displaySubject.relationship && (
-            <span className={styles.role}>
-              {displaySubject.relationship === 'self' ? '本人' : displaySubject.relationship === 'friend' ? '朋友' : '其他'}
-            </span>
-          )}
-        </div>
-        <CaretDown size={14} className={styles.chevron} weight="bold" />
+    <div className={`${styles.switcher} ${className}`}>
+      {/* 对象胶囊按钮列表 */}
+      <div className={styles.pillList}>
+        {subjects.map((sub) => (
+          <div key={sub.id} className={styles.pillWrapper}>
+            <button
+              className={`${styles.pill} ${currentSubject?.id === sub.id ? styles.active : ''}`}
+              onClick={() => onSelect(sub)}
+            >
+              <span className={styles.pillName}>{sub.name}</span>
+            </button>
+            {/* 删除按钮 */}
+            <button
+              className={styles.deleteBtn}
+              onClick={(e) => handleDeleteClick(e, sub)}
+              title="删除此命盘"
+            >
+              <X size={10} weight="bold" />
+            </button>
+          </div>
+        ))}
+        
+        {/* 添加新对象按钮 */}
+        <button className={styles.addPill} onClick={handleAddNew}>
+          <Plus size={16} weight="bold" />
+          <span>新增</span>
+        </button>
       </div>
 
-      {/* Dropdown Menu */}
-      {isOpen && (
-        <div className={styles.dropdown}>
-          <div className={styles.sectionTitle}>切换测算对象</div>
-          
-          <div className={styles.list}>
-            {subjects.map((sub) => (
-              <div 
-                key={sub.id} 
-                className={`${styles.option} ${currentSubject?.id === sub.id ? styles.active : ''}`}
-                onClick={() => handleSelect(sub)}
-              >
-                <div className={`${styles.avatar} ${sub.relationship === 'self' ? styles.self : ''}`}>
-                  {sub.relationship === 'self' ? <User weight="fill" size={14} /> : getAvatarText(sub.name)}
-                </div>
-                <div className={styles.info}>
-                  <span className={styles.name}>{sub.name}</span>
-                  <span className={styles.role}>
-                    {sub.relationship === 'self' ? '本人' : sub.relationship === 'friend' ? '朋友' : '其他'}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className={styles.addOption} onClick={handleAddNew}>
-            <div className={styles.avatar}>
-              <Plus size={14} weight="bold" />
-            </div>
-            <span>添加新对象</span>
+      {/* 删除确认弹窗 */}
+      <Modal
+        isOpen={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        title="确认删除"
+      >
+        <div className={styles.modalContent}>
+          <p>确定要删除「{deleteTarget?.name}」的命盘数据吗？</p>
+          <p className={styles.modalWarning}>此操作不可恢复</p>
+          <div className={styles.modalActions}>
+            <button 
+              className={styles.cancelBtn}
+              onClick={() => setDeleteTarget(null)}
+            >
+              取消
+            </button>
+            <button 
+              className={styles.confirmBtn}
+              onClick={handleConfirmDelete}
+            >
+              确认删除
+            </button>
           </div>
         </div>
-      )}
+      </Modal>
     </div>
   );
 }

@@ -8,13 +8,15 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import GradientBackground from '../components/GradientBackground';
 import BirthInfoForm from '../components/bazi/BirthInfoForm';
-import FormInput from '../components/common/FormInput'; // Import FormInput
-import { calculateBazi } from '../utils/bazi/calculator'; // Import Calculator
-import { mockSubjects } from '../mock/subjects';
+import FormInput from '../components/common/FormInput';
+import { calculateBazi } from '../utils/bazi/calculator';
+import { api } from '../services/api';
 import styles from './BaziInputPage.module.css';
 
+const LOCAL_SUBJECTS_KEY = 'bazi_local_subjects';
+
 const INITIAL_FORM = {
-  name: '', // Added name
+  name: '',
   gender: 'female',
   calendarType: 'solar',
   birthYear: 1990,
@@ -22,8 +24,40 @@ const INITIAL_FORM = {
   birthDay: 1,
   birthHour: 12,
   birthMinute: 0,
-  location: { province: '', city: '', district: '' }, // 3 levels
+  location: { province: '', city: '', district: '' },
   isLeapMonth: false
+};
+
+// 生成本地 ID
+const generateLocalId = () => `local_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+// 获取本地保存的命盘
+export const getLocalSubjects = () => {
+  try {
+    return JSON.parse(localStorage.getItem(LOCAL_SUBJECTS_KEY) || '[]');
+  } catch {
+    return [];
+  }
+};
+
+// 保存命盘到本地
+const saveLocalSubject = (subject) => {
+  const subjects = getLocalSubjects();
+  // 检查是否已存在同名
+  const existingIndex = subjects.findIndex(s => s.name === subject.name);
+  if (existingIndex >= 0) {
+    subjects[existingIndex] = subject; // 更新
+  } else {
+    subjects.push(subject); // 新增
+  }
+  localStorage.setItem(LOCAL_SUBJECTS_KEY, JSON.stringify(subjects));
+  return subject;
+};
+
+// 删除本地命盘
+export const deleteLocalSubject = (id) => {
+  const subjects = getLocalSubjects().filter(s => s.id !== id);
+  localStorage.setItem(LOCAL_SUBJECTS_KEY, JSON.stringify(subjects));
 };
 
 export default function BaziInputPage() {
@@ -40,10 +74,9 @@ export default function BaziInputPage() {
   useEffect(() => {
     const subjectId = searchParams.get('subjectId');
     if (subjectId) {
-      // 尝试从 mock 数据或 localStorage 获取对象信息
-      const savedSubjects = JSON.parse(localStorage.getItem('bazi_subjects') || '[]');
-      const allSubjects = [...(mockSubjects || []), ...savedSubjects];
-      const subject = allSubjects.find(s => s.id === subjectId);
+      // 尝试从本地获取对象信息
+      const localSubjects = getLocalSubjects();
+      const subject = localSubjects.find(s => s.id === subjectId);
       
       if (subject) {
         setFormData(prev => ({
@@ -75,7 +108,7 @@ export default function BaziInputPage() {
     setIsSubmitting(true);
     
     try {
-      // 1. 前端计算八字 (无需登录)
+      // 1. 前端计算八字
       const birthData = {
         gender: formData.gender,
         calendarType: formData.calendarType,
@@ -85,19 +118,65 @@ export default function BaziInputPage() {
         hour: formData.birthHour,
         minute: formData.birthMinute,
         isLeapMonth: formData.isLeapMonth,
-        location: formData.location.district || formData.location.city, // Use most specific
+        location: formData.location.district || formData.location.city,
       };
       
       const baziData = calculateBazi(birthData);
       
-      // 2. 存入 sessionStorage，跳转结果页 (不创建对象)
-      sessionStorage.setItem('current_bazi_input', JSON.stringify(formData));
-      sessionStorage.setItem('current_bazi_result', JSON.stringify(baziData));
-      
-      // 模拟一点延迟提升体验
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      navigate('/bazi'); 
+      // 2. 自动保存
+      if (isLoggedIn) {
+        // 已登录：保存到后端
+        try {
+          const res = await api.post('/subjects', {
+            name: formData.name,
+            gender: formData.gender,
+            calendarType: formData.calendarType,
+            birthYear: formData.birthYear,
+            birthMonth: formData.birthMonth,
+            birthDay: formData.birthDay,
+            birthHour: formData.birthHour,
+            birthMinute: formData.birthMinute,
+            isLeapMonth: formData.isLeapMonth,
+            location: `${formData.location.province}/${formData.location.city}/${formData.location.district}`,
+            baziData,
+          });
+          
+          // 跳转到结果页，带上 subjectId
+          navigate(`/bazi?subjectId=${res.subject.id}`);
+        } catch (error) {
+          if (error.code === 'NAME_DUPLICATE') {
+            toast.error('该称呼已存在，请使用其他称呼');
+          } else {
+            console.error('Create subject error:', error);
+            toast.error(error.message || '保存失败，请重试');
+          }
+          setIsSubmitting(false);
+          return;
+        }
+      } else {
+        // 未登录：保存到本地
+        const localSubject = {
+          id: generateLocalId(),
+          name: formData.name,
+          gender: formData.gender,
+          calendarType: formData.calendarType,
+          birthYear: formData.birthYear,
+          birthMonth: formData.birthMonth,
+          birthDay: formData.birthDay,
+          birthHour: formData.birthHour,
+          birthMinute: formData.birthMinute,
+          isLeapMonth: formData.isLeapMonth,
+          location: `${formData.location.province}/${formData.location.city}/${formData.location.district}`,
+          baziData,
+          isLocal: true, // 标记为本地数据
+          createdAt: new Date().toISOString(),
+        };
+        
+        saveLocalSubject(localSubject);
+        
+        // 跳转到结果页，带上本地 ID
+        navigate(`/bazi?localId=${localSubject.id}`);
+      }
     } catch (error) {
       console.error(error);
       toast.error('排盘计算失败，请检查输入');
@@ -110,7 +189,6 @@ export default function BaziInputPage() {
     <>
       <Navbar />
       <main className={styles.main}>
-        {/* Background - Purple/Gold for Input Anticipation - Strengthened */}
         <GradientBackground 
           gridCount={0} 
           glowColors={['rgba(138, 67, 225, 0.5)', 'rgba(239, 123, 22, 0.4)']} 

@@ -64,7 +64,7 @@ export default function Footer() {
               <h4>产品服务</h4>
               <ul>
                 {footerLinks.product.map((link) => (
-                  <li key={link.path}>
+                  <li key={link.label}>
                     <Link to={link.path}>{link.label}</Link>
                   </li>
                 ))}
@@ -75,7 +75,7 @@ export default function Footer() {
               <h4>关于公司</h4>
               <ul>
                 {footerLinks.company.map((link) => (
-                  <li key={link.path}>
+                  <li key={link.label}>
                     <Link to={link.path}>{link.label}</Link>
                   </li>
                 ))}
@@ -86,7 +86,7 @@ export default function Footer() {
               <h4>资源中心</h4>
               <ul>
                 {footerLinks.resources.map((link) => (
-                  <li key={link.path}>
+                  <li key={link.label}>
                     <Link to={link.path}>{link.label}</Link>
                   </li>
                 ))}
@@ -97,7 +97,7 @@ export default function Footer() {
               <h4>法律条款</h4>
               <ul>
                 {footerLinks.legal.map((link) => (
-                  <li key={link.path}>
+                  <li key={link.label}>
                     <Link to={link.path}>{link.label}</Link>
                   </li>
                 ))}

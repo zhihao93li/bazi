@@ -113,7 +113,13 @@ subjectsRoutes.post('/', authRequired, async (c) => {
     });
   } catch (error) {
     console.error('Create subject error:', error);
-    return c.json({ success: false, message: '创建测算对象失败' }, 500);
+    // 返回更详细的错误信息
+    const errorMessage = error instanceof Error ? error.message : '未知错误';
+    return c.json({ 
+      success: false, 
+      message: '创建测算对象失败',
+      detail: errorMessage,
+    }, 500);
   }
 });
 
