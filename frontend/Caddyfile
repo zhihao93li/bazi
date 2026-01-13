@@ -1,6 +1,21 @@
 :{$PORT} {
-    root * dist
+    # 使用绝对路径，避免路径混淆
+    root * /app/dist
+    
+    # 启用 gzip 压缩
     encode gzip
+    
+    # 静态文件服务
     file_server
+    
+    # SPA 路由策略：
+    # 1. 尝试直接访问请求的文件 {path}
+    # 2. 如果文件不存在，返回 index.html
     try_files {path} /index.html
+    
+    # 错误日志（可选，帮助调试）
+    log {
+        output stdout
+        level INFO
+    }
 }
