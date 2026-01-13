@@ -1,7 +1,7 @@
 # Nixpacks 配置 - 后端 API 服务
 
 [phases.setup]
-nixPkgs = ["nodejs_20", "openssl"]
+nixPkgs = ["nodejs_22", "openssl"]
 
 [phases.build]
 cmds = [
