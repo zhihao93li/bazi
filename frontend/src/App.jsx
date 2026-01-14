@@ -14,6 +14,7 @@ import HomePage from './pages/HomePage'
 const WaitlistPage = lazy(() => import('./pages/WaitlistPage'))
 const PrivacyPage = lazy(() => import('./pages/PrivacyPage'))
 const TermsPage = lazy(() => import('./pages/TermsPage'))
+const RefundPage = lazy(() => import('./pages/RefundPage'))
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'))
 
 // 八字命理页面 - 懒加载
@@ -45,6 +46,7 @@ function App() {
             <Route path="/waitlist" element={<WaitlistPage />} />
             <Route path="/privacy-policy" element={<PrivacyPage />} />
             <Route path="/terms" element={<TermsPage />} />
+            <Route path="/refund-policy" element={<RefundPage />} />
 
             {/* Bazi Public/Hybrid Routes */}
             <Route path="/bazi/input" element={<BaziInputPage />} />
