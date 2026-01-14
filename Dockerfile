@@ -26,5 +26,5 @@ RUN npm prune --production
 # 暴露端口
 EXPOSE 3000
 
-# 启动命令
-CMD ["node", "dist/index.js"]
+# 启动命令（先同步数据库结构，再启动服务）
+CMD ["sh", "-c", "npx prisma db push --skip-generate && node dist/index.js"]
