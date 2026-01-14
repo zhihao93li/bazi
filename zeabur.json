@@ -1,18 +1,6 @@
 {
-  "$schema": "https://json-schema.zeabur.app/zeabur.json",
-  "build": {
-    "type": "dockerfile",
-    "dockerfile": "Dockerfile"
-  },
-  "start": {
-    "command": "node dist/index.js"
-  },
-  "env": {
-    "NODE_ENV": "production",
-    "PORT": "3000"
-  },
-  "healthCheck": {
-    "path": "/health",
-    "port": 3000
-  }
+  "$schema": "https://schema.zeabur.app/v1.json",
+  "build_command": "npm run build && npx prisma generate && npx prisma migrate deploy",
+  "start_command": "npm start",
+  "output_dir": "dist"
 }

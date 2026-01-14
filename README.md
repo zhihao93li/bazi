@@ -188,60 +188,114 @@ src/
 └── types/               # TypeScript 类型定义
 ```
 
-## 部署到 Railway
+## 部署指南
 
-本项目是前后端分离架构，需要在 Railway 部署两个服务。
+本项目是前后端分离架构，推荐使用 **Cloudflare Pages + Zeabur** 部署。
 
-### 1. 创建 Railway 项目
+### 部署架构
 
-1. 登录 [Railway](https://railway.app/)
-2. 创建新项目
+- **前端**：Cloudflare Pages（全球 CDN，免费额度充足）
+- **后端**：Zeabur（支持 Node.js，自动 HTTPS）
+- **数据库**：Zeabur PostgreSQL
 
-### 2. 添加 PostgreSQL 数据库
+---
 
-1. 点击 "Add Service" → "Database" → "PostgreSQL"
-2. Railway 会自动生成 `DATABASE_URL` 环境变量
+### 一、Zeabur 部署后端
 
-### 3. 部署后端服务
+#### 1. 创建 Zeabur 项目
 
-1. 点击 "Add Service" → "GitHub Repo" → 选择本仓库
-2. 设置 **Root Directory** 为 `/`（留空或根目录）
-3. 配置环境变量：
+1. 登录 [Zeabur](https://zeabur.com/)
+2. 创建新项目，选择香港或新加坡区域
+
+#### 2. 添加 PostgreSQL 数据库
+
+1. 点击 **添加服务** → **Marketplace** → 搜索 **PostgreSQL**
+2. 部署完成后记录 `DATABASE_URL`
+
+#### 3. 部署后端服务
+
+1. 点击 **添加服务** → **Git** → 选择 GitHub 仓库
+2. **Root Directory** 保持为空（根目录）
+3. Zeabur 会自动识别 Node.js 项目
+
+#### 4. 配置后端环境变量
 
 | 变量名 | 说明 |
 |--------|------|
-| `DATABASE_URL` | 引用 PostgreSQL 服务变量 |
-| `JWT_SECRET` | JWT 密钥（用 `openssl rand -base64 32` 生成） |
+| `DATABASE_URL` | `${POSTGRES.DATABASE_URL}` 引用数据库 |
+| `JWT_SECRET` | JWT 密钥（`openssl rand -base64 32`） |
 | `OPENAI_API_KEY` | OpenAI API 密钥 |
 | `OPENAI_BASE_URL` | OpenAI API 地址（可选） |
 | `STRIPE_SECRET_KEY` | Stripe 密钥 (`sk_live_xxx`) |
 | `STRIPE_WEBHOOK_SECRET` | Stripe Webhook 签名密钥 |
 | `FRONTEND_URL` | 前端域名（用于支付回调） |
 | `NODE_ENV` | `production` |
-| `CORS_ORIGIN` | 前端域名（部署后填入） |
+| `CORS_ORIGIN` | 前端域名 |
 | `INITIAL_GIFT_POINTS` | 新用户赠送积分，如 `100` |
 | `SMS_PROVIDER` | `mock` 或 `aliyun` |
 
-### 4. 部署前端服务
+#### 5. 生成域名
 
-1. 点击 "Add Service" → "GitHub Repo" → 选择同一仓库
-2. 设置 **Root Directory** 为 `/frontend`
-3. 配置环境变量：
+在服务的 **网络** 设置中生成域名（如 `bazi-api.zeabur.app`）
 
-| 变量名 | 说明 |
-|--------|------|
-| `VITE_API_BASE` | 后端 API 地址，如 `https://xxx.up.railway.app/api` |
+---
 
-### 5. 配置域名和 CORS
+### 二、Cloudflare Pages 部署前端
 
-1. 为前端和后端服务各自生成域名
-2. 将前端域名添加到后端的 `CORS_ORIGIN` 环境变量
+#### 1. 创建 Pages 项目
+
+1. 登录 [Cloudflare Dashboard](https://dash.cloudflare.com/)
+2. 进入 **Workers & Pages** → **Create application** → **Pages**
+3. 连接 GitHub 并选择仓库
+
+#### 2. 配置构建设置
+
+| 设置项 | 值 |
+|--------|-----|
+| **Root directory** | `frontend` |
+| **Build command** | `npm run build` |
+| **Build output directory** | `dist` |
+
+#### 3. 配置环境变量
+
+| 变量名 | 值 |
+|--------|-----|
+| `VITE_API_BASE` | `https://你的后端.zeabur.app/api` |
+
+#### 4. 部署
+
+点击 **Save and Deploy**，获得域名如 `bazi-frontend.pages.dev`
+
+---
+
+### 三、配置关联
+
+#### 1. 更新后端环境变量
+
+回到 Zeabur 更新：
+- `CORS_ORIGIN` = `https://bazi-frontend.pages.dev`
+- `FRONTEND_URL` = `https://bazi-frontend.pages.dev`
+
+#### 2. 配置 Stripe Webhook
+
+1. 在 [Stripe Dashboard](https://dashboard.stripe.com/) 添加 Webhook 端点
+2. URL: `https://你的后端.zeabur.app/api/payment/webhook`
+3. 监听事件: `checkout.session.completed`
+
+#### 3. 初始化数据库
+
+在 Zeabur 终端运行：
+```bash
+npx prisma db seed
+```
+
+---
 
 ### 部署注意事项
 
-- 后端会自动运行数据库迁移 (`prisma migrate deploy`)
-- 首次部署后可运行 `npx prisma db seed` 初始化积分套餐数据
+- 后端会自动运行数据库迁移（通过 `zeabur.json` 配置）
 - 健康检查端点：`/health`
+- 首次部署后运行 seed 初始化积分套餐数据
 
 ## License
 
