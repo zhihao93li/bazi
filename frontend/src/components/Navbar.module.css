@@ -4,7 +4,7 @@
   left: 50%;
   transform: translateX(-50%);
   width: 100%;
-  max-width: 1200px;
+  max-width: 1150px;
   z-index: 1000;
   padding: 20px 40px;
   transition: all 0.3s ease;
@@ -42,7 +42,7 @@
 }
 
 .logoImage {
-  height: 32px;
+  height: 40px;
   width: auto;
 }
 
@@ -59,13 +59,14 @@
 }
 
 .navLink {
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 500;
   color: var(--dark-7);
-  padding: 8px 12px;
+  padding: 8px 14px;
   border-radius: var(--radius-sm);
   transition: color 0.2s;
-  background-color: transparent; /* Remove bg block */
+  background-color: transparent;
+  /* Remove bg block */
 }
 
 /* Original Prismo Style: Red Text on Hover */
@@ -84,10 +85,10 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 12px 24px;
+  padding: 14px 28px;
   background: var(--dark-7);
   color: var(--absolute-white);
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 500;
   border-radius: var(--radius-full);
   transition: background-color 0.2s, transform 0.2s;
@@ -183,7 +184,8 @@
 
 .mobileLink:hover {
   background-color: var(--light-94);
-  color: var(--accent-red); /* Match mobile too */
+  color: var(--accent-red);
+  /* Match mobile too */
 }
 
 /* Mobile Points Badge */
