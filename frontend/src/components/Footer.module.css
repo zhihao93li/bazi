@@ -1,7 +1,7 @@
 .footer {
   background: var(--dark-7);
   color: var(--absolute-white);
-  padding: 80px 40px 40px;
+  padding: 60px 40px 40px;
 }
 
 .container {
@@ -10,17 +10,14 @@
 }
 
 .top {
-  display: grid;
-  grid-template-columns: 1fr 2fr;
-  gap: 60px;
-  padding-bottom: 60px;
+  padding-bottom: 40px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .brand {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
 }
 
 .logo img {
@@ -38,7 +35,6 @@
   font-size: 16px;
   color: var(--grey-50);
   line-height: 1.6;
-  max-width: 280px;
 }
 
 .contact {
@@ -60,37 +56,6 @@
   color: var(--absolute-white);
 }
 
-.links {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 40px;
-}
-
-.linkGroup h4 {
-  font-size: 14px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 20px;
-  color: var(--absolute-white);
-}
-
-.linkGroup ul {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.linkGroup a {
-  font-size: 15px;
-  color: var(--grey-50);
-  transition: color 0.2s;
-}
-
-.linkGroup a:hover {
-  color: var(--absolute-white);
-}
-
 .bottom {
   display: flex;
   align-items: center;
@@ -103,52 +68,41 @@
   color: var(--grey-50);
 }
 
-.social {
-  display: flex;
-  gap: 16px;
-}
-
-.socialLink {
+.legalLinks {
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius-full);
+  gap: 6px;
+  font-size: 14px;
+}
+
+.legalLinks a {
+  color: var(--grey-50);
+  transition: color 0.2s;
+}
+
+.legalLinks a:hover {
   color: var(--absolute-white);
-  transition: background-color 0.2s, transform 0.2s;
 }
 
-.socialLink:hover {
-  background: rgba(255, 255, 255, 0.2);
-  transform: translateY(-2px);
-}
-
-@media (max-width: 900px) {
-  .top {
-    grid-template-columns: 1fr;
-    gap: 40px;
-  }
-
-  .links {
-    grid-template-columns: repeat(2, 1fr);
-  }
+.separator {
+  color: var(--grey-50);
+  opacity: 0.5;
+  margin: 0 6px;
 }
 
 @media (max-width: 600px) {
   .footer {
-    padding: 50px 16px 30px;
-  }
-
-  .links {
-    grid-template-columns: 1fr;
-    gap: 30px;
+    padding: 40px 16px 30px;
   }
 
   .bottom {
     flex-direction: column;
-    gap: 20px;
+    gap: 16px;
     text-align: center;
+  }
+
+  .legalLinks {
+    flex-wrap: wrap;
+    justify-content: center;
   }
 }

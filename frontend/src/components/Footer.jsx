@@ -1,20 +1,12 @@
 import { Link } from 'react-router-dom'
-import { 
-  Envelope
-} from '@phosphor-icons/react'
+import { Envelope } from '@phosphor-icons/react'
 import styles from './Footer.module.css'
 
-const footerLinks = {
-  product: [
-    { label: '命理解读', path: '/bazi/input' },
-    { label: '积分充值', path: '/points' },
-  ],
-  legal: [
-    { label: '隐私政策', path: '/privacy-policy' },
-    { label: '服务条款', path: '/terms' },
-    { label: '退款政策', path: '/refund-policy' },
-  ],
-}
+const legalLinks = [
+  { label: '隐私政策', path: '/privacy-policy' },
+  { label: '服务条款', path: '/terms' },
+  { label: '退款政策', path: '/refund-policy' },
+]
 
 export default function Footer() {
   return (
@@ -35,36 +27,20 @@ export default function Footer() {
               </a>
             </div>
           </div>
-
-          <div className={styles.links}>
-            <div className={styles.linkGroup}>
-              <h4>产品服务</h4>
-              <ul>
-                {footerLinks.product.map((link) => (
-                  <li key={link.label}>
-                    <Link to={link.path}>{link.label}</Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className={styles.linkGroup}>
-              <h4>法律条款</h4>
-              <ul>
-                {footerLinks.legal.map((link) => (
-                  <li key={link.label}>
-                    <Link to={link.path}>{link.label}</Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
         </div>
 
         <div className={styles.bottom}>
           <p className={styles.copyright}>
             © 2026 CHONGSEN. All rights reserved.
           </p>
+          <div className={styles.legalLinks}>
+            {legalLinks.map((link, index) => (
+              <span key={link.label}>
+                <Link to={link.path}>{link.label}</Link>
+                {index < legalLinks.length - 1 && <span className={styles.separator}>·</span>}
+              </span>
+            ))}
+          </div>
         </div>
       </div>
     </footer>
