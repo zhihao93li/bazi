@@ -154,6 +154,14 @@
   color: var(--dark-7);
 }
 
+.mobileActions {
+  display: none;
+}
+
+.mobileHeaderPoints {
+  display: none;
+}
+
 .mobileNav {
   position: absolute;
   top: 100%;
@@ -225,6 +233,29 @@
 
   .menuButton {
     display: flex;
+  }
+
+  .mobileActions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .mobileHeaderPoints {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: linear-gradient(135deg, #FFF8E6 0%, #FFEFCC 100%);
+    color: #B8860B;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: var(--radius-full);
+    border: 1px solid rgba(184, 134, 11, 0.2);
+  }
+
+  .mobileHeaderPoints svg {
+    color: #DAA520;
   }
 }
 

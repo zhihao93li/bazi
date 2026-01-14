@@ -203,9 +203,9 @@ export default function BaziResultPage() {
   // 处理命盘切换
   const handleSwitchSubject = useCallback((subject) => {
     if (subject.isLocal) {
-      setSearchParams({ localId: subject.id });
+      setSearchParams({ localId: subject.id }, { replace: true });
     } else {
-      setSearchParams({ subjectId: subject.id });
+      setSearchParams({ subjectId: subject.id }, { replace: true });
     }
   }, [setSearchParams]);
 

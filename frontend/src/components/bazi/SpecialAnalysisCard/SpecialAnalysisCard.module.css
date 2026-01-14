@@ -21,7 +21,12 @@
   padding-bottom: var(--spacing-sm);
   border-bottom: 1px solid var(--light-90);
   overflow-x: auto;
+  overflow-y: hidden;
   scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  /* 禁止纵向滚动/抖动 */
+  touch-action: pan-x;
+  overscroll-behavior-y: contain;
 }
 
 .tabs::-webkit-scrollbar {
@@ -74,6 +79,15 @@
 .tabSpinner {
   animation: spin 1s linear infinite;
   opacity: 0.8;
+}
+
+/* 手势滑动容器 */
+.swipeContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  touch-action: pan-y pinch-zoom;
+  user-select: none;
 }
 
 /* 内容区域 */
@@ -215,17 +229,33 @@
 
 /* 动画 */
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 0.6; }
-  50% { opacity: 1; }
+
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+
+  50% {
+    opacity: 1;
+  }
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(5px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* 响应式 */
@@ -233,7 +263,7 @@
   .tabs {
     gap: var(--spacing-sm);
   }
-  
+
   .tab {
     padding: var(--spacing-xs);
     font-size: var(--text-caption);

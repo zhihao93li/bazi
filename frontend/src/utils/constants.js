@@ -4,8 +4,7 @@ import citiesData from 'province-city-china/dist/city.json';
 import areasData from 'province-city-china/dist/area.json';
 
 export const GENDER_OPTIONS = [
-  { value: 'female', label: '女' },
-  { value: 'male', label: '男' }
+  { value: 'female', label: '女' }
 ];
 
 export const CALENDAR_OPTIONS = [
@@ -26,7 +25,7 @@ provincesData.forEach(p => {
   // Key by province code (2 digits), e.g. "11" for Beijing
   const provinceNode = { value: p.name, label: p.name, cities: [] };
   provinceMap.set(p.province, provinceNode);
-  
+
   // 为直辖市添加一个与省同名的"城市"，用于三级选择
   if (MUNICIPALITIES.includes(p.province)) {
     const cityNode = { value: p.name, label: p.name, districts: [] };
@@ -51,7 +50,7 @@ citiesData.forEach(c => {
 
 areasData.forEach(a => {
   const node = { value: a.name, label: a.name };
-  
+
   // 直辖市的区县直接关联到虚拟城市
   if (MUNICIPALITIES.includes(a.province)) {
     const municipalityCity = municipalityCityMap.get(a.province);

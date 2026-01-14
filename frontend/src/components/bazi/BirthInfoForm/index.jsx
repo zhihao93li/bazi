@@ -3,7 +3,7 @@ import FormInput from '../../common/FormInput';
 import FormSelect from '../../common/FormSelect';
 import ButtonGroup from '../../common/ButtonGroup';
 import Checkbox from '../../common/Checkbox';
-import { PROVINCES, GENDER_OPTIONS, CALENDAR_OPTIONS } from '../../../utils/constants';
+import { PROVINCES, CALENDAR_OPTIONS } from '../../../utils/constants';
 import styles from './BirthInfoForm.module.css';
 
 export default function BirthInfoForm({
@@ -109,17 +109,11 @@ export default function BirthInfoForm({
 
   return (
     <div className={`${styles.formGrid} ${className}`}>
-      {/* Gender & Calendar Type */}
+      {/* Gender (display only) & Calendar Type */}
       <div className={styles.row}>
         <div>
           <div className={styles.sectionTitle}>性别</div>
-          <ButtonGroup
-            options={GENDER_OPTIONS}
-            value={value.gender}
-            name="gender"
-            onChange={(e) => handleChange('gender', e.target.value)}
-            fullWidth
-          />
+          <div className={styles.genderDisplay}>女</div>
         </div>
         <div>
           <div className={styles.sectionTitle}>历法</div>
@@ -161,15 +155,15 @@ export default function BirthInfoForm({
             onChange={(e) => handleChange('birthDay', e.target.value)}
             error={errors.birthDay}
           />
-          
+
           {/* Lunar Leap Month Checkbox - Inside flex row */}
           {value.calendarType === 'lunar' && (
             <div className={styles.checkboxWrapper}>
-               <Checkbox 
-                  label="闰月"
-                  checked={value.isLeapMonth}
-                  onChange={(e) => handleChange('isLeapMonth', e.target.checked)}
-               />
+              <Checkbox
+                label="闰月"
+                checked={value.isLeapMonth}
+                onChange={(e) => handleChange('isLeapMonth', e.target.checked)}
+              />
             </div>
           )}
         </div>

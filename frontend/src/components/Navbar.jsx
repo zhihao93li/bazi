@@ -38,9 +38,9 @@ export default function Navbar() {
     <nav className={`${styles.navbar} ${isScrolled ? styles.scrolled : ''}`}>
       <div className={styles.container}>
         <Link to="/" className={styles.logo}>
-          <img 
-            src="https://framerusercontent.com/images/E65CrTfgroEJwcxOOIN1vzXb5w.svg" 
-            alt="Prismo" 
+          <img
+            src="https://framerusercontent.com/images/E65CrTfgroEJwcxOOIN1vzXb5w.svg"
+            alt="Prismo"
             className={styles.logoImage}
           />
         </Link>
@@ -50,7 +50,7 @@ export default function Navbar() {
           <ul className={styles.navLinks}>
             {displayLinks.map((link) => (
               <li key={link.path}>
-                <Link 
+                <Link
                   to={link.path}
                   className={`${styles.navLink} ${location.pathname === link.path ? styles.active : ''}`}
                 >
@@ -59,7 +59,7 @@ export default function Navbar() {
               </li>
             ))}
           </ul>
-          
+
           {isLoggedIn ? (
             <div className={styles.userActions}>
               <Link to="/points" className={styles.pointsBadge}>
@@ -79,13 +79,22 @@ export default function Navbar() {
         </div>
 
         {/* Mobile Menu Button */}
-        <button 
-          className={styles.menuButton}
-          onClick={() => setIsOpen(!isOpen)}
-          aria-label="Toggle menu"
-        >
-          {isOpen ? <X size={24} /> : <List size={24} />}
-        </button>
+        <div className={styles.mobileActions}>
+          {/* 移动端积分余额显示 */}
+          {isLoggedIn && (
+            <Link to="/points" className={styles.mobileHeaderPoints}>
+              <Coins weight="fill" size={16} />
+              <span>{user?.balance?.toLocaleString() || 0}</span>
+            </Link>
+          )}
+          <button
+            className={styles.menuButton}
+            onClick={() => setIsOpen(!isOpen)}
+            aria-label="Toggle menu"
+          >
+            {isOpen ? <X size={24} /> : <List size={24} />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile Navigation */}
@@ -101,7 +110,7 @@ export default function Navbar() {
             <ul className={styles.mobileLinks}>
               {displayLinks.map((link) => (
                 <li key={link.path}>
-                  <Link 
+                  <Link
                     to={link.path}
                     className={styles.mobileLink}
                     onClick={() => setIsOpen(false)}
@@ -112,8 +121,8 @@ export default function Navbar() {
               ))}
               {isLoggedIn && (
                 <li>
-                  <Link 
-                    to="/points" 
+                  <Link
+                    to="/points"
                     className={styles.mobilePointsBadge}
                     onClick={() => setIsOpen(false)}
                   >
@@ -124,16 +133,16 @@ export default function Navbar() {
               )}
               <li>
                 {isLoggedIn ? (
-                  <Link 
-                    to="/profile" 
+                  <Link
+                    to="/profile"
                     className={styles.mobileCta}
                     onClick={() => setIsOpen(false)}
                   >
                     用户中心
                   </Link>
                 ) : (
-                  <Link 
-                    to="/login" 
+                  <Link
+                    to="/login"
                     className={styles.mobileCta}
                     onClick={() => setIsOpen(false)}
                   >

@@ -49,6 +49,7 @@
 
 .value {
   color: var(--dark-7);
+  white-space: nowrap;
 }
 
 .placeholder {
@@ -107,4 +108,17 @@
 .error {
   font-size: 14px;
   color: var(--accent-red);
+}
+
+/* Mobile responsive */
+@media (max-width: 640px) {
+  .select {
+    padding: 12px 10px;
+    font-size: 14px;
+  }
+
+  .option {
+    padding: 10px 12px;
+    font-size: 14px;
+  }
 }

@@ -7,6 +7,8 @@ import { useToast } from '../components/common'
 import { FormInput, ButtonGroup, Card } from '../components/common'
 import Button from '../components/Button'
 import GradientBackground from '../components/GradientBackground'
+import { api } from '../services/api'
+import { getLocalSubjects } from './BaziInputPage'
 import styles from './LoginPage.module.css'
 
 export default function LoginPage() {
@@ -87,9 +89,38 @@ export default function LoginPage() {
         toast.success('注册成功！已赠送 100 积分')
       }
 
-      // 跳转
-      const callbackUrl = searchParams.get('callbackUrl') || '/bazi/input'
-      navigate(callbackUrl, { replace: true })
+      // 检查跳转目标
+      const callbackUrl = searchParams.get('callbackUrl')
+      if (callbackUrl) {
+        // 如果有明确的 callbackUrl，直接跳转
+        navigate(callbackUrl, { replace: true })
+      } else {
+        // 没有 callbackUrl，根据是否有命盘数据决定跳转
+        try {
+          // 检查本地命盘
+          const localSubjects = getLocalSubjects()
+          if (localSubjects.length > 0) {
+            navigate('/bazi', { replace: true })
+            return
+          }
+
+          // 检查云端命盘（已登录状态）
+          const res = await api.get('/subjects')
+          if (res.subjects && res.subjects.length > 0) {
+            navigate('/bazi', { replace: true })
+          } else {
+            navigate('/bazi/input', { replace: true })
+          }
+        } catch {
+          // API 失败时检查本地
+          const localSubjects = getLocalSubjects()
+          if (localSubjects.length > 0) {
+            navigate('/bazi', { replace: true })
+          } else {
+            navigate('/bazi/input', { replace: true })
+          }
+        }
+      }
     } catch (error) {
       toast.error(error.message)
     } finally {

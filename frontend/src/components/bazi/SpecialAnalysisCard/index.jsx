@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { Lock, Sparkle, Coins, Spinner } from '@phosphor-icons/react';
 import Card from '../../common/Card';
 import styles from './SpecialAnalysisCard.module.css';
@@ -18,7 +18,7 @@ const SPECIAL_THEMES = [
  */
 function parseSimpleMarkdown(text) {
   if (!text) return '';
-  
+
   return text
     .replace(/^### (.*$)/gm, '<h3>$1</h3>')
     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
@@ -32,6 +32,7 @@ function parseSimpleMarkdown(text) {
  * 专项分析卡片组件
  * 
  * 支持并行解锁：每个主题独立显示自己的 loading 状态
+ * 支持手势切换：左滑/右滑切换 tab
  */
 export default function SpecialAnalysisCard({
   themesData = {},
@@ -40,6 +41,47 @@ export default function SpecialAnalysisCard({
 }) {
   const [activeTab, setActiveTab] = useState(SPECIAL_THEMES[0].id);
   const [displayContent, setDisplayContent] = useState('');
+
+  // 手势相关
+  const touchStartX = useRef(0);
+  const touchEndX = useRef(0);
+  const contentRef = useRef(null);
+  const SWIPE_THRESHOLD = 50; // 滑动阈值
+
+  // 切换到下一个/上一个 tab
+  const switchTab = useCallback((direction) => {
+    const currentIndex = SPECIAL_THEMES.findIndex(t => t.id === activeTab);
+    let newIndex;
+
+    if (direction === 'next') {
+      newIndex = (currentIndex + 1) % SPECIAL_THEMES.length;
+    } else {
+      newIndex = (currentIndex - 1 + SPECIAL_THEMES.length) % SPECIAL_THEMES.length;
+    }
+
+    setActiveTab(SPECIAL_THEMES[newIndex].id);
+  }, [activeTab]);
+
+  // 触摸开始
+  const handleTouchStart = useCallback((e) => {
+    touchStartX.current = e.touches[0].clientX;
+  }, []);
+
+  // 触摸结束
+  const handleTouchEnd = useCallback((e) => {
+    touchEndX.current = e.changedTouches[0].clientX;
+    const diff = touchStartX.current - touchEndX.current;
+
+    if (Math.abs(diff) > SWIPE_THRESHOLD) {
+      if (diff > 0) {
+        // 左滑 → 下一个
+        switchTab('next');
+      } else {
+        // 右滑 → 上一个
+        switchTab('prev');
+      }
+    }
+  }, [switchTab]);
 
   // 当 themesData 变化时更新显示内容
   useEffect(() => {
@@ -85,7 +127,7 @@ export default function SpecialAnalysisCard({
           const isActive = activeTab === theme.id;
           const themeUnlocked = data.isUnlocked || false;
           const isThemeLoading = data.isLoading || false;
-          
+
           return (
             <div
               key={theme.id}
@@ -103,50 +145,57 @@ export default function SpecialAnalysisCard({
         })}
       </div>
 
-      {/* 内容区域 */}
-      {isCurrentTabLoading ? (
-        <div className={styles.loadingContainer}>
-          <div className={styles.spinner} />
-          <span className={styles.loadingText}>AI 正在解读「{activeTheme?.name}」...</span>
-          <span className={styles.loadingHint}>通常需要 10-30 秒</span>
-        </div>
-      ) : isUnlocked && displayContent ? (
-        <div className={styles.content}>
-          <div dangerouslySetInnerHTML={{ 
-            __html: parseSimpleMarkdown(displayContent) 
-          }} />
-        </div>
-      ) : (
-        <div className={styles.lockedContainer}>
-          <div className={styles.lockedIcon}>
-            <Lock weight="fill" />
+      {/* 内容区域 - 支持手势切换 */}
+      <div
+        ref={contentRef}
+        className={styles.swipeContainer}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
+        {isCurrentTabLoading ? (
+          <div className={styles.loadingContainer}>
+            <div className={styles.spinner} />
+            <span className={styles.loadingText}>AI 正在解读「{activeTheme?.name}」...</span>
+            <span className={styles.loadingHint}>通常需要 10-30 秒</span>
           </div>
-          <button 
-            className={styles.unlockButton}
-            onClick={handleUnlockClick}
-            disabled={isCurrentTabLoading}
-          >
-            <Sparkle weight="fill" size={16} />
-            <span>解锁「{activeTheme?.name}」</span>
-            <span className={styles.unlockPrice}>
-              <Coins weight="fill" size={14} />
-              {price}
-            </span>
-          </button>
-          {/* 显示其他主题正在加载的提示 */}
-          {loadingThemes.length > 0 && (
-            <div className={styles.otherLoadingHint}>
-              <Spinner size={14} />
-              <span>
-                {loadingThemes.length === 1 
-                  ? `正在解锁「${loadingThemes[0].name}」...`
-                  : `正在解锁 ${loadingThemes.length} 个主题...`
-                }
-              </span>
+        ) : isUnlocked && displayContent ? (
+          <div className={styles.content}>
+            <div dangerouslySetInnerHTML={{
+              __html: parseSimpleMarkdown(displayContent)
+            }} />
+          </div>
+        ) : (
+          <div className={styles.lockedContainer}>
+            <div className={styles.lockedIcon}>
+              <Lock weight="fill" />
             </div>
-          )}
-        </div>
-      )}
+            <button
+              className={styles.unlockButton}
+              onClick={handleUnlockClick}
+              disabled={isCurrentTabLoading}
+            >
+              <Sparkle weight="fill" size={16} />
+              <span>解锁「{activeTheme?.name}」</span>
+              <span className={styles.unlockPrice}>
+                <Coins weight="fill" size={14} />
+                {price}
+              </span>
+            </button>
+            {/* 显示其他主题正在加载的提示 */}
+            {loadingThemes.length > 0 && (
+              <div className={styles.otherLoadingHint}>
+                <Spinner size={14} />
+                <span>
+                  {loadingThemes.length === 1
+                    ? `正在解锁「${loadingThemes[0].name}」...`
+                    : `正在解锁 ${loadingThemes.length} 个主题...`
+                  }
+                </span>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </Card>
   );
 }

@@ -21,7 +21,7 @@
 }
 
 /* Date inputs take remaining space */
-.dateRow > div:not(.checkboxWrapper) {
+.dateRow>div:not(.checkboxWrapper) {
   flex: 1;
 }
 
@@ -30,7 +30,8 @@
   flex: 0 0 auto;
   display: flex;
   align-items: center;
-  height: 48px; /* Match input height roughly */
+  height: 48px;
+  /* Match input height roughly */
 }
 
 .timeRow {
@@ -52,18 +53,42 @@
   margin-bottom: var(--spacing-xs);
 }
 
+/* 性别（只读展示） */
+.genderDisplay {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--absolute-white);
+  background-color: var(--dark-7);
+  border-radius: var(--radius-full);
+}
+
 /* Mobile responsive */
 @media (max-width: 640px) {
   .row {
     grid-template-columns: 1fr;
   }
-  
+
   .dateRow {
-    flex-wrap: wrap; /* Wrap on small screens */
+    /* 不换行，允许横向滚动 */
+    flex-wrap: nowrap;
+    gap: var(--spacing-xs);
   }
-  
-  .dateRow > div {
-    min-width: 80px; /* Prevent too small */
+
+  /* 年份选择器需要更多空间 */
+  .dateRow>div:first-child {
+    flex: 1.2;
+    min-width: 0;
+    /* 允许收缩 */
+  }
+
+  /* 月份和日选择器 */
+  .dateRow>div:not(:first-child):not(.checkboxWrapper) {
+    flex: 1;
+    min-width: 0;
   }
 
   .locationRow {
