@@ -281,11 +281,110 @@ export async function deductPoints(params: Omit<PointsChangeParams, 'type'>): Pr
 }
 
 /**
+ * 退还积分（用于操作失败后的回滚）
+ * 使用数据库事务确保原子性，并记录详细日志
+ */
+export interface RefundParams {
+  userId: string;
+  amount: number;
+  description: string;
+  orderId?: string;
+  reason: string; // 退款原因，用于日志
+}
+
+export async function refundPoints(params: RefundParams): Promise<PointsOperationResult> {
+  const { userId, amount, description, orderId, reason } = params;
+
+  // 验证金额
+  if (amount <= 0) {
+    throw new PointsError(
+      PointsErrorCode.INVALID_AMOUNT,
+      "退还积分数量必须大于0"
+    );
+  }
+
+  // 详细日志记录
+  console.log(`[Points Refund] Starting refund for user: ${userId}`);
+  console.log(`[Points Refund] Amount: ${amount}, Reason: ${reason}`);
+  console.log(`[Points Refund] OrderId: ${orderId || 'N/A'}`);
+
+  try {
+    // 使用事务确保原子性
+    const result = await prisma.$transaction(async (tx) => {
+      // 获取或创建账户
+      let account = await tx.pointsAccount.findUnique({
+        where: { userId },
+      });
+
+      if (!account) {
+        // 如果账户不存在，创建一个（理论上不应该发生，但防御性编程）
+        console.warn(`[Points Refund] Account not found for user ${userId}, creating new account`);
+        account = await tx.pointsAccount.create({
+          data: {
+            userId,
+            balance: 0,
+          },
+        });
+      }
+
+      const previousBalance = account.balance;
+      // 计算新余额
+      const newBalance = account.balance + amount;
+
+      // 更新账户余额
+      const updatedAccount = await tx.pointsAccount.update({
+        where: { userId },
+        data: { balance: newBalance },
+      });
+
+      // 创建交易记录（退款记录金额为正数，type为refund）
+      const transaction = await tx.pointsTransaction.create({
+        data: {
+          userId,
+          type: "refund",
+          amount: amount, // 正数，表示增加
+          balance: newBalance,
+          description: `${description} [退款原因: ${reason}]`,
+          orderId: orderId ? `refund_${orderId}` : undefined,
+        },
+      });
+
+      console.log(`[Points Refund] SUCCESS - User: ${userId}, Previous: ${previousBalance}, Refunded: ${amount}, New: ${newBalance}`);
+      console.log(`[Points Refund] Transaction ID: ${transaction.id}`);
+
+      return {
+        balance: updatedAccount.balance,
+        transactionId: transaction.id,
+        previousBalance,
+      };
+    });
+
+    return {
+      success: true,
+      message: "积分退还成功",
+      balance: result.balance,
+      transactionId: result.transactionId,
+    };
+  } catch (error) {
+    console.error(`[Points Refund] FAILED - User: ${userId}, Amount: ${amount}, Reason: ${reason}`);
+    console.error(`[Points Refund] Error:`, error);
+
+    if (error instanceof PointsError) {
+      throw error;
+    }
+    throw new PointsError(
+      PointsErrorCode.OPERATION_FAILED,
+      `积分退还失败: ${error instanceof Error ? error.message : "未知错误"}`
+    );
+  }
+}
+
+/**
  * 赠送初始积分（用于新用户注册）
  */
 export async function grantInitialPoints(userId: string): Promise<PointsOperationResult> {
   const initialPoints = parseInt(process.env.INITIAL_POINTS_GIFT || "100", 10);
-  
+
   return addPoints({
     userId,
     amount: initialPoints,

@@ -5,7 +5,7 @@
 
 import prisma from '../prisma.js';
 import { generateInitialAnalysis, generateThemeAnalysis } from '../ai/service.js';
-import { deductPoints, checkSufficientBalance } from '../points/service.js';
+import { deductPoints, refundPoints } from '../points/service.js';
 import { PointsError, PointsErrorCode } from '../points/types.js';
 import type { AnalysisTheme } from '../ai/types.js';
 import type { BaziData } from '../bazi/types.js';
@@ -208,13 +208,15 @@ async function ensureInitialAnalysis(
 /**
  * 解锁主题
  * 
- * 流程：
+ * 流程（乐观锁模式）：
  * 1. 验证主题和价格
- * 2. 检查积分是否充足
- * 3. 确保初步解读已生成
- * 4. 生成分主题解读
- * 5. 存储解读结果
- * 6. 扣除积分
+ * 2. 检查是否已解锁
+ * 3. 预扣积分（乐观锁，原子操作）
+ * 4. 获取测算对象信息
+ * 5. 确保初步解读已生成
+ * 6. 生成分主题解读
+ * 7. 存储解读结果
+ * 8. 如果任何步骤失败，退还积分
  */
 export async function unlockTheme(
   userId: string,
@@ -222,6 +224,7 @@ export async function unlockTheme(
   theme: AnalysisTheme
 ): Promise<ThemeUnlockResult> {
   const lockKey = `${subjectId}_${theme}`;
+  const orderId = `theme_${subjectId}_${theme}`;
 
   // 0. 检查是否有正在进行的解锁任务（防止并发重复解锁）
   const existingTask = themeUnlockLocks.get(lockKey);
@@ -263,15 +266,20 @@ export async function unlockTheme(
 
   // 创建解锁任务并加锁（防止并发重复调用 AI）
   const unlockTask = (async (): Promise<ThemeUnlockResult> => {
+    let pointsDeducted = false;
+    let deductResult: { balance?: number } = {};
+
     try {
-      // 3. 检查积分是否充足
-      const { sufficient, currentBalance } = await checkSufficientBalance(userId, price);
-      if (!sufficient) {
-        throw new PointsError(
-          PointsErrorCode.INSUFFICIENT_BALANCE,
-          `积分不足，当前余额: ${currentBalance}，需要: ${price}`
-        );
-      }
+      // 3. 预扣积分（乐观锁 - 原子操作，自动检查余额）
+      console.log(`[Theme Service] Pre-deducting points for theme: ${theme}, amount: ${price}`);
+      deductResult = await deductPoints({
+        userId,
+        amount: price,
+        description: `解锁主题解读 - ${theme}`,
+        orderId,
+      });
+      pointsDeducted = true;
+      console.log(`[Theme Service] Points pre-deducted successfully, remaining: ${deductResult.balance}`);
 
       // 4. 获取测算对象信息
       const subject = await prisma.subject.findUnique({
@@ -328,6 +336,17 @@ export async function unlockTheme(
         // 捕获唯一约束冲突（并发请求导致）
         if (error && typeof error === 'object' && 'code' in error && error.code === 'P2002') {
           console.log(`[Theme Service] Theme already unlocked (concurrent request): ${theme}`);
+          // 已经有人解锁了，需要退还我们预扣的积分
+          console.log(`[Theme Service] Refunding pre-deducted points due to concurrent unlock`);
+          await refundPoints({
+            userId,
+            amount: price,
+            description: `解锁主题解读 - ${theme}`,
+            orderId,
+            reason: '并发解锁冲突，已由其他请求完成',
+          });
+          pointsDeducted = false;
+
           // 查询已有记录
           const existingAnalysis = await prisma.themeAnalysis.findUnique({
             where: {
@@ -342,20 +361,12 @@ export async function unlockTheme(
             success: true,
             theme,
             content: existingAnalysis?.content as string || content,
-            pointsDeducted: 0, // 不扣积分
+            pointsDeducted: 0, // 已退还
             remainingBalance: account?.balance || 0,
           };
         }
         throw error;
       }
-
-      // 8. 扣除积分
-      const deductResult = await deductPoints({
-        userId,
-        amount: price,
-        description: `解锁主题解读 - ${theme}`,
-        orderId: `theme_${subjectId}_${theme}`,
-      });
 
       console.log(`[Theme Service] Theme unlocked successfully: ${theme}`);
 
@@ -366,6 +377,29 @@ export async function unlockTheme(
         pointsDeducted: price,
         remainingBalance: deductResult.balance ?? 0,
       };
+    } catch (error) {
+      // 如果已经扣了积分但后续流程失败，需要退还
+      if (pointsDeducted) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        console.error(`[Theme Service] Operation failed after deducting points, initiating refund`);
+        console.error(`[Theme Service] Failure reason: ${errorMessage}`);
+
+        try {
+          await refundPoints({
+            userId,
+            amount: price,
+            description: `解锁主题解读 - ${theme}`,
+            orderId,
+            reason: `操作失败: ${errorMessage}`,
+          });
+          console.log(`[Theme Service] Points refunded successfully after failure`);
+        } catch (refundError) {
+          // 退款失败是严重错误，需要人工介入
+          console.error(`[Theme Service] CRITICAL: Refund failed!`, refundError);
+          console.error(`[Theme Service] User: ${userId}, Amount: ${price}, OrderId: ${orderId}`);
+        }
+      }
+      throw error;
     } finally {
       // 任务完成后释放锁
       themeUnlockLocks.delete(lockKey);

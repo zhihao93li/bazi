@@ -5,7 +5,7 @@
 /**
  * 积分变动类型
  */
-export type PointsTransactionType = 'recharge' | 'consume' | 'gift';
+export type PointsTransactionType = 'recharge' | 'consume' | 'gift' | 'refund';
 
 /**
  * 积分账户信息
@@ -79,7 +79,7 @@ export enum PointsErrorCode {
  */
 export class PointsError extends Error {
   code: PointsErrorCode;
-  
+
   constructor(code: PointsErrorCode, message: string) {
     super(message);
     this.code = code;
