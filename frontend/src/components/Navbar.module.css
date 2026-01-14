@@ -39,11 +39,21 @@
 .logo {
   display: flex;
   align-items: center;
+  gap: 8px;
 }
 
-.logoImage {
+.logoIcon {
   height: 40px;
-  width: auto;
+  width: 40px;
+  object-fit: cover;
+  object-position: left center;
+  overflow: hidden;
+}
+
+.logoText {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--dark-7);
 }
 
 .desktopNav {
@@ -273,8 +283,13 @@
     padding: 6px 6px 6px 16px;
   }
 
-  .logoImage {
+  .logoIcon {
     height: 32px;
+    width: 32px;
+  }
+
+  .logoText {
+    font-size: 18px;
   }
 
   .mobileNav {

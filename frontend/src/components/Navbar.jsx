@@ -37,9 +37,10 @@ export default function Navbar() {
         <Link to="/" className={styles.logo}>
           <img
             src="https://framerusercontent.com/images/E65CrTfgroEJwcxOOIN1vzXb5w.svg"
-            alt="Prismo"
-            className={styles.logoImage}
+            alt="她赋"
+            className={styles.logoIcon}
           />
+          <span className={styles.logoText}>她赋</span>
         </Link>
 
         {/* Desktop Navigation */}
