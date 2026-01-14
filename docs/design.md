@@ -7,29 +7,31 @@
 ## Architecture
 
 ### 技术栈
-- **框架**: Next.js 15 (App Router)
-- **样式**: Tailwind CSS + CSS Custom Properties
+- **框架**: React 18 + Vite
+- **路由**: React Router DOM
+- **样式**: CSS Modules + CSS Custom Properties
 - **动画**: Framer Motion
-- **字体**: Geist Sans (已配置)
 
-### 文件结构变更
+### 文件结构
 ```
-src/
-├── app/
-│   ├── globals.css          # 更新全局样式和 CSS 变量
-│   ├── page.tsx             # 重构首页
-│   ├── login/page.tsx       # 优化登录页
-│   ├── bazi/page.tsx        # 优化排盘页
-│   ├── history/page.tsx     # 优化历史页
-│   ├── points/page.tsx      # 优化积分页
-│   └── profile/page.tsx     # 优化用户中心
+frontend/src/
+├── styles/
+│   ├── global.css           # 全局样式和 CSS 变量
+│   └── variables.css        # CSS 变量定义
+├── pages/
+│   ├── HomePage.jsx         # 首页
+│   ├── LoginPage.jsx        # 登录页
+│   ├── BaziInputPage.jsx    # 八字输入页
+│   ├── BaziResultPage.jsx   # 排盘结果页
+│   ├── HistoryPage.jsx      # 历史记录页
+│   ├── PointsPage.jsx       # 积分页
+│   └── ProfilePage.jsx      # 用户中心
 ├── components/
-│   └── ui/
-│       ├── pill-button.tsx  # 新增：胶囊按钮
-│       ├── social-proof.tsx # 新增：社会证明组件
-│       └── bento-grid.tsx   # 新增：Bento 网格布局
+│   ├── common/              # 通用组件 (Button, Card, Modal 等)
+│   ├── bazi/                # 八字相关组件
+│   └── subject/             # 测算对象组件
 └── public/
-    └── noise.png            # 新增：颗粒纹理图片
+    └── noise.png            # 颗粒纹理图片
 ```
 
 ## Components and Interfaces
