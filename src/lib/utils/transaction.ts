@@ -9,7 +9,7 @@
  */
 
 import prisma from "../prisma.js";
-import { Prisma, PrismaClient } from "../../generated/prisma/client.js";
+import { Prisma, PrismaClient } from "@prisma/client";
 
 /**
  * 事务客户端类型
