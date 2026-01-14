@@ -23,7 +23,7 @@
   direction: rtl;
 }
 
-.featureBlock.reverse > * {
+.featureBlock.reverse>* {
   direction: ltr;
 }
 
@@ -133,11 +133,13 @@
   bottom: -6px;
   left: 50%;
   transform: translateX(-50%);
-  width: 1200px;
+  width: 100%;
+  max-width: 1200px;
   height: 10px;
   background-image: url('https://framerusercontent.com/images/iDrlOYszhHrSmrgaFKo5G5kRV8.svg');
   background-size: contain;
   background-repeat: no-repeat;
+  background-position: center;
 }
 
 @media (max-width: 1024px) {
@@ -157,19 +159,28 @@
 
 @media (max-width: 768px) {
   .features {
-    padding: 60px 20px;
+    padding: 60px 16px;
   }
 
   .container {
-    gap: 80px;
+    gap: 60px;
+  }
+
+  .content {
+    gap: 30px;
   }
 
   .title {
-    font-size: 32px;
+    font-size: 28px;
+  }
+
+  .description {
+    font-size: 15px;
   }
 
   .featureGrid {
     grid-template-columns: 1fr;
+    gap: 20px;
   }
 
   .featureItem {
@@ -177,9 +188,43 @@
     border-bottom: 1px solid var(--light-85);
     padding-right: 0;
     padding-bottom: 20px;
+    gap: 14px;
   }
 
   .featureItem:last-child {
     border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .featureText h3 {
+    font-size: 18px;
+  }
+
+  .featureText p {
+    font-size: 15px;
+  }
+
+  .imageCard {
+    padding: 16px;
+    border-radius: var(--radius-lg);
+  }
+
+  .checkpoints {
+    gap: 12px;
+  }
+
+  .checkpoint {
+    font-size: 14px;
+    gap: 10px;
+  }
+
+  .checkIcon {
+    width: 20px;
+    height: 20px;
+  }
+
+  .checkIcon svg {
+    width: 12px;
+    height: 12px;
   }
 }

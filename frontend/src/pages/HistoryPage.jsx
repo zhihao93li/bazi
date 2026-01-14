@@ -56,7 +56,7 @@ export default function HistoryPage() {
     }
   };
 
-  const filteredRecords = records.filter(r => 
+  const filteredRecords = records.filter(r =>
     (r.subjectName || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -73,44 +73,44 @@ export default function HistoryPage() {
       <Navbar />
       <main className={styles.main}>
         {/* Background - Memory/Cool for History - Strengthened */}
-        <GradientBackground 
-          gridCount={0} 
-          glowColors={['rgba(94, 106, 210, 0.5)', 'rgba(138, 67, 225, 0.4)']} 
+        <GradientBackground
+          gridCount={0}
+          glowColors={['rgba(94, 106, 210, 0.5)', 'rgba(138, 67, 225, 0.4)']}
           noiseOpacity={0.15}
           animated
           expanded
         />
 
         <div className={styles.container}>
-          
+
           {/* Header */}
           <div className={styles.header}>
             <div className={styles.titleGroup}>
               <h1 className={styles.title}>历史记录</h1>
               <p className={styles.subtitle}>查看您的测算历史与分析报告</p>
             </div>
-            
+
             <div className={styles.filterGroup}>
-               <div style={{ position: 'relative' }}>
-                 <input 
-                   type="text" 
-                   placeholder="搜索称呼..." 
-                   value={searchTerm}
-                   onChange={(e) => setSearchTerm(e.target.value)}
-                   style={{
-                     padding: '10px 16px 10px 36px',
-                     borderRadius: '20px',
-                     border: '1px solid var(--light-90)',
-                     fontSize: '14px',
-                     outline: 'none',
-                     width: '200px'
-                   }}
-                 />
-                 <MagnifyingGlass 
-                   size={16} 
-                   style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--grey-50)' }} 
-                 />
-               </div>
+              <div style={{ position: 'relative' }}>
+                <input
+                  type="text"
+                  placeholder="搜索称呼..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  style={{
+                    padding: '10px 16px 10px 36px',
+                    borderRadius: '20px',
+                    border: '1px solid var(--light-90)',
+                    fontSize: '14px',
+                    outline: 'none',
+                    width: '200px'
+                  }}
+                />
+                <MagnifyingGlass
+                  size={16}
+                  style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--grey-50)' }}
+                />
+              </div>
             </div>
           </div>
 
@@ -118,8 +118,7 @@ export default function HistoryPage() {
           <div className={styles.listContainer}>
             {isLoading ? (
               <div className={styles.emptyState}>
-                <LoadingSpinner size="medium" />
-                <p style={{ marginTop: '12px' }}>加载中...</p>
+                <LoadingSpinner size="large" color="purple" />
               </div>
             ) : filteredRecords.length === 0 ? (
               <div className={styles.emptyState}>
@@ -154,9 +153,9 @@ export default function HistoryPage() {
                           </div>
                         </div>
                       </div>
-                      
+
                       <div className={styles.cardRight}>
-                        <button 
+                        <button
                           className={styles.deleteButton}
                           onClick={(e) => handleDelete(e, record.id)}
                           title="删除记录"

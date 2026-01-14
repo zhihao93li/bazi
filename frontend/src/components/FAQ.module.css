@@ -123,15 +123,37 @@
 
 @media (max-width: 600px) {
   .faq {
-    padding: 60px 20px;
+    padding: 50px 16px;
+  }
+
+  .container {
+    gap: 40px;
   }
 
   .title {
-    font-size: 32px;
+    font-size: 28px;
   }
 
   .faqQuestion {
-    font-size: 16px;
+    font-size: 15px;
+    padding: 18px 16px;
+    gap: 12px;
+  }
+
+  .faqAnswer p {
+    padding: 0 16px 18px;
+    font-size: 14px;
+  }
+
+  .cta {
     padding: 20px;
+  }
+
+  .ctaContent h3 {
+    font-size: 18px;
+  }
+
+  .ctaContent p {
+    font-size: 15px;
   }
 }

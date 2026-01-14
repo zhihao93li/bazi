@@ -37,13 +37,11 @@
 .badgeNumber {
   font-size: 17px;
   font-weight: 600;
-  background: linear-gradient(
-    90deg,
-    rgb(255, 47, 47) 0%,
-    rgb(239, 123, 22) 30%,
-    rgb(213, 17, 253) 60%,
-    rgb(138, 67, 225) 100%
-  );
+  background: linear-gradient(90deg,
+      rgb(255, 47, 47) 0%,
+      rgb(239, 123, 22) 30%,
+      rgb(213, 17, 253) 60%,
+      rgb(138, 67, 225) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -145,7 +143,15 @@
 
 @media (max-width: 900px) {
   .hero {
-    padding: 120px 20px 60px;
+    padding: 100px 20px 60px;
+  }
+
+  .container {
+    gap: 30px;
+  }
+
+  .content {
+    gap: 30px;
   }
 
   .title {
@@ -155,11 +161,41 @@
   .subtitle {
     font-size: 16px;
   }
+
+  .imageWrapper {
+    transform: none;
+    border-radius: 12px;
+    padding: 3px;
+  }
+
+  .dashboardImage {
+    border-radius: 10px;
+  }
 }
 
 @media (max-width: 600px) {
+  .hero {
+    padding: 90px 16px 40px;
+  }
+
+  .container {
+    gap: 24px;
+  }
+
+  .content {
+    gap: 24px;
+  }
+
+  .textContent {
+    gap: 16px;
+  }
+
   .title {
-    font-size: 32px;
+    font-size: 28px;
+  }
+
+  .subtitle {
+    font-size: 15px;
   }
 
   .badge {
@@ -168,12 +204,30 @@
     padding: 8px 16px;
   }
 
+  .badgeNumber,
+  .badgeText {
+    font-size: 14px;
+  }
+
   .rating {
     flex-direction: column;
     gap: 8px;
   }
 
+  .ratingText {
+    font-size: 14px;
+  }
+
   .divider {
     display: none;
+  }
+
+  .imageWrapper {
+    padding: 2px;
+    border-radius: 10px;
+  }
+
+  .dashboardImage {
+    border-radius: 8px;
   }
 }

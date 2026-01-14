@@ -1,22 +1,11 @@
 import { lazy, Suspense } from 'react'
 import { Routes, Route } from 'react-router-dom'
-import { ToastProvider } from './components/common'
+import { ToastProvider, LoadingOverlay } from './components/common'
 import { AuthProvider } from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
 
-// 加载中组件
-const LoadingFallback = () => (
-  <div style={{
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: '100vh',
-    background: '#0a0a0a',
-    color: '#fff'
-  }}>
-    <div>加载中...</div>
-  </div>
-)
+// 页面级加载组件 - 使用全屏遮罩
+const LoadingFallback = () => <LoadingOverlay fixed text="加载中..." />
 
 // 首页直接导入（首屏必须）
 import HomePage from './pages/HomePage'
