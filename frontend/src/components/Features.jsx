@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+import { m } from 'framer-motion'
 import { 
   Compass, 
   Brain, 
@@ -49,7 +49,7 @@ export default function Features() {
       <div className={styles.container}>
         {/* First Feature Block */}
         <div className={styles.featureBlock}>
-          <motion.div 
+          <m.div 
             className={styles.content}
             initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -74,9 +74,9 @@ export default function Features() {
                 </div>
               ))}
             </div>
-          </motion.div>
+          </m.div>
 
-          <motion.div 
+          <m.div 
             className={styles.imageCard}
             initial={{ opacity: 0, x: 30 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -87,13 +87,15 @@ export default function Features() {
               src="https://framerusercontent.com/images/QyjdbazPTUU8hu2UwEgcPTgnEo.svg" 
               alt="Features"
               className={styles.featureImage}
+              loading="lazy"
+              decoding="async"
             />
-          </motion.div>
+          </m.div>
         </div>
 
         {/* Second Feature Block */}
         <div className={`${styles.featureBlock} ${styles.reverse}`}>
-          <motion.div 
+          <m.div 
             className={styles.imageCard}
             initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -104,10 +106,12 @@ export default function Features() {
               src="https://framerusercontent.com/images/wgGuBRTVLu8u6u3dSvRbJZCEgN0.png" 
               alt="AI Analysis"
               className={styles.featureImage}
+              loading="lazy"
+              decoding="async"
             />
-          </motion.div>
+          </m.div>
 
-          <motion.div 
+          <m.div 
             className={styles.content}
             initial={{ opacity: 0, x: 30 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -134,7 +138,7 @@ export default function Features() {
                 </div>
               ))}
             </div>
-          </motion.div>
+          </m.div>
         </div>
       </div>
 

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { m, AnimatePresence } from 'framer-motion'
 import { Plus, Minus } from '@phosphor-icons/react'
 import Tag from './Tag'
 import Button from './Button'
@@ -45,7 +45,7 @@ function FAQItem({ faq, isOpen, onClick }) {
       </button>
       <AnimatePresence>
         {isOpen && (
-          <motion.div
+          <m.div
             className={styles.faqAnswer}
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
@@ -53,7 +53,7 @@ function FAQItem({ faq, isOpen, onClick }) {
             transition={{ duration: 0.3 }}
           >
             <p>{faq.answer}</p>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
     </div>
@@ -66,7 +66,7 @@ export default function FAQ() {
   return (
     <section className={styles.faq}>
       <div className={styles.container}>
-        <motion.div 
+        <m.div 
           className={styles.header}
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -75,7 +75,7 @@ export default function FAQ() {
         >
           <Tag>常见问题</Tag>
           <h2 className={styles.title}>关于八字命理的疑问</h2>
-        </motion.div>
+        </m.div>
 
         <div className={styles.faqList}>
           <div className={styles.faqColumn}>
@@ -100,7 +100,7 @@ export default function FAQ() {
           </div>
         </div>
 
-        <motion.div 
+        <m.div 
           className={styles.cta}
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -112,7 +112,7 @@ export default function FAQ() {
             <p>立即开始免费排盘，发现未知的自己。</p>
           </div>
           <Button to="/bazi/input">立即体验</Button>
-        </motion.div>
+        </m.div>
       </div>
     </section>
   )

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { List, X, User, Coins } from '@phosphor-icons/react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { m, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
 import styles from './Navbar.module.css'
 
@@ -91,7 +91,7 @@ export default function Navbar() {
       {/* Mobile Navigation */}
       <AnimatePresence>
         {isOpen && (
-          <motion.div
+          <m.div
             className={styles.mobileNav}
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -142,7 +142,7 @@ export default function Navbar() {
                 )}
               </li>
             </ul>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
     </nav>

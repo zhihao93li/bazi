@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
+import { m } from 'framer-motion'
 import { GoogleLogo, Star, StarHalf } from '@phosphor-icons/react'
 import Button from './Button'
 import GradientBackground from './GradientBackground'
@@ -25,7 +25,7 @@ export default function Hero() {
       <GradientBackground />
 
       <div className={styles.container}>
-        <motion.div 
+        <m.div 
           className={styles.content}
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -63,9 +63,9 @@ export default function Hero() {
               <span className={styles.ratingText}>4.9 分好评 · 基于 30k+ 用户反馈</span>
             </div>
           </div>
-        </motion.div>
+        </m.div>
 
-        <motion.div 
+        <m.div 
           className={styles.imageContainer}
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
@@ -77,9 +77,12 @@ export default function Hero() {
               src="https://framerusercontent.com/images/BesZqi2DRImbj4FXrPED12W5zA.png" 
               alt="Bazi Dashboard"
               className={styles.dashboardImage}
+              loading="eager"
+              fetchPriority="high"
+              decoding="async"
             />
           </div>
-        </motion.div>
+        </m.div>
       </div>
     </section>
   )
