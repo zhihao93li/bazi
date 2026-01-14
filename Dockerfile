@@ -27,4 +27,4 @@ RUN npm prune --production
 EXPOSE 3000
 
 # 启动命令（先同步数据库结构，再启动服务）
-CMD ["sh", "-c", "npx prisma db push --skip-generate && node dist/index.js"]
+CMD ["sh", "-c", "npx prisma db push --accept-data-loss && node dist/index.js"]
