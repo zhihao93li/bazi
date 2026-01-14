@@ -79,9 +79,9 @@ export default function SubjectsPage() {
       <Navbar />
       <main className={styles.main}>
         {/* Background - Pink/Green for Relationships */}
-        <GradientBackground 
-          gridCount={0} 
-          glowColors={['rgba(213, 17, 253, 0.2)', 'rgba(39, 179, 44, 0.15)']} 
+        <GradientBackground
+          gridCount={0}
+          glowColors={['rgba(213, 17, 253, 0.2)', 'rgba(39, 179, 44, 0.15)']}
           noiseOpacity={0.1}
           animated
           expanded

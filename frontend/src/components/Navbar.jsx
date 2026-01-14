@@ -25,12 +25,9 @@ export default function Navbar() {
   const navLinks = [
     { label: '首页', path: '/' },
     { label: '命理解读', path: '/bazi' },
-    { label: '历史记录', path: '/history' },
   ]
 
-  const authLinks = [
-    { label: '积分充值', path: '/points' },
-  ]
+  const authLinks = []
 
   const displayLinks = isLoggedIn ? [...navLinks, ...authLinks] : navLinks
 

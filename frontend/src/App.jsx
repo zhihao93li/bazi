@@ -91,14 +91,14 @@ function App() {
                 </ProtectedRoute>
               }
             />
-            <Route
+            {/*            <Route
               path="/history"
               element={
                 <ProtectedRoute>
                   <HistoryPage />
                 </ProtectedRoute>
               }
-            />
+            />*/}
 
             {/* Dev Routes (Keep public for easy access during dev) */}
             <Route path="/dev/components" element={<ComponentsPage />} />

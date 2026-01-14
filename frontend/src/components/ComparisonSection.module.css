@@ -1,0 +1,239 @@
+.section {
+    padding: 100px 20px;
+    /* background-color: var(--light-95); // Optional: keep page bg or specific section bg */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 60px;
+    overflow: hidden;
+    /* Prevent connecting lines from overflowing */
+}
+
+.header {
+    text-align: center;
+    max-width: 800px;
+    position: relative;
+    z-index: 2;
+}
+
+.title {
+    font-size: 52px;
+    font-weight: 600;
+    color: rgb(17, 17, 17);
+    line-height: 1.1;
+    letter-spacing: -1px;
+}
+
+/* Main Container */
+.comparisonWrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    /* Cards stretch to same height */
+    justify-content: center;
+    gap: 80px;
+    /* Precise gap from analysis */
+    position: relative;
+    width: 100%;
+    max-width: 1100px;
+}
+
+/* V/S Badge & Connector */
+.vsContainer {
+    position: absolute;
+    top: 32px;
+    /* Aligned with top area */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.vsBadge {
+    background-color: #111111;
+    color: #FFFFFF;
+    border-radius: 100px;
+    padding: 6px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    min-width: 58px;
+    text-align: center;
+    position: relative;
+    z-index: 2;
+    box-shadow: 0 0 0 4px var(--light-95);
+    /* Fake border to cut through lines if needed */
+}
+
+/* Connecting Lines (Simulated with pseudo-elements on vsContainer to be behind badge) */
+.vsContainer::before {
+    content: "";
+    position: absolute;
+    right: 50%;
+    /* Start from center go left */
+    top: 50%;
+    width: 50px;
+    /* Reach towards left card */
+    height: 1px;
+    background: linear-gradient(270deg, #111111 0%, rgba(17, 17, 17, 0) 100%);
+    transform: translateY(-50%);
+    z-index: 1;
+}
+
+.vsContainer::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    /* Start from center go right */
+    top: 50%;
+    width: 50px;
+    /* Reach towards right card */
+    height: 1px;
+    background: linear-gradient(90deg, #E8E4E2 0%, #FF2F2F 50%, #8A43E1 100%);
+    transform: translateY(-50%);
+    z-index: 1;
+}
+
+
+/* Left Card */
+.cardLeft {
+    flex: 1 1 0;
+    min-width: 0;
+    /* Allow shrinking */
+    background-color: rgb(232, 228, 226);
+    border: 2px solid rgb(232, 228, 226);
+    border-radius: 20px;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+}
+
+.cardHeader {
+    margin-bottom: 30px;
+}
+
+.cardTitle {
+    font-size: 24px;
+    font-weight: 700;
+    color: rgb(30, 30, 30);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Right Card Container */
+.rightCardWrapper {
+    flex: 1 1 0;
+    min-width: 0;
+    /* Allow shrinking */
+    position: relative;
+    border-radius: 20px;
+    padding: 2px;
+    isolation: isolate;
+    box-sizing: border-box;
+}
+
+/* The Gradient Background Layer */
+.gradientBg {
+    position: absolute;
+    inset: 0;
+    border-radius: 20px;
+    background: linear-gradient(90deg, #FF2F2F 0%, #EF7B16 36%, #8A43E1 70%, #D511FD 100%);
+    z-index: -1;
+}
+
+/* The Content Layer */
+.cardRightContent {
+    background-color: #FFFFFF;
+    border-radius: 19px;
+    /* 20px - padding approx */
+    padding: 40px;
+    height: 100%;
+    box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.05), 0px 4px 10px rgba(0, 0, 0, 0.05);
+    /* Soft double shadow */
+    display: flex;
+    flex-direction: column;
+}
+
+/* List Styles */
+.list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.listItem {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 17px;
+    line-height: 1.4;
+}
+
+.listItemLeft span {
+    color: rgb(76, 76, 76);
+    font-weight: 500;
+}
+
+.listItemRight span {
+    color: rgb(30, 30, 30);
+    font-weight: 600;
+    /* Slightly bolder */
+}
+
+.iconLeft {
+    margin-top: 2px;
+    color: rgb(120, 120, 120);
+    opacity: 0.8;
+}
+
+.iconRightWrapper {
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    background-color: #111111;
+    border-radius: 50%;
+    color: white;
+    flex-shrink: 0;
+}
+
+/* Mobile */
+@media (max-width: 900px) {
+    .section {
+        padding: 60px 20px;
+    }
+
+    .title {
+        font-size: 32px;
+    }
+
+    .comparisonWrapper {
+        flex-direction: column;
+        gap: 40px;
+    }
+
+    .vsContainer {
+        position: relative;
+        top: auto;
+        left: auto;
+        transform: none;
+        margin: -20px 0;
+        /* Negate gap to pull them closer */
+        z-index: 10;
+    }
+
+    .vsContainer::before,
+    .vsContainer::after {
+        display: none;
+        /* Hide lines on mobile */
+    }
+
+    .vsBadge {
+        border: 4px solid var(--light-95);
+        /* Add border to separate from cards */
+    }
+}

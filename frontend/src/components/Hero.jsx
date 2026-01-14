@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { m } from 'framer-motion'
-import { GoogleLogo, Star, StarHalf } from '@phosphor-icons/react'
+
 import Button from './Button'
 import GradientBackground from './GradientBackground'
 import styles from './Hero.module.css'
@@ -25,24 +25,23 @@ export default function Hero() {
       <GradientBackground />
 
       <div className={styles.container}>
-        <m.div 
+        <m.div
           className={styles.content}
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
           <div className={styles.badge}>
-            <span className={styles.badgeNumber}>200K+</span>
-            <span className={styles.badgeText}>次排盘记录 · 持续增长中</span>
+            <span className={styles.badgeNumber}>她</span>
+            <span className={styles.badgeText}>的力量，自成诗赋</span>
           </div>
 
           <div className={styles.textContent}>
             <h1 className={styles.title}>
-              AI 驱动的专业八字命理分析
+              她赋｜女性命理解读工具
             </h1>
             <p className={styles.subtitle}>
-              融合传统周易智慧与现代人工智能，为您提供精准的四柱排盘、
-              深度的性格剖析与人生运势解读。
+              以传统命理为结构，以现代女性的视角重新解读人生
             </p>
           </div>
 
@@ -50,22 +49,12 @@ export default function Hero() {
             <Button to="/bazi/input" size="large">
               立即排盘
             </Button>
-            
-            <div className={styles.rating}>
-              <div className={styles.stars}>
-                <Star size={14} weight="fill" color="var(--accent-orange)" />
-                <Star size={14} weight="fill" color="var(--accent-orange)" />
-                <Star size={14} weight="fill" color="var(--accent-orange)" />
-                <Star size={14} weight="fill" color="var(--accent-orange)" />
-                <Star size={14} weight="fill" color="var(--accent-orange)" />
-              </div>
-              <div className={styles.divider} />
-              <span className={styles.ratingText}>4.9 分好评 · 基于 30k+ 用户反馈</span>
-            </div>
+
+
           </div>
         </m.div>
 
-        <m.div 
+        <m.div
           className={styles.imageContainer}
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
@@ -73,8 +62,8 @@ export default function Hero() {
         >
           <div className={`${styles.imageWrapper} ${isScrolled ? styles.imageWrapperScrolled : ''}`}>
             {/* 使用一个代表命理/数据的抽象图或仪表盘截图占位 */}
-            <img 
-              src="https://framerusercontent.com/images/BesZqi2DRImbj4FXrPED12W5zA.png" 
+            <img
+              src="https://framerusercontent.com/images/BesZqi2DRImbj4FXrPED12W5zA.png"
               alt="Bazi Dashboard"
               className={styles.dashboardImage}
               loading="eager"
