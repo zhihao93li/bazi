@@ -1,4 +1,7 @@
-import { province as provincesData, city as citiesData, area as areasData } from 'province-city-china/data';
+// 直接导入 JSON 文件，避免 CommonJS 全量打包问题（7.3MB → 400KB）
+import provincesData from 'province-city-china/dist/province.json';
+import citiesData from 'province-city-china/dist/city.json';
+import areasData from 'province-city-china/dist/area.json';
 
 export const GENDER_OPTIONS = [
   { value: 'female', label: '女' },
