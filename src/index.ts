@@ -36,9 +36,24 @@ app.use('*', cors({
   credentials: true,
 }));
 
-// 健康检查
-app.get('/health', (c) => {
-  return c.json({ status: 'ok', timestamp: new Date().toISOString() });
+// 健康检查（包含数据库连接验证）
+import { prisma } from './lib/prisma.js';
+
+app.get('/health', async (c) => {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    return c.json({
+      status: 'ok',
+      database: 'connected',
+      timestamp: new Date().toISOString()
+    });
+  } catch {
+    return c.json({
+      status: 'degraded',
+      database: 'disconnected',
+      timestamp: new Date().toISOString()
+    }, 503);
+  }
 });
 
 // API 路由
@@ -59,9 +74,9 @@ app.notFound((c) => {
 // 全局错误处理
 app.onError((err, c) => {
   console.error('Server error:', err);
-  return c.json({ 
-    success: false, 
-    message: process.env.NODE_ENV === 'production' ? '服务器错误' : err.message 
+  return c.json({
+    success: false,
+    message: process.env.NODE_ENV === 'production' ? '服务器错误' : err.message
   }, 500);
 });
 

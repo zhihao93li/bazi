@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useCallback } from 'react';
+import { useEffect, useMemo, useCallback, useRef } from 'react';
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { m } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
@@ -6,7 +6,7 @@ import { useToast, LoadingOverlay } from '../components/common';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import GradientBackground from '../components/GradientBackground';
-import { getLocalSubjects } from './BaziInputPage';
+import { getLocalSubjects } from '../utils/localSubjects';
 
 // Query Hooks
 import {
@@ -152,14 +152,23 @@ export default function BaziResultPage() {
     }
   }, [subjectsLoaded, subjects, subjectId, localId, isLoadingSubjects, setSearchParams, navigate]);
 
+  // 记录已尝试同步的本地命盘 ID，避免重复请求
+  const syncAttemptedRef = useRef(new Set());
+
   // 登录后自动同步本地命盘到后端
   useEffect(() => {
     if (!isLoggedIn || !localId || !subjectsLoaded || syncLocalSubject.isPending) return;
+
+    // 如果已经尝试过同步这个 localId，则跳过
+    if (syncAttemptedRef.current.has(localId)) return;
 
     const localSubjects = getLocalSubjects();
     const localSubject = localSubjects.find(s => s.id === localId);
 
     if (!localSubject) return;
+
+    // 标记为已尝试同步
+    syncAttemptedRef.current.add(localId);
 
     syncLocalSubject.mutate(localSubject, {
       onSuccess: ({ newSubject }) => {
@@ -175,7 +184,7 @@ export default function BaziResultPage() {
         }
       },
     });
-  }, [isLoggedIn, localId, subjectsLoaded, syncLocalSubject, setSearchParams, toast]);
+  }, [isLoggedIn, localId, subjectsLoaded, syncLocalSubject.isPending, setSearchParams, toast]);
 
   // ==================== 事件处理 ====================
 

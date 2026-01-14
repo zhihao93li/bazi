@@ -8,7 +8,7 @@ import { FormInput, ButtonGroup, Card } from '../components/common'
 import Button from '../components/Button'
 import GradientBackground from '../components/GradientBackground'
 import { api } from '../services/api'
-import { getLocalSubjects } from './BaziInputPage'
+import { getLocalSubjects } from '../utils/localSubjects'
 import styles from './LoginPage.module.css'
 
 export default function LoginPage() {

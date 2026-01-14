@@ -10,7 +10,7 @@
  */
 
 import { Hono } from 'hono';
-import { authRequired, getCurrentUserId } from '../middleware/auth.js';
+import { authRequired, requireUserId } from '../middleware/auth.js';
 import prisma from '../lib/prisma.js';
 import {
   createSubject,
@@ -33,10 +33,7 @@ export const subjectsRoutes = new Hono();
  */
 subjectsRoutes.get('/', authRequired, async (c) => {
   try {
-    const userId = getCurrentUserId(c);
-    if (!userId) {
-      return c.json({ success: false, message: '请先登录' }, 401);
-    }
+    const userId = requireUserId(c);
 
     const limit = parseInt(c.req.query('limit') || '50', 10);
     const offset = parseInt(c.req.query('offset') || '0', 10);
@@ -67,10 +64,7 @@ subjectsRoutes.get('/', authRequired, async (c) => {
  */
 subjectsRoutes.post('/', authRequired, async (c) => {
   try {
-    const userId = getCurrentUserId(c);
-    if (!userId) {
-      return c.json({ success: false, message: '请先登录' }, 401);
-    }
+    const userId = requireUserId(c);
 
     const body = await c.req.json();
     const input: CreateSubjectInput = {
@@ -115,8 +109,8 @@ subjectsRoutes.post('/', authRequired, async (c) => {
     console.error('Create subject error:', error);
     // 返回更详细的错误信息
     const errorMessage = error instanceof Error ? error.message : '未知错误';
-    return c.json({ 
-      success: false, 
+    return c.json({
+      success: false,
       message: '创建测算对象失败',
       detail: errorMessage,
     }, 500);
@@ -129,10 +123,7 @@ subjectsRoutes.post('/', authRequired, async (c) => {
  */
 subjectsRoutes.get('/:id', authRequired, async (c) => {
   try {
-    const userId = getCurrentUserId(c);
-    if (!userId) {
-      return c.json({ success: false, message: '请先登录' }, 401);
-    }
+    const userId = requireUserId(c);
 
     const id = c.req.param('id');
     const subject = await getSubjectById(id, userId);
@@ -161,10 +152,7 @@ subjectsRoutes.get('/:id', authRequired, async (c) => {
  */
 subjectsRoutes.put('/:id', authRequired, async (c) => {
   try {
-    const userId = getCurrentUserId(c);
-    if (!userId) {
-      return c.json({ success: false, message: '请先登录' }, 401);
-    }
+    const userId = requireUserId(c);
 
     const id = c.req.param('id');
     const body = await c.req.json();
@@ -206,10 +194,7 @@ subjectsRoutes.put('/:id', authRequired, async (c) => {
  */
 subjectsRoutes.delete('/:id', authRequired, async (c) => {
   try {
-    const userId = getCurrentUserId(c);
-    if (!userId) {
-      return c.json({ success: false, message: '请先登录' }, 401);
-    }
+    const userId = requireUserId(c);
 
     const id = c.req.param('id');
     const success = await deleteSubject(id, userId);
@@ -234,10 +219,7 @@ subjectsRoutes.delete('/:id', authRequired, async (c) => {
  */
 subjectsRoutes.get('/:id/reports', authRequired, async (c) => {
   try {
-    const userId = getCurrentUserId(c);
-    if (!userId) {
-      return c.json({ success: false, message: '请先登录' }, 401);
-    }
+    const userId = requireUserId(c);
 
     const subjectId = c.req.param('id');
 

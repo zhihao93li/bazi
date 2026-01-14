@@ -8,7 +8,7 @@
  */
 
 import { Hono } from 'hono';
-import { authRequired, getCurrentUserId } from '../middleware/auth.js';
+import { authRequired, requireUserId } from '../middleware/auth.js';
 import {
   getAllThemePricing,
   getThemeUnlockStatus,
@@ -17,24 +17,7 @@ import {
   unlockTheme,
 } from '../lib/themes/index.js';
 import { PointsError, PointsErrorCode } from '../lib/points/types.js';
-import type { AnalysisTheme } from '../lib/ai/types.js';
-
-// 有效的主题列表
-const VALID_THEMES: AnalysisTheme[] = [
-  'life_color',
-  'relationship',
-  'career_wealth',
-  'health',
-  'life_lesson',
-  'yearly_fortune',
-];
-
-/**
- * 验证主题是否有效
- */
-function isValidTheme(theme: string): theme is AnalysisTheme {
-  return VALID_THEMES.includes(theme as AnalysisTheme);
-}
+import { isValidTheme } from '../lib/themes/constants.js';
 
 export const themesRoutes = new Hono();
 
@@ -64,10 +47,7 @@ themesRoutes.get('/pricing', async (c) => {
  */
 themesRoutes.get('/status/:subjectId', authRequired, async (c) => {
   try {
-    const userId = getCurrentUserId(c);
-    if (!userId) {
-      return c.json({ success: false, message: '请先登录' }, 401);
-    }
+    const userId = requireUserId(c);
 
     const subjectId = c.req.param('subjectId');
     if (!subjectId) {
@@ -94,10 +74,7 @@ themesRoutes.get('/status/:subjectId', authRequired, async (c) => {
  */
 themesRoutes.get('/:subjectId/:theme', authRequired, async (c) => {
   try {
-    const userId = getCurrentUserId(c);
-    if (!userId) {
-      return c.json({ success: false, message: '请先登录' }, 401);
-    }
+    const userId = requireUserId(c);
 
     const subjectId = c.req.param('subjectId');
     const theme = c.req.param('theme');
@@ -111,7 +88,7 @@ themesRoutes.get('/:subjectId/:theme', authRequired, async (c) => {
     }
 
     const detail = await getThemeDetail(subjectId, theme, userId);
-    
+
     return c.json({
       success: true,
       ...detail,
@@ -132,33 +109,30 @@ themesRoutes.get('/:subjectId/:theme', authRequired, async (c) => {
  */
 themesRoutes.post('/unlock', authRequired, async (c) => {
   try {
-    const userId = getCurrentUserId(c);
-    if (!userId) {
-      return c.json({ success: false, message: '请先登录' }, 401);
-    }
+    const userId = requireUserId(c);
 
     const body = await c.req.json();
     const { subjectId, theme } = body as { subjectId: string; theme: string };
 
     if (!subjectId) {
-      return c.json({ 
-        success: false, 
+      return c.json({
+        success: false,
         message: '请选择测算对象',
         code: 'SUBJECT_REQUIRED',
       }, 400);
     }
 
     if (!theme) {
-      return c.json({ 
-        success: false, 
+      return c.json({
+        success: false,
         message: '请选择要解锁的主题',
         code: 'THEME_REQUIRED',
       }, 400);
     }
 
     if (!isValidTheme(theme)) {
-      return c.json({ 
-        success: false, 
+      return c.json({
+        success: false,
         message: '无效的主题',
         code: 'INVALID_THEME',
       }, 400);
@@ -180,10 +154,10 @@ themesRoutes.post('/unlock', authRequired, async (c) => {
     if (error instanceof PointsError) {
       if (error.code === PointsErrorCode.INSUFFICIENT_BALANCE) {
         return c.json(
-          { 
-            success: false, 
-            message: error.message, 
-            code: 'INSUFFICIENT_POINTS' 
+          {
+            success: false,
+            message: error.message,
+            code: 'INSUFFICIENT_POINTS'
           },
           402
         );
@@ -193,8 +167,8 @@ themesRoutes.post('/unlock', authRequired, async (c) => {
     if (error instanceof Error) {
       if (error.message.includes('already unlocked')) {
         return c.json(
-          { 
-            success: false, 
+          {
+            success: false,
             message: '该主题已解锁',
             code: 'ALREADY_UNLOCKED',
           },
@@ -204,8 +178,8 @@ themesRoutes.post('/unlock', authRequired, async (c) => {
 
       if (error.message.includes('Subject not found')) {
         return c.json(
-          { 
-            success: false, 
+          {
+            success: false,
             message: '测算对象不存在',
             code: 'SUBJECT_NOT_FOUND',
           },
@@ -215,8 +189,8 @@ themesRoutes.post('/unlock', authRequired, async (c) => {
 
       if (error.message.includes('Unauthorized')) {
         return c.json(
-          { 
-            success: false, 
+          {
+            success: false,
             message: '无权访问该测算对象',
             code: 'UNAUTHORIZED',
           },
@@ -226,8 +200,8 @@ themesRoutes.post('/unlock', authRequired, async (c) => {
 
       if (error.message.includes('no bazi data')) {
         return c.json(
-          { 
-            success: false, 
+          {
+            success: false,
             message: '测算对象缺少八字数据，请重新排盘',
             code: 'BAZI_DATA_MISSING',
           },
@@ -250,10 +224,7 @@ themesRoutes.post('/unlock', authRequired, async (c) => {
  */
 themesRoutes.post('/batch', authRequired, async (c) => {
   try {
-    const userId = getCurrentUserId(c);
-    if (!userId) {
-      return c.json({ success: false, message: '请先登录' }, 401);
-    }
+    const userId = requireUserId(c);
 
     const body = await c.req.json();
     const { subjectId, themes } = body as { subjectId: string; themes: string[] };
@@ -263,7 +234,7 @@ themesRoutes.post('/batch', authRequired, async (c) => {
     }
 
     const validThemes = themes.filter(isValidTheme);
-    
+
     const results = await Promise.all(
       validThemes.map((theme) => getThemeDetail(subjectId, theme, userId))
     );

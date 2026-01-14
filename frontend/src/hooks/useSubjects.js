@@ -6,7 +6,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api, isAbortError } from '../services/api';
-import { getLocalSubjects, deleteLocalSubject } from '../pages/BaziInputPage';
+import { getLocalSubjects, deleteLocalSubject } from '../utils/localSubjects';
 
 // Query Keys
 export const SUBJECTS_QUERY_KEY = ['subjects'];
@@ -20,11 +20,11 @@ export function useSubjects(isLoggedIn) {
     queryKey: [...SUBJECTS_QUERY_KEY, isLoggedIn],
     queryFn: async ({ signal }) => {
       let allSubjects = [];
-      
+
       // 加载本地命盘
       const localSubjects = getLocalSubjects();
       allSubjects = [...localSubjects];
-      
+
       // 如果已登录，加载后端命盘
       if (isLoggedIn) {
         try {
@@ -37,7 +37,7 @@ export function useSubjects(isLoggedIn) {
           console.error('Failed to fetch subjects:', error);
         }
       }
-      
+
       return allSubjects;
     },
     staleTime: 2 * 60 * 1000, // 2分钟内不重新请求
@@ -49,7 +49,7 @@ export function useSubjects(isLoggedIn) {
  */
 export function useSyncLocalSubject() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (localSubject) => {
       const res = await api.post('/subjects', {
@@ -65,13 +65,13 @@ export function useSyncLocalSubject() {
         location: localSubject.location,
         baziData: localSubject.baziData,
       });
-      
+
       return { newSubject: res.subject, localId: localSubject.id };
     },
     onSuccess: ({ newSubject, localId }) => {
       // 删除本地存储中的命盘
       deleteLocalSubject(localId);
-      
+
       // 更新缓存：移除本地的，添加后端的
       queryClient.setQueryData([...SUBJECTS_QUERY_KEY, true], (old) => {
         if (!old) return [newSubject];
@@ -87,7 +87,7 @@ export function useSyncLocalSubject() {
  */
 export function useDeleteSubject() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async ({ id, isLocal }) => {
       if (isLocal) {

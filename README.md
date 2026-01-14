@@ -58,11 +58,8 @@ NODE_ENV="development"
 # 生成 Prisma 客户端
 npx prisma generate
 
-# 运行数据库迁移
+# 运行数据库迁移（自动包含种子数据）
 npx prisma migrate deploy
-
-# （可选）填充测试数据
-npx prisma db seed
 ```
 
 ### 4. 启动服务
@@ -282,20 +279,17 @@ src/
 2. URL: `https://你的后端.zeabur.app/api/payment/webhook`
 3. 监听事件: `checkout.session.completed`
 
-#### 3. 初始化数据库
+#### 3. 数据库初始化
 
-在 Zeabur 终端运行：
-```bash
-npx prisma db seed
-```
+首次部署时，Zeabur 会自动运行 `prisma migrate deploy`，迁移中已包含种子数据（积分套餐和主题价格配置）。
 
 ---
 
 ### 部署注意事项
 
 - 后端会自动运行数据库迁移（通过 `zeabur.json` 配置）
-- 健康检查端点：`/health`
-- 首次部署后运行 seed 初始化积分套餐数据
+- 健康检查端点：`/health`（包含数据库连接状态）
+- 种子数据通过 SQL 迁移自动应用，无需手动执行
 
 ## License
 

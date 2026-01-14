@@ -6,7 +6,7 @@
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '../services/api';
-import { getLocalSubjects } from '../pages/BaziInputPage';
+import { getLocalSubjects } from '../utils/localSubjects';
 
 // Query Keys
 export const SUBJECT_DETAIL_QUERY_KEY = 'subject-detail';
@@ -20,7 +20,7 @@ export const SUBJECT_DETAIL_QUERY_KEY = 'subject-detail';
  */
 export function useSubjectDetail(subjectId, localId, options = {}) {
   const { subjects = [] } = options;
-  
+
   return useQuery({
     queryKey: [SUBJECT_DETAIL_QUERY_KEY, subjectId || localId],
     queryFn: async ({ signal }) => {
@@ -33,7 +33,7 @@ export function useSubjectDetail(subjectId, localId, options = {}) {
         }
         return localSubject;
       }
-      
+
       if (subjectId) {
         // 后端命盘：先尝试从已加载的 subjects 中查找
         const existingSubject = subjects.find(s => s.id === subjectId && !s.isLocal);
@@ -41,12 +41,12 @@ export function useSubjectDetail(subjectId, localId, options = {}) {
           // 已有完整数据，直接使用
           return existingSubject;
         }
-        
+
         // 请求后端获取详情
         const res = await api.get(`/subjects/${subjectId}`, { signal });
         return res.subject;
       }
-      
+
       return null;
     },
     enabled: !!(subjectId || localId),
@@ -60,13 +60,13 @@ export function useSubjectDetail(subjectId, localId, options = {}) {
  */
 export function usePrefetchSubjectDetail() {
   const queryClient = useQueryClient();
-  
+
   return async (subjectId, localId) => {
     if (localId) {
       // 本地命盘无需预取
       return;
     }
-    
+
     if (subjectId) {
       await queryClient.prefetchQuery({
         queryKey: [SUBJECT_DETAIL_QUERY_KEY, subjectId],

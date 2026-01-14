@@ -9,9 +9,12 @@ import GradientBackground from '../components/GradientBackground';
 import BirthInfoForm from '../components/bazi/BirthInfoForm';
 import FormInput from '../components/common/FormInput';
 import { calculateBazi } from '../utils/bazi/calculator';
+import {
+  generateLocalId,
+  getLocalSubjects,
+  saveLocalSubject
+} from '../utils/localSubjects';
 import styles from './BaziInputPage.module.css';
-
-const LOCAL_SUBJECTS_KEY = 'bazi_local_subjects';
 
 const INITIAL_FORM = {
   name: '',
@@ -24,38 +27,6 @@ const INITIAL_FORM = {
   birthMinute: 0,
   location: { province: '', city: '', district: '' },
   isLeapMonth: false
-};
-
-// 生成本地 ID
-const generateLocalId = () => `local_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-
-// 获取本地保存的命盘
-export const getLocalSubjects = () => {
-  try {
-    return JSON.parse(localStorage.getItem(LOCAL_SUBJECTS_KEY) || '[]');
-  } catch {
-    return [];
-  }
-};
-
-// 保存命盘到本地
-const saveLocalSubject = (subject) => {
-  const subjects = getLocalSubjects();
-  // 检查是否已存在同名
-  const existingIndex = subjects.findIndex(s => s.name === subject.name);
-  if (existingIndex >= 0) {
-    subjects[existingIndex] = subject; // 更新
-  } else {
-    subjects.push(subject); // 新增
-  }
-  localStorage.setItem(LOCAL_SUBJECTS_KEY, JSON.stringify(subjects));
-  return subject;
-};
-
-// 删除本地命盘
-export const deleteLocalSubject = (id) => {
-  const subjects = getLocalSubjects().filter(s => s.id !== id);
-  localStorage.setItem(LOCAL_SUBJECTS_KEY, JSON.stringify(subjects));
 };
 
 export default function BaziInputPage() {
