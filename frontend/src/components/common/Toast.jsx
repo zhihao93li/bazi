@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { m, AnimatePresence } from 'framer-motion'
 import { CheckCircle, XCircle, Warning, Info, X } from '@phosphor-icons/react'
 import styles from './Toast.module.css'
 
@@ -18,13 +18,13 @@ export function ToastProvider({ children }) {
   const addToast = useCallback((message, type = 'info', duration = 3000) => {
     const id = Date.now()
     setToasts((prev) => [...prev, { id, message, type }])
-    
+
     if (duration > 0) {
       setTimeout(() => {
         removeToast(id)
       }, duration)
     }
-    
+
     return id
   }, [])
 
@@ -47,7 +47,7 @@ export function ToastProvider({ children }) {
           {toasts.map((t) => {
             const Icon = icons[t.type]
             return (
-              <motion.div
+              <m.div
                 key={t.id}
                 className={`${styles.toast} ${styles[t.type]}`}
                 initial={{ opacity: 0, y: 50, scale: 0.9 }}
@@ -57,13 +57,13 @@ export function ToastProvider({ children }) {
               >
                 <Icon size={20} weight="fill" className={styles.icon} />
                 <span className={styles.message}>{t.message}</span>
-                <button 
+                <button
                   className={styles.closeButton}
                   onClick={() => removeToast(t.id)}
                 >
                   <X size={16} />
                 </button>
-              </motion.div>
+              </m.div>
             )
           })}
         </AnimatePresence>

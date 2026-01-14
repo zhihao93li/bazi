@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useCallback } from 'react';
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useToast, LoadingOverlay } from '../components/common';
 import Navbar from '../components/Navbar';
@@ -63,10 +63,10 @@ export default function BaziResultPage() {
   useSubjectSwitchEffect(subjectId, localId);
 
   // ==================== Query Hooks ====================
-  
+
   // 1. 获取命盘列表
-  const { 
-    data: subjects = [], 
+  const {
+    data: subjects = [],
     isLoading: isLoadingSubjects,
     isSuccess: subjectsLoaded,
   } = useSubjects(isLoggedIn);
@@ -75,14 +75,14 @@ export default function BaziResultPage() {
   const { data: themePricing = {} } = useThemePricing();
 
   // 3. 获取命盘详情
-  const { 
+  const {
     data: currentSubject,
     isLoading: isLoadingSubject,
     isError: isSubjectError,
   } = useSubjectDetail(subjectId, localId, { subjects });
 
   // 4. 获取主题状态和内容
-  const { 
+  const {
     data: themesData = DEFAULT_THEMES_DATA,
   } = useThemes(subjectId, isLoggedIn, themePricing);
 
@@ -158,7 +158,7 @@ export default function BaziResultPage() {
 
     const localSubjects = getLocalSubjects();
     const localSubject = localSubjects.find(s => s.id === localId);
-    
+
     if (!localSubject) return;
 
     syncLocalSubject.mutate(localSubject, {
@@ -186,7 +186,7 @@ export default function BaziResultPage() {
       navigate('/login?callbackUrl=' + encodeURIComponent(location.pathname + location.search));
       return;
     }
-    
+
     if (!subjectId) {
       toast.info('本地命盘需要先同步到云端才能使用 AI 解读');
       return;
@@ -196,7 +196,7 @@ export default function BaziResultPage() {
     if (themesDataWithPricing[theme]?.isLoading) {
       return; // 静默忽略，该主题已在加载
     }
-    
+
     unlockThemeMutation.mutate({ subjectId, theme });
   }, [isLoggedIn, subjectId, unlockThemeMutation, themesDataWithPricing, toast, navigate, location]);
 
@@ -261,8 +261,8 @@ export default function BaziResultPage() {
     <>
       <Navbar />
       <main className={styles.main}>
-        <GradientBackground 
-          gridCount={0} 
+        <GradientBackground
+          gridCount={0}
           glowColors={baziGlowColors}
           noiseOpacity={0.15}
           showTopGradient={true}
@@ -272,7 +272,7 @@ export default function BaziResultPage() {
         />
 
         <div className={styles.container}>
-          
+
           {/* 顶部标题 */}
           <div className={styles.topBar}>
             <h1 className={styles.title}>命盘解读</h1>
@@ -281,7 +281,7 @@ export default function BaziResultPage() {
           {/* 对象切换器（平铺胶囊按钮） */}
           {subjects.length > 0 && (
             <div className={styles.subjectSwitcherBar}>
-              <SubjectSwitcher 
+              <SubjectSwitcher
                 currentSubject={currentSubject}
                 subjects={subjects}
                 onSelect={handleSwitchSubject}
@@ -292,23 +292,23 @@ export default function BaziResultPage() {
 
           {/* 核心内容网格 */}
           <div className={styles.contentGrid}>
-            
+
             {/* 左侧：命盘卡片 */}
-            <motion.div 
+            <m.div
               className={styles.leftCol}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <BaziChartCard 
+              <BaziChartCard
                 data={baziResult}
                 subject={currentSubject}
                 isSaved={!currentSubject?.isLocal}
               />
-            </motion.div>
+            </m.div>
 
             {/* 右侧：AI 解读卡片（三个并列） */}
-            <motion.div 
+            <m.div
               className={styles.rightCol}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -339,7 +339,7 @@ export default function BaziResultPage() {
                   onUnlock={handleUnlockTheme}
                 />
               </div>
-            </motion.div>
+            </m.div>
           </div>
         </div>
       </main>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence } from 'framer-motion';
 import { ClockCounterClockwise, Trash, CaretRight, User, MagnifyingGlass } from '@phosphor-icons/react';
 import { useAuth } from '../context/AuthContext';
 import { useToast, LoadingSpinner, LoadingOverlay } from '../components/common'; // Import
@@ -128,7 +128,7 @@ export default function HistoryPage() {
             ) : (
               <AnimatePresence>
                 {filteredRecords.map((record) => (
-                  <motion.div
+                  <m.div
                     key={record.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -165,7 +165,7 @@ export default function HistoryPage() {
                         <CaretRight size={18} className={styles.arrow} />
                       </div>
                     </Link>
-                  </motion.div>
+                  </m.div>
                 ))}
               </AnimatePresence>
             )}

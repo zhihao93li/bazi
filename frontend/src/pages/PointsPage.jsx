@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { m } from 'framer-motion'
 import { Check, ArrowUp, ArrowDown, Gift } from '@phosphor-icons/react'
 import { useAuth } from '../context/AuthContext'
 import { useToast, Card, LoadingSpinner, LoadingOverlay } from '../components/common' // Import Loading
@@ -52,7 +52,7 @@ export default function PointsPage() {
 
   const handlePurchase = async (pkg) => {
     setPurchasing(pkg.id)
-    
+
     try {
       // 调用后端创建 Stripe Checkout Session
       const result = await api.post('/payment/create-checkout', {
@@ -104,16 +104,16 @@ export default function PointsPage() {
       <Navbar />
       <main className={styles.main}>
         {/* Background - Gold/Orange for Wealth */}
-        <GradientBackground 
-          gridCount={0} 
-          glowColors={['rgba(239, 123, 22, 0.3)', 'rgba(255, 47, 47, 0.2)']} 
+        <GradientBackground
+          gridCount={0}
+          glowColors={['rgba(239, 123, 22, 0.3)', 'rgba(255, 47, 47, 0.2)']}
           noiseOpacity={0.1}
           animated
           expanded
         />
 
         <div className={styles.container}>
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
@@ -138,14 +138,14 @@ export default function PointsPage() {
               <h2 className={styles.sectionTitle}>充值套餐</h2>
               <div className={styles.packagesGrid}>
                 {packages.map((pkg, index) => (
-                  <motion.div
+                  <m.div
                     key={pkg.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3, delay: index * 0.1 }}
                   >
-                    <Card 
-                      hover 
+                    <Card
+                      hover
                       padding="medium"
                       className={`${styles.packageCard} ${pkg.popular ? styles.popular : ''}`}
                     >
@@ -164,7 +164,7 @@ export default function PointsPage() {
                         {purchasing === pkg.id ? <LoadingSpinner size="small" color="white" /> : '购买'}
                       </Button>
                     </Card>
-                  </motion.div>
+                  </m.div>
                 ))}
               </div>
             </section>
@@ -181,7 +181,7 @@ export default function PointsPage() {
                   <div className={styles.emptyState}>暂无积分记录</div>
                 ) : (
                   transactions.map((tx, index) => (
-                    <motion.div
+                    <m.div
                       key={tx.id}
                       className={styles.transactionItem}
                       initial={{ opacity: 0, x: -20 }}
@@ -203,12 +203,12 @@ export default function PointsPage() {
                         </span>
                         <span className={styles.transactionBalance}>余额: {tx.balance}</span>
                       </div>
-                    </motion.div>
+                    </m.div>
                   ))
                 )}
               </Card>
             </section>
-          </motion.div>
+          </m.div>
         </div>
       </main>
       <Footer />

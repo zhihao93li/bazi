@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+import { m } from 'framer-motion'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import Button from '../components/Button'
@@ -15,7 +15,7 @@ export default function NotFoundPage() {
           <div className={styles.noise} />
         </div>
 
-        <motion.div 
+        <m.div
           className={styles.container}
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -25,14 +25,14 @@ export default function NotFoundPage() {
           <div className={styles.content}>
             <h2 className={styles.title}>Oops! This path leads to the past.</h2>
             <p className={styles.description}>
-              We regret to inform you that the page you're searching for seems to be beyond our grasp. 
+              We regret to inform you that the page you're searching for seems to be beyond our grasp.
               We apologize for any inconvenience this may cause.
             </p>
           </div>
           <Button to="/" size="large">
             Back to Home Page
           </Button>
-        </motion.div>
+        </m.div>
       </main>
       <Footer />
     </>

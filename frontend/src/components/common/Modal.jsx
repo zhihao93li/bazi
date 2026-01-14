@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { m, AnimatePresence } from 'framer-motion'
 import { X } from '@phosphor-icons/react'
 import styles from './Modal.module.css'
 
@@ -39,7 +39,7 @@ export default function Modal({
     <AnimatePresence>
       {isOpen && (
         <div className={styles.modalWrapper}>
-          <motion.div
+          <m.div
             className={styles.overlay}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -47,7 +47,7 @@ export default function Modal({
             transition={{ duration: 0.2 }}
             onClick={onClose}
           />
-          <motion.div
+          <m.div
             className={`${styles.modal} ${styles[size]} ${className}`}
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -67,7 +67,7 @@ export default function Modal({
             <div className={styles.content}>
               {children}
             </div>
-          </motion.div>
+          </m.div>
         </div>
       )}
     </AnimatePresence>

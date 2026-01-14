@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { m } from 'framer-motion'
 import { ArrowLeft } from '@phosphor-icons/react'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../components/common'
@@ -14,7 +14,7 @@ export default function LoginPage() {
   const navigate = useNavigate()
   const { login, register, isLoggedIn } = useAuth()
   const toast = useToast()
-  
+
   const [mode, setMode] = useState('login') // login | register
   const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState({
@@ -47,19 +47,19 @@ export default function LoginPage() {
 
   const validate = () => {
     const newErrors = {}
-    
+
     if (!formData.username.trim()) {
       newErrors.username = '请输入用户名'
     } else if (formData.username.length < 3) {
       newErrors.username = '用户名至少3位'
     }
-    
+
     if (!formData.password) {
       newErrors.password = '请输入密码'
     } else if (formData.password.length < 6) {
       newErrors.password = '密码至少6位'
     }
-    
+
     if (mode === 'register') {
       if (!formData.confirmPassword) {
         newErrors.confirmPassword = '请确认密码'
@@ -67,16 +67,16 @@ export default function LoginPage() {
         newErrors.confirmPassword = '两次密码不一致'
       }
     }
-    
+
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    
+
     if (!validate()) return
-    
+
     setIsLoading(true)
     try {
       if (mode === 'login') {
@@ -86,7 +86,7 @@ export default function LoginPage() {
         await register(formData.username, formData.password)
         toast.success('注册成功！已赠送 100 积分')
       }
-      
+
       // 跳转
       const callbackUrl = searchParams.get('callbackUrl') || '/bazi/input'
       navigate(callbackUrl, { replace: true })
@@ -104,18 +104,18 @@ export default function LoginPage() {
 
   return (
     <main className={styles.main}>
-        {/* Background - Customized for Login (Warm/Welcoming) */}
-        <GradientBackground 
-          gridCount={0} 
-          glowColors={['rgba(255, 47, 47, 0.2)', 'rgba(239, 123, 22, 0.2)']} 
-          noiseOpacity={0.1}
-          animated
-          expanded
-        />
+      {/* Background - Customized for Login (Warm/Welcoming) */}
+      <GradientBackground
+        gridCount={0}
+        glowColors={['rgba(255, 47, 47, 0.2)', 'rgba(239, 123, 22, 0.2)']}
+        noiseOpacity={0.1}
+        animated
+        expanded
+      />
 
       {/* 内容 */}
       <div className={styles.container}>
-        <motion.div
+        <m.div
           className={styles.content}
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -123,9 +123,9 @@ export default function LoginPage() {
         >
           {/* Logo */}
           <Link to="/" className={styles.logo}>
-            <img 
-              src="https://framerusercontent.com/images/E65CrTfgroEJwcxOOIN1vzXb5w.svg" 
-              alt="Prismo" 
+            <img
+              src="https://framerusercontent.com/images/E65CrTfgroEJwcxOOIN1vzXb5w.svg"
+              alt="Prismo"
               className={styles.logoImage}
             />
           </Link>
@@ -141,7 +141,7 @@ export default function LoginPage() {
               variant="light"
               fullWidth
             />
-            
+
             {/* 表单 */}
             <form onSubmit={handleSubmit} className={styles.form}>
               <FormInput
@@ -154,7 +154,7 @@ export default function LoginPage() {
                 maxLength={20}
                 required
               />
-              
+
               <FormInput
                 label="密码"
                 name="password"
@@ -166,7 +166,7 @@ export default function LoginPage() {
                 maxLength={32}
                 required
               />
-              
+
               {mode === 'register' && (
                 <FormInput
                   label="确认密码"
@@ -180,10 +180,10 @@ export default function LoginPage() {
                   required
                 />
               )}
-              
-              <Button 
-                type="submit" 
-                size="large" 
+
+              <Button
+                type="submit"
+                size="large"
                 disabled={isLoading}
                 className={styles.submitButton}
               >
@@ -197,7 +197,7 @@ export default function LoginPage() {
             <ArrowLeft size={18} />
             返回首页
           </Link>
-        </motion.div>
+        </m.div>
       </div>
     </main>
   )

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams, Link } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { m } from 'framer-motion'
 import { CheckCircle, Coins, ArrowRight } from '@phosphor-icons/react'
 import { useAuth } from '../context/AuthContext'
 import { Card, LoadingSpinner } from '../components/common'
@@ -66,16 +66,16 @@ export default function PaymentSuccessPage() {
     <>
       <Navbar />
       <main className={styles.main}>
-        <GradientBackground 
-          gridCount={0} 
-          glowColors={['rgba(39, 179, 44, 0.2)', 'rgba(74, 222, 128, 0.15)']} 
+        <GradientBackground
+          gridCount={0}
+          glowColors={['rgba(39, 179, 44, 0.2)', 'rgba(74, 222, 128, 0.15)']}
           noiseOpacity={0.08}
           animated
           expanded
         />
 
         <div className={styles.container}>
-          <motion.div
+          <m.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5 }}
@@ -88,14 +88,14 @@ export default function PaymentSuccessPage() {
                 </div>
               ) : (
                 <>
-                  <motion.div
+                  <m.div
                     className={styles.iconWrapper}
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     transition={{ type: 'spring', delay: 0.2 }}
                   >
                     <CheckCircle size={80} weight="fill" className={styles.successIcon} />
-                  </motion.div>
+                  </m.div>
 
                   <h1 className={styles.title}>支付成功</h1>
                   <p className={styles.subtitle}>您的积分已充值到账</p>
@@ -138,7 +138,7 @@ export default function PaymentSuccessPage() {
                 </>
               )}
             </Card>
-          </motion.div>
+          </m.div>
         </div>
       </main>
       <Footer />

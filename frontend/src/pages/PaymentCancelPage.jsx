@@ -1,5 +1,5 @@
 import { useNavigate, useSearchParams, Link } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { m } from 'framer-motion'
 import { XCircle, ArrowLeft } from '@phosphor-icons/react'
 import { Card } from '../components/common'
 import Button from '../components/Button'
@@ -17,29 +17,29 @@ export default function PaymentCancelPage() {
     <>
       <Navbar />
       <main className={styles.main}>
-        <GradientBackground 
-          gridCount={0} 
-          glowColors={['rgba(107, 114, 128, 0.2)', 'rgba(156, 163, 175, 0.15)']} 
+        <GradientBackground
+          gridCount={0}
+          glowColors={['rgba(107, 114, 128, 0.2)', 'rgba(156, 163, 175, 0.15)']}
           noiseOpacity={0.08}
           animated
           expanded
         />
 
         <div className={styles.container}>
-          <motion.div
+          <m.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5 }}
           >
             <Card padding="large" className={styles.resultCard}>
-              <motion.div
+              <m.div
                 className={styles.iconWrapper}
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ type: 'spring', delay: 0.2 }}
               >
                 <XCircle size={80} weight="fill" className={styles.cancelIcon} />
-              </motion.div>
+              </m.div>
 
               <h1 className={styles.title}>支付已取消</h1>
               <p className={styles.subtitle}>您可以随时重新选择套餐进行充值</p>
@@ -67,7 +67,7 @@ export default function PaymentCancelPage() {
                 </Link>
               </div>
             </Card>
-          </motion.div>
+          </m.div>
         </div>
       </main>
       <Footer />

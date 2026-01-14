@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { motion } from 'framer-motion'
+import { m } from 'framer-motion'
 import { GoogleLogo, Star, StarHalf } from '@phosphor-icons/react'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
@@ -13,7 +13,7 @@ export default function WaitlistPage() {
   const handleSubmit = (e) => {
     e.preventDefault()
     setStatus('loading')
-    
+
     // Simulate API call
     setTimeout(() => {
       setStatus('success')
@@ -28,14 +28,14 @@ export default function WaitlistPage() {
         <GradientBackground />
 
         <div className={styles.container}>
-          <motion.div 
+          <m.div
             className={styles.content}
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <img 
-              src="https://framerusercontent.com/images/T7nGca5vqvah8vLo7yTe6bea9Lc.png" 
+            <img
+              src="https://framerusercontent.com/images/T7nGca5vqvah8vLo7yTe6bea9Lc.png"
               alt="Prismo Logo"
               className={styles.logo}
             />
@@ -43,7 +43,7 @@ export default function WaitlistPage() {
             <div className={styles.textContent}>
               <h1 className={styles.title}>Get early access</h1>
               <p className={styles.subtitle}>
-                Be amongst the first to experience Wait and launch a viral waitlist. 
+                Be amongst the first to experience Wait and launch a viral waitlist.
                 Sign up to be notified when we launch!
               </p>
             </div>
@@ -57,13 +57,13 @@ export default function WaitlistPage() {
                 required
                 disabled={status === 'loading'}
               />
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 disabled={status === 'loading'}
                 className={status === 'success' ? styles.success : ''}
               >
-                {status === 'loading' ? 'Joining...' : 
-                 status === 'success' ? 'Joined!' : 'Get Started'}
+                {status === 'loading' ? 'Joining...' :
+                  status === 'success' ? 'Joined!' : 'Get Started'}
               </button>
             </form>
 
@@ -79,22 +79,22 @@ export default function WaitlistPage() {
               <div className={styles.divider} />
               <span>4.9 rating Based on 300k Users</span>
             </div>
-          </motion.div>
+          </m.div>
 
-          <motion.div 
+          <m.div
             className={styles.videoContainer}
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
             <div className={styles.videoWrapper}>
-              <img 
-                src="https://framerusercontent.com/images/BesZqi2DRImbj4FXrPED12W5zA.png" 
+              <img
+                src="https://framerusercontent.com/images/BesZqi2DRImbj4FXrPED12W5zA.png"
                 alt="Prismo Dashboard Preview"
                 className={styles.previewImage}
               />
             </div>
-          </motion.div>
+          </m.div>
         </div>
       </main>
       <Footer />

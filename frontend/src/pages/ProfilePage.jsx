@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
-import { 
-  User, 
+import { m } from 'framer-motion'
+import {
+  User,
   SignOut,
   YinYang,
   ClockCounterClockwise,
@@ -72,16 +72,16 @@ export default function ProfilePage() {
       <Navbar />
       <main className={styles.main}>
         {/* Background - Calm Blue/Purple for Personal Space */}
-        <GradientBackground 
-          gridCount={0} 
-          glowColors={['rgba(94, 106, 210, 0.2)', 'rgba(138, 67, 225, 0.2)']} 
+        <GradientBackground
+          gridCount={0}
+          glowColors={['rgba(94, 106, 210, 0.2)', 'rgba(138, 67, 225, 0.2)']}
           noiseOpacity={0.1}
           animated
           expanded
         />
 
         <div className={styles.container}>
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
@@ -134,7 +134,7 @@ export default function ProfilePage() {
               <h3 className={styles.sectionTitle}>快捷操作</h3>
               <div className={styles.actionsGrid}>
                 {quickActions.map((action, index) => (
-                  <motion.div
+                  <m.div
                     key={action.label}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -148,7 +148,7 @@ export default function ProfilePage() {
                         <span className={styles.actionLabel}>{action.label}</span>
                       </Link>
                     ) : (
-                      <button 
+                      <button
                         className={styles.actionCard}
                         onClick={action.onClick}
                       >
@@ -158,7 +158,7 @@ export default function ProfilePage() {
                         <span className={styles.actionLabel}>{action.label}</span>
                       </button>
                     )}
-                  </motion.div>
+                  </m.div>
                 ))}
               </div>
             </section>
@@ -188,15 +188,15 @@ export default function ProfilePage() {
 
             {/* 移动端退出按钮 */}
             <div className={styles.mobileLogout}>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={handleLogout}
                 className={styles.logoutButton}
               >
                 退出登录
               </Button>
             </div>
-          </motion.div>
+          </m.div>
         </div>
       </main>
       <Footer />
