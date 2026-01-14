@@ -7,6 +7,7 @@ import ProtectedRoute from './components/ProtectedRoute' // Import ProtectedRout
 import HomePage from './pages/HomePage'
 import WaitlistPage from './pages/WaitlistPage'
 import PrivacyPage from './pages/PrivacyPage'
+import TermsPage from './pages/TermsPage'
 import NotFoundPage from './pages/NotFoundPage'
 // 八字命理页面
 import LoginPage from './pages/LoginPage'
@@ -35,67 +36,68 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/waitlist" element={<WaitlistPage />} />
           <Route path="/privacy-policy" element={<PrivacyPage />} />
-          
+          <Route path="/terms" element={<TermsPage />} />
+
           {/* Bazi Public/Hybrid Routes */}
           <Route path="/bazi/input" element={<BaziInputPage />} />
           <Route path="/bazi" element={<BaziResultPage />} />
-          
+
           {/* Protected Routes */}
-          <Route 
-            path="/profile" 
+          <Route
+            path="/profile"
             element={
               <ProtectedRoute>
                 <ProfilePage />
               </ProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="/points" 
+          <Route
+            path="/points"
             element={
               <ProtectedRoute>
                 <PointsPage />
               </ProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="/payment/success" 
+          <Route
+            path="/payment/success"
             element={
               <ProtectedRoute>
                 <PaymentSuccessPage />
               </ProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="/payment/cancel" 
+          <Route
+            path="/payment/cancel"
             element={
               <ProtectedRoute>
                 <PaymentCancelPage />
               </ProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="/subjects" 
+          <Route
+            path="/subjects"
             element={
               <ProtectedRoute>
                 <SubjectsPage />
               </ProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="/history" 
+          <Route
+            path="/history"
             element={
               <ProtectedRoute>
                 <HistoryPage />
               </ProtectedRoute>
-            } 
+            }
           />
-          
+
           {/* Dev Routes (Keep public for easy access during dev) */}
           <Route path="/dev/components" element={<ComponentsPage />} />
           <Route path="/dev/birth-form" element={<BirthFormPage />} />
           <Route path="/dev/bazi-cards" element={<BaziCardsPage />} />
           <Route path="/dev/switcher" element={<SwitcherPage />} />
-          
+
           {/* 404 */}
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
