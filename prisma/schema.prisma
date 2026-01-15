@@ -139,7 +139,7 @@ model FortuneReport {
   deletedAt  DateTime? // 软删除
 
   user    User     @relation(fields: [userId], references: [id])
-  subject Subject? @relation(fields: [subjectId], references: [id])
+  subject Subject? @relation(fields: [subjectId], references: [id], onDelete: Cascade)
 
   @@index([userId, createdAt])
   @@index([subjectId, createdAt])
@@ -156,7 +156,7 @@ model ThemeAnalysis {
   createdAt  DateTime @default(now())
 
   user    User    @relation(fields: [userId], references: [id])
-  subject Subject @relation(fields: [subjectId], references: [id])
+  subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
 
   @@unique([subjectId, theme]) // 一个对象一个主题只有一条记录（永久解锁）
   @@index([userId, subjectId])
