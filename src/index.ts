@@ -87,13 +87,20 @@ console.log(`🚀 八字算命 API 服务启动中...`);
 console.log(`📍 监听端口: ${port}`);
 console.log(`🌐 CORS 来源: ${corsOrigin}`);
 
+// 同步数据库结构（确保 schema 与数据库一致）
+import { syncDatabase } from './lib/db/sync.js';
+try {
+  await syncDatabase();
+} catch (error) {
+  console.error('Failed to sync database:', error);
+}
+
 // 初始化数据库种子数据
 import { bootstrapDatabase } from './lib/db/bootstrap.js';
 try {
   await bootstrapDatabase();
 } catch (error) {
   console.error('Failed to bootstrap database:', error);
-  // Continue even if bootstrap fails, to ensure service availability
 }
 
 serve({
