@@ -18,8 +18,21 @@ import type {
 } from './types.js';
 import { DEFAULT_AI_CONFIG } from './types.js';
 
-// 配置文件路径
-const CONFIG_FILE_PATH = path.join(process.cwd(), 'config', 'ai-prompts.yaml');
+// 配置文件路径 - 支持开发和生产环境
+// 生产环境: dist/lib/ai/ 运行，config 在 dist/config/
+// 开发环境: src/lib/ai/ 运行（通过 tsx），config 在 ./config/
+function getConfigFilePath(): string {
+  // 首先尝试相对于当前模块位置（生产环境 dist/lib/ai/ -> dist/config/）
+  const prodPath = path.join(path.dirname(new URL(import.meta.url).pathname), '..', '..', 'config', 'ai-prompts.yaml');
+  if (fs.existsSync(prodPath)) {
+    return prodPath;
+  }
+
+  // 回退到 cwd/config（开发环境）
+  return path.join(process.cwd(), 'config', 'ai-prompts.yaml');
+}
+
+const CONFIG_FILE_PATH = getConfigFilePath();
 
 // 缓存配置和文件修改时间
 let cachedConfig: AIConfig | null = null;
