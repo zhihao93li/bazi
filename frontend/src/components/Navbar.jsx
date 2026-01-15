@@ -24,7 +24,7 @@ export default function Navbar() {
 
   const navLinks = [
     { label: '首页', path: '/' },
-    { label: '命理解读', path: '/bazi' },
+    { label: '人生解读', path: '/bazi' },
   ]
 
   const authLinks = []

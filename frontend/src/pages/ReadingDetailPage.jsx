@@ -188,7 +188,7 @@ export default function ReadingDetailPage() {
     const subjectName = currentSubject?.name || '命盘';
     const currentYear = new Date().getFullYear();
     const displayName = theme === 'yearly'
-        ? `${currentYear}年运势`
+        ? `${currentYear}成长建议`
         : themeConfig.name;
 
     return (

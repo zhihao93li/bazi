@@ -141,7 +141,7 @@ export default function BaziInputPage() {
           >
             <div className={styles.header}>
               <h1 className={styles.title}>八字排盘</h1>
-              <p className={styles.subtitle}>输入出生信息，开启命理解读</p>
+              <p className={styles.subtitle}>输入出生信息，开启人生解读</p>
             </div>
 
             <Card padding="large" className={styles.inputCard}>

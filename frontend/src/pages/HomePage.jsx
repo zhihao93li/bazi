@@ -13,7 +13,7 @@ export default function HomePage() {
         <Hero />
         <ComparisonSection />
         <Features />
-        <FAQ />
+        {/* <FAQ /> */}
       </main>
       <Footer />
     </>

@@ -248,9 +248,9 @@ export default function BaziResultPage() {
         <div className={styles.container}>
 
           {/* 顶部标题 */}
-          <div className={styles.topBar}>
+          {/* <div className={styles.topBar}>
             <h1 className={styles.title}>命盘解读</h1>
-          </div>
+          </div> */}
 
           {/* 对象切换器（平铺胶囊按钮） */}
           {subjects.length > 0 && (
@@ -310,7 +310,7 @@ export default function BaziResultPage() {
                 {/* 流年解读入口 */}
                 <ReadingEntryCard
                   theme="yearly"
-                  title={`${currentYear}年运势`}
+                  title={`${currentYear}成长建议`}
                   icon={CalendarBlank}
                   content={themesDataWithPricing.yearly_fortune.content}
                   description={READING_DESCRIPTIONS.yearly_fortune}

@@ -16,7 +16,7 @@ export default function YearlyFortuneCard({
   return (
     <ThemeCard
       theme="yearly_fortune"
-      title={`${currentYear}年运势`}
+      title={`${currentYear}成长建议`}
       price={price}
       isUnlocked={isUnlocked}
       content={content}
