@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.zeabur.app/v1.json",
   "build_command": "npx prisma generate && npm run build",
-  "start_command": "npx prisma db push --skip-generate && npm start",
+  "start_command": "npx prisma db push --skip-generate --accept-data-loss && npm start",
   "output_dir": "dist"
 }
