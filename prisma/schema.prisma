@@ -50,7 +50,7 @@ model Subject {
   initialAnalysis   Json?     // 初步解读结果（后台参考资料，不展示给用户）
   initialAnalyzedAt DateTime? // 初步解读时间
 
-  user           User            @relation(fields: [userId], references: [id])
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   reports        FortuneReport[]
   themeAnalyses  ThemeAnalysis[]
 
@@ -67,7 +67,7 @@ model VerificationCode {
   createdAt DateTime @default(now())
   userId    String?
 
-  user User? @relation(fields: [userId], references: [id])
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([phone, createdAt])
 }
@@ -79,7 +79,7 @@ model PointsAccount {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user User @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 
@@ -93,7 +93,7 @@ model PointsTransaction {
   orderId     String?
   createdAt   DateTime @default(now())
 
-  user User @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, createdAt])
 }
@@ -111,7 +111,7 @@ model PaymentOrder {
   createdAt       DateTime  @default(now())
   paidAt          DateTime?
 
-  user User @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, createdAt])
   @@index([orderNo])
@@ -138,7 +138,7 @@ model FortuneReport {
   createdAt  DateTime  @default(now())
   deletedAt  DateTime? // 软删除
 
-  user    User     @relation(fields: [userId], references: [id])
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   subject Subject? @relation(fields: [subjectId], references: [id], onDelete: Cascade)
 
   @@index([userId, createdAt])
@@ -155,7 +155,7 @@ model ThemeAnalysis {
   pointsCost Int      // 消耗积分
   createdAt  DateTime @default(now())
 
-  user    User    @relation(fields: [userId], references: [id])
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
 
   @@unique([subjectId, theme]) // 一个对象一个主题只有一条记录（永久解锁）
