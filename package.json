@@ -8,8 +8,8 @@
   },
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "prisma generate && prisma db push --skip-generate --accept-data-loss && tsc",
-    "start": "node dist/index.js",
+    "build": "prisma generate && tsc && cp -r prisma dist/prisma",
+    "start": "prisma db push --schema=dist/prisma/schema.prisma --accept-data-loss && node dist/index.js",
     "lint": "eslint",
     "test": "vitest --run",
     "test:watch": "vitest",
