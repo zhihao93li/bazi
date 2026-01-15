@@ -18,6 +18,7 @@ export interface ThemePricingInfo {
   name: string;
   description: string | null;
   price: number;
+  originalPrice: number | null;
   isActive: boolean;
 }
 
@@ -46,7 +47,14 @@ export interface ThemeUnlockResult {
  */
 export async function getAllThemePricing(): Promise<ThemePricingInfo[]> {
   const pricing = await prisma.themePricing.findMany({
-    where: { isActive: true },
+    // show all, frontend can filter by isActive if needed, or we just map it
+    // But requirement says "show coming soon", so we might need isActive=false items?
+    // The previous code filtered where: { isActive: true }.
+    // If I want to show "Coming Soon", I should probably allow isActive=false but sort them?
+    // Or maybe "Coming Soon" items are isActive=false?
+    // The requirement says "create in db, show in frontend, but not clickable".
+    // If I filter isActive: true, then synastry (isActive=false) won't show up.
+    // So I should remove the filter or change it.
     orderBy: { sortOrder: 'asc' },
   });
 
@@ -55,6 +63,7 @@ export async function getAllThemePricing(): Promise<ThemePricingInfo[]> {
     name: p.name,
     description: p.description,
     price: p.price,
+    originalPrice: p.originalPrice,
     isActive: p.isActive,
   }));
 }

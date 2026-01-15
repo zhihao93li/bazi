@@ -133,19 +133,25 @@ export default function ReadingDetailPage() {
             // 专项分析：获取当前Tab的数据
             const tabConfig = themeConfig.tabs.find(t => t.id === activeTab);
             if (!tabConfig) return null;
+            const pricing = themePricing[tabConfig.key] || {};
             return {
                 ...themesData[tabConfig.key],
                 themeKey: tabConfig.key,
                 name: tabConfig.name,
+                price: pricing.price || 0,
+                originalPrice: pricing.originalPrice || null,
             };
         } else {
+            const pricing = themePricing[themeConfig.key] || {};
             return {
                 ...themesData[themeConfig.key],
                 themeKey: themeConfig.key,
                 name: themeConfig.name,
+                price: pricing.price || 0,
+                originalPrice: pricing.originalPrice || null,
             };
         }
-    }, [theme, themeConfig, themesData, activeTab]);
+    }, [theme, themeConfig, themesData, activeTab, themePricing]);
 
     // 处理解锁
     const handleUnlock = useCallback(() => {
@@ -269,7 +275,10 @@ export default function ReadingDetailPage() {
                                     <span>解锁解读</span>
                                     <span className={styles.unlockPrice}>
                                         <Coins weight="fill" size={16} />
-                                        {currentThemeData?.price || themePricing[currentThemeData?.themeKey]?.price || 0}
+                                        {currentThemeData?.originalPrice && currentThemeData.originalPrice > (currentThemeData.price || 0) && (
+                                            <span className={styles.originalPrice}>{currentThemeData.originalPrice}</span>
+                                        )}
+                                        <span>{currentThemeData?.price || 0}</span>
                                     </span>
                                 </button>
                             </div>

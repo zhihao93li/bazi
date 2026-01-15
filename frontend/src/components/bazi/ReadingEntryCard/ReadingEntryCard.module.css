@@ -53,6 +53,38 @@
     font-weight: 500;
 }
 
+.originalPrice {
+    text-decoration: line-through;
+    color: var(--grey-40);
+    margin-right: 4px;
+    font-size: 11px;
+}
+
+.discountPrice {
+    color: var(--accent-orange);
+    font-weight: 600;
+}
+
+.comingSoonBadge {
+    font-size: 12px;
+    color: var(--grey-50);
+    background: var(--light-94);
+    padding: 4px 10px;
+    border-radius: var(--radius-full);
+    font-weight: 500;
+}
+
+.card.disabled {
+    opacity: 0.7;
+    cursor: default;
+    pointer-events: none;
+}
+
+.card.disabled:hover {
+    transform: none;
+    box-shadow: none;
+}
+
 .description {
     font-size: var(--text-small);
     color: var(--grey-30);

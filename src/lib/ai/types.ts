@@ -15,7 +15,8 @@ export type AnalysisTheme =
   | 'career_wealth'   // 事业财富
   | 'health'          // 身心健康
   | 'life_lesson'     // 人生课题
-  | 'yearly_fortune'; // 流年解读
+  | 'yearly_fortune'  // 流年解读
+  | 'synastry';       // 合盘分析
 
 /**
  * 主题分类
@@ -78,6 +79,13 @@ export const THEME_METADATA: Record<AnalysisTheme, ThemeMeta> = {
     description: '当年运势分析与趋吉避凶',
     category: 'standalone',
     icon: 'calendar',
+  },
+  synastry: {
+    id: 'synastry',
+    name: '合盘分析',
+    description: '双人关系深度解读',
+    category: 'standalone',
+    icon: 'users',
   },
 };
 
@@ -160,6 +168,7 @@ export interface ThemePromptTemplates {
   health: PromptTemplate;
   life_lesson: PromptTemplate;
   yearly_fortune: PromptTemplate;
+  synastry: PromptTemplate;
 }
 
 /**

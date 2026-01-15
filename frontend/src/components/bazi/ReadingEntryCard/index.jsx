@@ -34,26 +34,36 @@ export default function ReadingEntryCard({
     description,
     isUnlocked = false,
     price = 0,
+    originalPrice = null,
+    comingSoon = false,
     subjectId,
     className = '',
 }) {
     const summary = truncateSummary(content);
-    const linkTo = `/bazi/reading/${theme}?subjectId=${subjectId}`;
+    // 如果是即将推出，不需要链接
+    const linkTo = comingSoon ? '#' : `/bazi/reading/${theme}?subjectId=${subjectId}`;
 
     return (
-        <Card className={`${styles.card} ${className}`}>
-            <Link to={linkTo} className={styles.link}>
+        <Card className={`${styles.card} ${className} ${comingSoon ? styles.disabled : ''}`}>
+            <Link to={linkTo} className={styles.link} onClick={e => comingSoon && e.preventDefault()}>
                 <div className={styles.header}>
                     <span className={styles.icon}>
                         {IconComponent && <IconComponent size={22} weight="duotone" />}
                     </span>
                     <h3 className={styles.title}>{title}</h3>
-                    {isUnlocked ? (
+                    {comingSoon ? (
+                        <span className={styles.comingSoonBadge}>即将推出</span>
+                    ) : isUnlocked ? (
                         <span className={styles.statusUnlocked}>已解锁</span>
                     ) : (
                         <span className={styles.statusLocked}>
                             <Lock size={12} weight="fill" />
-                            {price}积分
+                            {originalPrice && originalPrice > price && (
+                                <span className={styles.originalPrice}>{originalPrice}</span>
+                            )}
+                            <span className={originalPrice ? styles.discountPrice : ''}>
+                                {price}积分
+                            </span>
                         </span>
                     )}
                 </div>

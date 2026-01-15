@@ -7,8 +7,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { parse as parseYaml } from 'yaml';
-import type { 
-  AIConfig, 
+import type {
+  AIConfig,
   PromptTemplates,
   NewAIConfig,
   NewPromptTemplates,
@@ -61,6 +61,10 @@ const DEFAULT_NEW_AI_CONFIG: NewAIConfig = {
       yearly_fortune: {
         system: '你是一位资深的命理分析师，专注于流年运势分析。',
         user: '请分析此人的当年运势。',
+      },
+      synastry: {
+        system: '你是一位资深的命理分析师，专注于合盘分析。',
+        user: '请分析双人合盘。',
       },
     },
   },
@@ -117,6 +121,7 @@ function validateThemePrompts(themes: unknown): themes is ThemePromptTemplates {
     'health',
     'life_lesson',
     'yearly_fortune',
+    'synastry',
   ];
 
   return requiredKeys.every(
@@ -133,7 +138,7 @@ function validateNewPrompts(prompts: unknown): prompts is NewPromptTemplates {
   }
 
   const p = prompts as Record<string, unknown>;
-  
+
   if (!validatePromptTemplate(p.initial)) {
     return false;
   }

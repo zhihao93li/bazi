@@ -164,11 +164,12 @@ model ThemeAnalysis {
 
 // 主题价格配置
 model ThemePricing {
-  id          String  @id @default(cuid())
-  theme       String  @unique // 主题标识
-  name        String          // 显示名称
-  description String?         // 主题描述
-  price       Int             // 积分价格
-  isActive    Boolean @default(true)
-  sortOrder   Int     @default(0)
+  id            String  @id @default(cuid())
+  theme         String  @unique // 主题标识
+  name          String          // 显示名称
+  description   String?         // 主题描述
+  price         Int             // 积分价格（当前价格/折扣价）
+  originalPrice Int?            // 原价（用于显示划线价格，如200打折到150）
+  isActive      Boolean @default(true)
+  sortOrder     Int     @default(0)
 }

@@ -87,6 +87,15 @@ console.log(`🚀 八字算命 API 服务启动中...`);
 console.log(`📍 监听端口: ${port}`);
 console.log(`🌐 CORS 来源: ${corsOrigin}`);
 
+// 初始化数据库种子数据
+import { bootstrapDatabase } from './lib/db/bootstrap.js';
+try {
+  await bootstrapDatabase();
+} catch (error) {
+  console.error('Failed to bootstrap database:', error);
+  // Continue even if bootstrap fails, to ensure service availability
+}
+
 serve({
   fetch: app.fetch,
   port,

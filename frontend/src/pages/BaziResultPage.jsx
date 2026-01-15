@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useCallback, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { m } from 'framer-motion';
-import { Palette, CalendarBlank } from '@phosphor-icons/react';
+import { Palette, CalendarBlank, Users } from '@phosphor-icons/react';
 import { useAuth } from '../context/AuthContext';
 import { useToast, LoadingOverlay } from '../components/common';
 import Navbar from '../components/Navbar';
@@ -36,6 +36,7 @@ import styles from './BaziResultPage.module.css';
 const READING_DESCRIPTIONS = {
   life_color: '探索你的核心性格与天生特质',
   yearly_fortune: '了解今年的机遇与挑战',
+  synastry: '双人关系深度解读',
 };
 
 /**
@@ -48,6 +49,7 @@ const DEFAULT_THEMES_DATA = {
   health: { isUnlocked: false, content: null, price: 0 },
   life_lesson: { isUnlocked: false, content: null, price: 0 },
   yearly_fortune: { isUnlocked: false, content: null, price: 0 },
+  synastry: { isUnlocked: false, content: null, price: 0 },
 };
 
 export default function BaziResultPage() {
@@ -91,10 +93,15 @@ export default function BaziResultPage() {
   const themesDataWithPricing = useMemo(() => {
     const result = { ...DEFAULT_THEMES_DATA };
     Object.keys(result).forEach(theme => {
+      // 确保后端返回了该主题的数据，如果没有则使用默认值
+      const backendData = themesData?.[theme] || {};
+      const pricingInfo = themePricing[theme] || {};
+
       result[theme] = {
         ...result[theme],
-        ...(themesData?.[theme] || {}),
-        price: themePricing[theme]?.price || 0,
+        ...backendData,
+        price: pricingInfo.price || 0,
+        originalPrice: pricingInfo.originalPrice || null,
       };
     });
     return result;
@@ -309,6 +316,18 @@ export default function BaziResultPage() {
                   description={READING_DESCRIPTIONS.yearly_fortune}
                   isUnlocked={themesDataWithPricing.yearly_fortune.isUnlocked}
                   price={themesDataWithPricing.yearly_fortune.price}
+                  originalPrice={themesDataWithPricing.yearly_fortune.originalPrice}
+                  subjectId={subjectId}
+                />
+
+                {/* 合盘分析入口 (即将推出) */}
+                <ReadingEntryCard
+                  theme="synastry"
+                  title="合盘分析"
+                  icon={Users}
+                  description={READING_DESCRIPTIONS.synastry}
+                  price={themesDataWithPricing.synastry.price}
+                  comingSoon={true}
                   subjectId={subjectId}
                 />
               </div>
