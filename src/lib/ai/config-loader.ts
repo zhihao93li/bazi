@@ -164,16 +164,41 @@ function validateThemePrompts(themes: unknown): themes is ThemePromptTemplates {
  */
 function validateNewPrompts(prompts: unknown): prompts is NewPromptTemplates {
   if (!prompts || typeof prompts !== 'object') {
+    console.warn('[AI Config] Prompts is not an object');
     return false;
   }
 
   const p = prompts as Record<string, unknown>;
 
   if (!validatePromptTemplate(p.initial)) {
+    console.warn('[AI Config] Initial prompt template validation failed');
     return false;
   }
 
-  return validateThemePrompts(p.themes);
+  // Detailed theme validation logging
+  const themes = p.themes as Record<string, unknown> | undefined;
+  if (!themes || typeof themes !== 'object') {
+    console.warn('[AI Config] Themes is not an object');
+    return false;
+  }
+
+  const requiredKeys = ['life_color', 'relationship', 'career_wealth', 'health', 'life_lesson', 'yearly_fortune', 'synastry'];
+
+  for (const key of requiredKeys) {
+    if (!(key in themes)) {
+      console.warn(`[AI Config] Missing theme: ${key}`);
+      return false;
+    }
+    if (!validatePromptTemplate(themes[key])) {
+      console.warn(`[AI Config] Invalid prompt template for theme: ${key}`);
+      const t = themes[key] as Record<string, unknown>;
+      console.warn(`[AI Config]   system type: ${typeof t?.system}, user type: ${typeof t?.user}`);
+      return false;
+    }
+  }
+
+  console.log('[AI Config] All prompt templates validated successfully');
+  return true;
 }
 
 /**
