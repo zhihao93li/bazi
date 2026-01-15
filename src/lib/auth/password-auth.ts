@@ -10,6 +10,8 @@ import prisma from "../prisma.js";
 
 // 密码最小长度
 const MIN_PASSWORD_LENGTH = 6;
+// 密码最大长度（bcrypt 只处理前 72 字节，设置 72 作为上限）
+const MAX_PASSWORD_LENGTH = 72;
 
 // 初始赠送积分数量（可通过环境变量配置）
 const INITIAL_GIFT_POINTS = parseInt(process.env.INITIAL_GIFT_POINTS || "100", 10);
@@ -48,11 +50,14 @@ export function validateUsername(username: string): { valid: boolean; message: s
 
 /**
  * 验证密码格式
- * 密码规则：至少6位
+ * 密码规则：6-72位（bcrypt 只处理前 72 字节）
  */
 export function validatePassword(password: string): { valid: boolean; message: string } {
   if (!password || password.length < MIN_PASSWORD_LENGTH) {
     return { valid: false, message: `密码至少${MIN_PASSWORD_LENGTH}位` };
+  }
+  if (password.length > MAX_PASSWORD_LENGTH) {
+    return { valid: false, message: `密码最多${MAX_PASSWORD_LENGTH}位` };
   }
   return { valid: true, message: "" };
 }

@@ -126,7 +126,7 @@
 }
 
 /* 响应式：小屏幕时图例移到下方 */
-@media (max-width: 520px) {
+@media (max-width: 480px) {
   .mainContent {
     flex-direction: column;
     gap: var(--spacing-md);

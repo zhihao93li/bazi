@@ -56,7 +56,7 @@
 }
 
 /* 响应式 */
-@media (max-width: 600px) {
+@media (max-width: 768px) {
   .main {
     padding: 100px 20px 80px;
   }

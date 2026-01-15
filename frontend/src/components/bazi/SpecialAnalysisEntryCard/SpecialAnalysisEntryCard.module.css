@@ -1,0 +1,107 @@
+.card {
+    transition: all 0.2s;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--light-90);
+}
+
+.icon {
+    font-size: 20px;
+}
+
+.title {
+    flex: 1;
+    font-size: var(--heading-5);
+    font-weight: 600;
+    color: var(--dark-7);
+    margin: 0;
+}
+
+.status {
+    font-size: 12px;
+    color: var(--grey-50);
+    background: var(--light-94);
+    padding: 4px 10px;
+    border-radius: var(--radius-full);
+    font-weight: 500;
+}
+
+/* 2x2 网格 */
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 20px 16px;
+    background: var(--light-96);
+    border: 1px solid var(--light-90);
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    transition: all 0.2s;
+    position: relative;
+}
+
+.item:hover {
+    background: var(--light-94);
+    border-color: var(--light-85);
+    transform: translateY(-2px);
+}
+
+.item.unlocked {
+    background: rgba(39, 179, 44, 0.05);
+    border-color: rgba(39, 179, 44, 0.2);
+}
+
+.item.unlocked:hover {
+    background: rgba(39, 179, 44, 0.1);
+}
+
+.itemIcon {
+    font-size: 24px;
+}
+
+.itemName {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--dark-7);
+}
+
+.lockIcon {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: var(--grey-50);
+    opacity: 0.6;
+}
+
+/* 响应式 */
+@media (max-width: 480px) {
+    .grid {
+        gap: 8px;
+    }
+
+    .item {
+        padding: 16px 12px;
+    }
+
+    .itemIcon {
+        font-size: 20px;
+    }
+
+    .itemName {
+        font-size: 13px;
+    }
+}

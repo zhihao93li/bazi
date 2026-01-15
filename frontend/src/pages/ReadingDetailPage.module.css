@@ -1,0 +1,377 @@
+.main {
+    min-height: 100vh;
+    background: var(--light-95);
+    padding: 100px 24px 80px;
+    position: relative;
+}
+
+.container {
+    max-width: 720px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+}
+
+/* 页头 */
+.header {
+    margin-bottom: 24px;
+}
+
+.backButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--grey-50);
+    font-size: var(--text-small);
+    margin-bottom: 16px;
+    transition: color 0.2s;
+}
+
+.backButton:hover {
+    color: var(--dark-7);
+}
+
+.title {
+    font-size: var(--heading-4);
+    font-weight: 600;
+    color: var(--dark-7);
+    margin: 0;
+}
+
+/* Tab导航 */
+.tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--light-90);
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+}
+
+.tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.tab {
+    padding: 10px 16px;
+    background: var(--light-96);
+    border: 1px solid var(--light-90);
+    border-radius: var(--radius-full);
+    color: var(--grey-50);
+    font-size: var(--text-small);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.tab:hover {
+    background: var(--light-94);
+    color: var(--dark-7);
+}
+
+.tabActive {
+    background: var(--dark-7);
+    border-color: var(--dark-7);
+    color: white;
+}
+
+.tabActive:hover {
+    background: var(--dark-12);
+    color: white;
+}
+
+.tabLocked {
+    opacity: 0.7;
+}
+
+/* 内容卡片 */
+.contentCard {
+    min-height: 400px;
+    margin-bottom: 40px;
+}
+
+/* 内容区域 */
+.content {
+    color: var(--dark-12);
+    font-size: var(--text-small);
+    line-height: 1.8;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.content h2 {
+    font-size: var(--heading-5);
+    font-weight: 600;
+    margin: 24px 0 12px;
+    color: var(--dark-7);
+}
+
+.content h2:first-child {
+    margin-top: 0;
+}
+
+.content h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 20px 0 10px;
+    color: var(--dark-7);
+}
+
+.content p {
+    margin-bottom: 16px;
+    color: var(--grey-30);
+}
+
+.content ul,
+.content ol {
+    margin-bottom: 16px;
+    padding-left: 24px;
+}
+
+.content li {
+    margin-bottom: 8px;
+    color: var(--grey-30);
+}
+
+.content strong {
+    color: var(--dark-7);
+    font-weight: 600;
+}
+
+/* 加载状态 */
+.loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+    gap: 16px;
+    color: var(--grey-50);
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--light-90);
+    border-top-color: var(--dark-7);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.loadingHint {
+    font-size: var(--text-small);
+    color: var(--grey-50);
+}
+
+/* 锁定状态 */
+.locked {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+    gap: 16px;
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.lockedIcon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--light-94);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--grey-50);
+}
+
+.lockedTitle {
+    font-size: var(--heading-5);
+    font-weight: 600;
+    color: var(--dark-7);
+    margin: 0;
+}
+
+.lockedDesc {
+    font-size: var(--text-small);
+    color: var(--grey-50);
+    max-width: 320px;
+    margin: 0;
+}
+
+.unlockButton {
+    margin-top: 8px;
+    background: var(--dark-7);
+    color: white;
+    padding: 14px 28px;
+    border-radius: var(--radius-full);
+    font-weight: 500;
+    font-size: var(--text-small);
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.unlockButton:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.unlockButton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.unlockPrice {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 600;
+    opacity: 0.9;
+}
+
+/* 其他解读 */
+.otherReadings {
+    margin-top: 40px;
+}
+
+.otherTitle {
+    font-size: var(--text-small);
+    font-weight: 600;
+    color: var(--grey-50);
+    margin-bottom: 16px;
+}
+
+.otherGrid {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.otherCard {
+    flex: 1;
+    min-width: 140px;
+    padding: 16px;
+    background: var(--absolute-white);
+    border: 1px solid var(--light-90);
+    border-radius: var(--radius-lg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    text-align: center;
+    transition: all 0.2s;
+}
+
+.otherCard:hover {
+    border-color: var(--light-85);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+.otherIcon {
+    font-size: 24px;
+}
+
+.otherName {
+    font-size: var(--text-small);
+    font-weight: 500;
+    color: var(--dark-7);
+}
+
+.otherStatus {
+    font-size: 12px;
+    color: var(--grey-50);
+    padding: 2px 8px;
+    background: var(--light-94);
+    border-radius: var(--radius-full);
+}
+
+.otherStatus.unlocked {
+    background: rgba(39, 179, 44, 0.1);
+    color: var(--accent-green);
+}
+
+/* 动画 */
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 响应式 - 平板 */
+@media (max-width: 1024px) {
+    .container {
+        max-width: 100%;
+        padding: 0 40px;
+    }
+}
+
+/* 响应式 - 手机 */
+@media (max-width: 768px) {
+    .main {
+        padding: 90px 20px 60px;
+    }
+
+    .container {
+        padding: 0;
+    }
+
+    .title {
+        font-size: var(--heading-5);
+    }
+
+    .tabs {
+        gap: 6px;
+    }
+
+    .tab {
+        padding: 8px 12px;
+        font-size: 14px;
+    }
+
+    .otherGrid {
+        flex-direction: column;
+    }
+
+    .otherCard {
+        flex-direction: row;
+        justify-content: space-between;
+        min-width: 100%;
+    }
+}
+
+/* 响应式 - 超小屏 */
+@media (max-width: 480px) {
+    .main {
+        padding: 80px 16px 50px;
+    }
+
+    .lockedDesc {
+        font-size: 14px;
+    }
+
+    .unlockButton {
+        padding: 12px 20px;
+        font-size: 14px;
+    }
+}

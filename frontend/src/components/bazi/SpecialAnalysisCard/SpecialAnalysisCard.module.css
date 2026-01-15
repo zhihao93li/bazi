@@ -259,7 +259,7 @@
 }
 
 /* 响应式 */
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .tabs {
     gap: var(--spacing-sm);
   }

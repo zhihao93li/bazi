@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useCallback, useRef } from 'react';
-import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { m } from 'framer-motion';
+import { Palette, CalendarBlank } from '@phosphor-icons/react';
 import { useAuth } from '../context/AuthContext';
 import { useToast, LoadingOverlay } from '../components/common';
 import Navbar from '../components/Navbar';
@@ -16,7 +17,6 @@ import {
   useSubjectDetail,
   useThemePricing,
   useThemes,
-  useUnlockTheme,
   useSubjectSwitchEffect,
 } from '../hooks';
 
@@ -24,17 +24,19 @@ import {
 import BaziChartCard from '../components/bazi/BaziChartCard';
 import SubjectSwitcher from '../components/bazi/SubjectSwitcher';
 
-// 新版主题解读组件
-import LifeColorCard from '../components/bazi/LifeColorCard';
-import SpecialAnalysisCard from '../components/bazi/SpecialAnalysisCard';
-import YearlyFortuneCard from '../components/bazi/YearlyFortuneCard';
+// 解读入口卡片组件
+import ReadingEntryCard from '../components/bazi/ReadingEntryCard';
+import SpecialAnalysisEntryCard from '../components/bazi/SpecialAnalysisEntryCard';
 
 import styles from './BaziResultPage.module.css';
 
 /**
- * 专项分析的主题列表
+ * 解读卡片描述文案
  */
-const SPECIAL_THEMES = ['relationship', 'career_wealth', 'health', 'life_lesson'];
+const READING_DESCRIPTIONS = {
+  life_color: '探索你的核心性格与天生特质',
+  yearly_fortune: '了解今年的机遇与挑战',
+};
 
 /**
  * 默认主题数据（用于未登录或无数据时）
@@ -50,9 +52,8 @@ const DEFAULT_THEMES_DATA = {
 
 export default function BaziResultPage() {
   const navigate = useNavigate();
-  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { isLoggedIn, updateUser } = useAuth();
+  const { isLoggedIn } = useAuth();
   const toast = useToast();
 
   // 从 URL 获取参数
@@ -107,23 +108,7 @@ export default function BaziResultPage() {
   // 删除命盘
   const deleteSubjectMutation = useDeleteSubject();
 
-  // 解锁主题
-  const unlockThemeMutation = useUnlockTheme({
-    onSuccess: (data, { theme }) => {
-      toast.success(`「${themePricing[theme]?.name || theme}」解锁成功`);
-    },
-    onError: (error, { theme }) => {
-      if (error.code === 'INSUFFICIENT_POINTS') {
-        toast.error('积分不足，请先充值');
-        navigate('/points');
-      } else if (error.code === 'ALREADY_UNLOCKED') {
-        // 已解锁，静默处理（Query 会自动刷新数据）
-      } else {
-        toast.error(error.message || '解锁失败');
-      }
-    },
-    updateUser,
-  });
+  // 解锁主题已移至 ReadingDetailPage 落地页处理
 
   // ==================== 副作用处理 ====================
 
@@ -188,27 +173,6 @@ export default function BaziResultPage() {
 
   // ==================== 事件处理 ====================
 
-  // 处理主题解锁
-  const handleUnlockTheme = useCallback((theme) => {
-    if (!isLoggedIn) {
-      toast.info('请先登录以使用 AI 解读');
-      navigate('/login?callbackUrl=' + encodeURIComponent(location.pathname + location.search));
-      return;
-    }
-
-    if (!subjectId) {
-      toast.info('本地命盘需要先同步到云端才能使用 AI 解读');
-      return;
-    }
-
-    // 检查该主题是否已经在加载中
-    if (themesDataWithPricing[theme]?.isLoading) {
-      return; // 静默忽略，该主题已在加载
-    }
-
-    unlockThemeMutation.mutate({ subjectId, theme });
-  }, [isLoggedIn, subjectId, unlockThemeMutation, themesDataWithPricing, toast, navigate, location]);
-
   // 处理命盘切换
   const handleSwitchSubject = useCallback((subject) => {
     if (subject.isLocal) {
@@ -241,14 +205,8 @@ export default function BaziResultPage() {
 
   // ==================== 计算派生数据 ====================
 
-  // 构建专项分析的数据
-  const specialAnalysisData = useMemo(() => {
-    const data = {};
-    SPECIAL_THEMES.forEach(theme => {
-      data[theme] = themesDataWithPricing[theme];
-    });
-    return data;
-  }, [themesDataWithPricing]);
+  // 获取当前年份（用于流年解读标题）
+  const currentYear = new Date().getFullYear();
 
   // 八字数据
   const baziResult = currentSubject?.baziData;
@@ -316,7 +274,7 @@ export default function BaziResultPage() {
               />
             </m.div>
 
-            {/* 右侧：AI 解读卡片（三个并列） */}
+            {/* 右侧：AI 解读入口卡片 */}
             <m.div
               className={styles.rightCol}
               initial={{ opacity: 0, y: 20 }}
@@ -324,28 +282,34 @@ export default function BaziResultPage() {
               transition={{ duration: 0.5, delay: 0.1 }}
             >
               <div className={styles.themeCardsWrapper}>
-                {/* 生命底色 */}
-                <LifeColorCard
-                  isUnlocked={themesDataWithPricing.life_color.isUnlocked}
+                {/* 生命底色入口 */}
+                <ReadingEntryCard
+                  theme="life-color"
+                  title="生命底色"
+                  icon={Palette}
                   content={themesDataWithPricing.life_color.content}
+                  description={READING_DESCRIPTIONS.life_color}
+                  isUnlocked={themesDataWithPricing.life_color.isUnlocked}
                   price={themesDataWithPricing.life_color.price}
-                  isLoading={themesDataWithPricing.life_color.isLoading}
-                  onUnlock={handleUnlockTheme}
+                  subjectId={subjectId}
                 />
 
-                {/* 专项分析（4个tab） */}
-                <SpecialAnalysisCard
-                  themesData={specialAnalysisData}
-                  onUnlock={handleUnlockTheme}
+                {/* 专项分析入口（2x2网格） */}
+                <SpecialAnalysisEntryCard
+                  themesData={themesDataWithPricing}
+                  subjectId={subjectId}
                 />
 
-                {/* 流年解读 */}
-                <YearlyFortuneCard
-                  isUnlocked={themesDataWithPricing.yearly_fortune.isUnlocked}
+                {/* 流年解读入口 */}
+                <ReadingEntryCard
+                  theme="yearly"
+                  title={`${currentYear}年运势`}
+                  icon={CalendarBlank}
                   content={themesDataWithPricing.yearly_fortune.content}
+                  description={READING_DESCRIPTIONS.yearly_fortune}
+                  isUnlocked={themesDataWithPricing.yearly_fortune.isUnlocked}
                   price={themesDataWithPricing.yearly_fortune.price}
-                  isLoading={themesDataWithPricing.yearly_fortune.isLoading}
-                  onUnlock={handleUnlockTheme}
+                  subjectId={subjectId}
                 />
               </div>
             </m.div>

@@ -32,7 +32,7 @@ const prisma: PrismaClient = (() => {
   if (process.env.NODE_ENV === "production") {
     return createPrismaClient();
   }
-  
+
   if (!global.__prisma) {
     global.__prisma = createPrismaClient();
   }

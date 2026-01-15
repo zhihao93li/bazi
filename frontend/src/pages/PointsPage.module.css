@@ -250,7 +250,7 @@
 }
 
 /* 响应式 */
-@media (max-width: 900px) {
+@media (max-width: 768px) {
   .packagesGrid {
     grid-template-columns: repeat(2, 1fr);
   }

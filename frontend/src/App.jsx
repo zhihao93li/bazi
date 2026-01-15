@@ -3,6 +3,7 @@ import { Routes, Route } from 'react-router-dom'
 import { ToastProvider, LoadingOverlay } from './components/common'
 import { AuthProvider } from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
+import GuestRoute from './components/GuestRoute'
 
 // 页面级加载组件 - 使用全屏遮罩
 const LoadingFallback = () => <LoadingOverlay fixed text="加载中..." />
@@ -26,6 +27,7 @@ const PaymentCancelPage = lazy(() => import('./pages/PaymentCancelPage'))
 const SubjectsPage = lazy(() => import('./pages/SubjectsPage'))
 const BaziInputPage = lazy(() => import('./pages/BaziInputPage'))
 const BaziResultPage = lazy(() => import('./pages/BaziResultPage'))
+const ReadingDetailPage = lazy(() => import('./pages/ReadingDetailPage'))
 const HistoryPage = lazy(() => import('./pages/HistoryPage'))
 
 // Dev pages - 懒加载
@@ -42,7 +44,7 @@ function App() {
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<HomePage />} />
-            <Route path="/login" element={<LoginPage />} />
+            <Route path="/login" element={<GuestRoute><LoginPage /></GuestRoute>} />
             <Route path="/waitlist" element={<WaitlistPage />} />
             <Route path="/privacy-policy" element={<PrivacyPage />} />
             <Route path="/terms" element={<TermsPage />} />
@@ -51,6 +53,7 @@ function App() {
             {/* Bazi Public/Hybrid Routes */}
             <Route path="/bazi/input" element={<BaziInputPage />} />
             <Route path="/bazi" element={<BaziResultPage />} />
+            <Route path="/bazi/reading/:theme" element={<ReadingDetailPage />} />
 
             {/* Protected Routes */}
             <Route

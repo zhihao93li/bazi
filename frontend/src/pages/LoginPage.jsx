@@ -14,7 +14,7 @@ import styles from './LoginPage.module.css'
 export default function LoginPage() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
-  const { login, register, isLoggedIn } = useAuth()
+  const { login, register } = useAuth()
   const toast = useToast()
 
   const [mode, setMode] = useState('login') // login | register
@@ -25,13 +25,6 @@ export default function LoginPage() {
     confirmPassword: '',
   })
   const [errors, setErrors] = useState({})
-
-  // 如果已登录，跳转到首页或回调地址
-  if (isLoggedIn) {
-    const callbackUrl = searchParams.get('callbackUrl') || '/'
-    navigate(callbackUrl, { replace: true })
-    return null
-  }
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -183,6 +176,7 @@ export default function LoginPage() {
                 placeholder="请输入用户名"
                 error={errors.username}
                 maxLength={20}
+                autoComplete="off"
                 required
               />
 
@@ -195,6 +189,7 @@ export default function LoginPage() {
                 placeholder="请输入密码"
                 error={errors.password}
                 maxLength={32}
+                autoComplete="new-password"
                 required
               />
 
@@ -208,6 +203,7 @@ export default function LoginPage() {
                   placeholder="请再次输入密码"
                   error={errors.confirmPassword}
                   maxLength={32}
+                  autoComplete="new-password"
                   required
                 />
               )}

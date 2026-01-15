@@ -111,7 +111,7 @@
 }
 
 /* Mobile responsive */
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .select {
     padding: 12px 10px;
     font-size: 14px;

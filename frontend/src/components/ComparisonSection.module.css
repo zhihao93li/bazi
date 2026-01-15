@@ -227,7 +227,7 @@
 }
 
 /* Mobile */
-@media (max-width: 900px) {
+@media (max-width: 768px) {
     .section {
         padding: 60px 20px;
     }
