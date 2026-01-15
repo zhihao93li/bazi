@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.zeabur.app/v1.json",
   "build_command": "npx prisma generate && npm run build",
-  "start_command": "npx prisma migrate deploy && npm start",
+  "start_command": "npx prisma db execute --file scripts/pre-start.sql && npx prisma migrate deploy && npm start",
   "output_dir": "dist"
 }
