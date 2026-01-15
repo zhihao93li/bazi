@@ -12,6 +12,13 @@ export default function RefundPage() {
           <p className={styles.lastUpdated}>最后更新：2026年1月</p>
 
           <section className={styles.section}>
+            <h2>服务提供方</h2>
+            <p>
+              本退款政策由 CHONGSEN HONGKONG LIMITED（以下简称"本公司"或"我们"）制定并执行。
+            </p>
+          </section>
+
+          <section className={styles.section}>
             <h2>1. 退款申请</h2>
             <p>
               如您对我们的服务不满意，或有其他合理原因需要申请退款，请发送邮件至 
@@ -55,6 +62,8 @@ export default function RefundPage() {
             <h2>5. 联系我们</h2>
             <p>
               如有任何关于退款的问题，请联系：
+              <br />
+              公司：CHONGSEN HONGKONG LIMITED
               <br />
               邮箱：<a href="mailto:tafuofficial@gmail.com">tafuofficial@gmail.com</a>
             </p>

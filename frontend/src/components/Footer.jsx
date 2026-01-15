@@ -31,7 +31,7 @@ export default function Footer() {
 
         <div className={styles.bottom}>
           <p className={styles.copyright}>
-            © 2026 CHONGSEN. All rights reserved.
+            © 2026 CHONGSEN HONGKONG LIMITED. All rights reserved.
           </p>
           <div className={styles.legalLinks}>
             {legalLinks.map((link, index) => (

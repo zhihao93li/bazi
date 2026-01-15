@@ -5,6 +5,10 @@ import styles from './PrivacyPage.module.css'
 
 const sections = [
   {
+    title: '服务提供方',
+    content: '本隐私政策由 CHONGSEN HONGKONG LIMITED（以下简称"我们"或"本公司"）制定并发布。我们致力于保护您的隐私权益，并遵守适用的数据保护法律法规。'
+  },
+  {
     title: '我们收集的信息',
     content: '为了提供八字命理分析服务，我们可能会收集以下类型的个人信息：',
     list: [
@@ -76,7 +80,7 @@ const sections = [
   },
   {
     title: '联系我们',
-    content: '如您对本隐私政策有任何疑问或建议，请通过以下方式联系我们：support@bazi.ai'
+    content: '如您对本隐私政策有任何疑问或建议，请通过以下方式联系我们：tafuofficial@gmail.com。本隐私政策由 CHONGSEN HONGKONG LIMITED 负责解释。'
   }
 ]
 

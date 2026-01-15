@@ -20,6 +20,9 @@ export default function PaymentSuccessPage() {
   const [error, setError] = useState(null)
 
   const orderNo = searchParams.get('order_no')
+  
+  // 从 sessionStorage 获取支付前的返回地址
+  const returnUrl = sessionStorage.getItem('paymentReturnUrl')
 
   // 获取订单信息并刷新用户余额
   useEffect(() => {
@@ -127,13 +130,36 @@ export default function PaymentSuccessPage() {
                   </div>
 
                   <div className={styles.actions}>
-                    <Button onClick={() => navigate('/bazi')}>
-                      开始命理解读
-                      <ArrowRight size={18} weight="bold" />
-                    </Button>
-                    <Link to="/points" className={styles.secondaryLink}>
-                      返回积分中心
-                    </Link>
+                    {returnUrl ? (
+                      // 如果有返回地址，优先显示返回按钮
+                      <>
+                        <Button onClick={() => {
+                          // 跳转后清除 sessionStorage
+                          sessionStorage.removeItem('paymentReturnUrl');
+                          navigate(returnUrl);
+                        }}>
+                          返回继续操作
+                          <ArrowRight size={18} weight="bold" />
+                        </Button>
+                        <Link 
+                          to="/bazi" 
+                          className={styles.secondaryLink}
+                          onClick={() => sessionStorage.removeItem('paymentReturnUrl')}
+                        >
+                          返回命盘
+                        </Link>
+                      </>
+                    ) : (
+                      <>
+                        <Button onClick={() => navigate('/bazi')}>
+                          开始命理解读
+                          <ArrowRight size={18} weight="bold" />
+                        </Button>
+                        <Link to="/points" className={styles.secondaryLink}>
+                          返回积分中心
+                        </Link>
+                      </>
+                    )}
                   </div>
                 </>
               )}

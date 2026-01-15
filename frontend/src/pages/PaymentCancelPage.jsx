@@ -12,6 +12,9 @@ export default function PaymentCancelPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const orderNo = searchParams.get('order_no')
+  
+  // 从 sessionStorage 获取支付前的返回地址
+  const returnUrl = sessionStorage.getItem('paymentReturnUrl')
 
   return (
     <>
@@ -62,9 +65,19 @@ export default function PaymentCancelPage() {
                   <ArrowLeft size={18} weight="bold" />
                   返回积分中心
                 </Button>
-                <Link to="/" className={styles.secondaryLink}>
-                  返回首页
-                </Link>
+                {returnUrl ? (
+                  <Link 
+                    to={returnUrl} 
+                    className={styles.secondaryLink}
+                    onClick={() => sessionStorage.removeItem('paymentReturnUrl')}
+                  >
+                    返回原页面
+                  </Link>
+                ) : (
+                  <Link to="/" className={styles.secondaryLink}>
+                    返回首页
+                  </Link>
+                )}
               </div>
             </Card>
           </m.div>

@@ -117,6 +117,9 @@ export default function ReadingDetailPage() {
         onError: (error) => {
             if (error.code === 'INSUFFICIENT_POINTS') {
                 toast.error('积分不足，请先充值');
+                // 将当前页面路径存入 sessionStorage，支付成功后读取
+                const currentPath = window.location.pathname + window.location.search;
+                sessionStorage.setItem('paymentReturnUrl', currentPath);
                 navigate('/points');
             } else {
                 toast.error(error.message || '解锁失败');
