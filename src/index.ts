@@ -87,12 +87,13 @@ console.log(`🚀 八字算命 API 服务启动中...`);
 console.log(`📍 监听端口: ${port}`);
 console.log(`🌐 CORS 来源: ${corsOrigin}`);
 
-// 同步数据库结构（确保 schema 与数据库一致）
+// 验证数据库连接（schema 同步在构建阶段由 zeabur.json 处理）
 import { syncDatabase } from './lib/db/sync.js';
 try {
   await syncDatabase();
 } catch (error) {
-  console.error('Failed to sync database:', error);
+  console.error('Failed to connect to database:', error);
+  process.exit(1); // 数据库连接失败时退出
 }
 
 // 初始化数据库种子数据
