@@ -22,14 +22,31 @@ import { DEFAULT_AI_CONFIG } from './types.js';
 // 生产环境: dist/lib/ai/ 运行，config 在 dist/config/
 // 开发环境: src/lib/ai/ 运行（通过 tsx），config 在 ./config/
 function getConfigFilePath(): string {
+  const moduleDir = path.dirname(new URL(import.meta.url).pathname);
+
   // 首先尝试相对于当前模块位置（生产环境 dist/lib/ai/ -> dist/config/）
-  const prodPath = path.join(path.dirname(new URL(import.meta.url).pathname), '..', '..', 'config', 'ai-prompts.yaml');
+  const prodPath = path.join(moduleDir, '..', '..', 'config', 'ai-prompts.yaml');
+  console.log(`[AI Config] Module dir: ${moduleDir}`);
+  console.log(`[AI Config] Trying prod path: ${prodPath}`);
+  console.log(`[AI Config] Prod path exists: ${fs.existsSync(prodPath)}`);
+
   if (fs.existsSync(prodPath)) {
+    console.log(`[AI Config] Using prod config path: ${prodPath}`);
     return prodPath;
   }
 
   // 回退到 cwd/config（开发环境）
-  return path.join(process.cwd(), 'config', 'ai-prompts.yaml');
+  const devPath = path.join(process.cwd(), 'config', 'ai-prompts.yaml');
+  console.log(`[AI Config] Trying dev path: ${devPath}`);
+  console.log(`[AI Config] Dev path exists: ${fs.existsSync(devPath)}`);
+
+  if (fs.existsSync(devPath)) {
+    console.log(`[AI Config] Using dev config path: ${devPath}`);
+    return devPath;
+  }
+
+  console.warn(`[AI Config] WARNING: Config file not found at either location!`);
+  return devPath; // Return anyway, will fail later with better error message
 }
 
 const CONFIG_FILE_PATH = getConfigFilePath();
