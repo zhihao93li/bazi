@@ -61,15 +61,16 @@ export default function Hero() {
           transition={{ duration: 0.6, delay: 0.2 }}
         >
           <div className={`${styles.imageWrapper} ${isScrolled ? styles.imageWrapperScrolled : ''}`}>
-            {/* 使用一个代表命理/数据的抽象图或仪表盘截图占位 */}
             <img
-              src="https://framerusercontent.com/images/BesZqi2DRImbj4FXrPED12W5zA.png"
-              alt="Bazi Dashboard"
+              src="/heropic.png"
+              alt="她赋命盘分析界面"
               className={styles.dashboardImage}
               loading="eager"
               fetchPriority="high"
               decoding="async"
             />
+            {/* 底部渐变蒙版，让图片与背景自然融合 */}
+            <div className={styles.imageOverlay} />
           </div>
         </m.div>
       </div>

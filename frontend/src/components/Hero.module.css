@@ -128,6 +128,8 @@
   transform-origin: center top;
   /* 放大过渡更慢一点 */
   transition: transform 0.8s ease-out;
+  /* 防止蒙版溢出 */
+  overflow: hidden;
 }
 
 /* 滚动后放大到正常尺寸 */
@@ -140,6 +142,47 @@
   height: auto;
   border-radius: 15px;
   display: block;
+  /* 让图片填充容器，可能会裁剪一点边缘 */
+  object-fit: cover;
+  /* 限制最大高度，避免图片太高 */
+  max-height: 680px;
+}
+
+/* 整体蒙版：降低清晰度和饱和度 */
+.imageOverlay {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  right: 4px;
+  border-radius: 15px;
+  pointer-events: none;
+  /* 半透明白色蒙版降低对比度 */
+  background: rgba(248, 248, 248, 0.15);
+  /* 轻微模糊降低清晰度 */
+  backdrop-filter: blur(0.5px) saturate(0.7);
+  -webkit-backdrop-filter: blur(0.5px) saturate(0.7);
+}
+
+/* 四周渐变蒙版 */
+.imageOverlay::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  border-radius: 15px;
+  /* 四周向内的渐变 */
+  background: 
+    /* 顶部渐变 */
+    linear-gradient(to bottom, rgba(248, 248, 248, 0.7) 0%, transparent 15%),
+    /* 底部渐变 */
+    linear-gradient(to top, rgba(248, 248, 248, 0.85) 0%, transparent 20%),
+    /* 左侧渐变 */
+    linear-gradient(to right, rgba(248, 248, 248, 0.6) 0%, transparent 10%),
+    /* 右侧渐变 */
+    linear-gradient(to left, rgba(248, 248, 248, 0.6) 0%, transparent 10%);
 }
 
 @media (max-width: 768px) {
@@ -232,6 +275,19 @@
   }
 
   .dashboardImage {
+    border-radius: 8px;
+    max-height: 400px;
+  }
+
+  .imageOverlay {
+    top: 2px;
+    bottom: 2px;
+    left: 2px;
+    right: 2px;
+    border-radius: 8px;
+  }
+
+  .imageOverlay::before {
     border-radius: 8px;
   }
 }
