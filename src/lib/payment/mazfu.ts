@@ -194,7 +194,7 @@ export async function createPayment(params: CreateMazfuPaymentParams): Promise<C
   // 金额从分转换为元，保留两位小数
   const moneyInYuan = (params.amount / 100).toFixed(2);
 
-  // 构建请求参数
+  // 构建请求参数（统一使用 PC 模式，返回二维码）
   const requestParams: Record<string, string> = {
     pid: config.pid,
     type: 'alipay',
@@ -203,7 +203,7 @@ export async function createPayment(params: CreateMazfuPaymentParams): Promise<C
     return_url: config.returnUrl,
     name: params.productName,
     money: moneyInYuan,
-    device: params.device,
+    device: 'pc',  // 固定为 pc，统一使用扫码支付
   };
 
   // 添加可选参数
@@ -223,6 +223,13 @@ export async function createPayment(params: CreateMazfuPaymentParams): Promise<C
     const formBody = Object.entries(requestParams)
       .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
       .join('&');
+
+    // 调试日志
+    console.log('[Mazfu] 请求参数:', {
+      ...requestParams,
+      sign: requestParams.sign?.substring(0, 8) + '...',
+    });
+    console.log('[Mazfu] API URL:', apiUrl);
 
     const response = await fetch(apiUrl, {
       method: 'POST',
@@ -247,6 +254,9 @@ export async function createPayment(params: CreateMazfuPaymentParams): Promise<C
       payurl?: string;
       money?: string;
     };
+
+    // 调试日志
+    console.log('[Mazfu] 响应:', data);
 
     // 检查返回状态
     if (data.code !== 1) {

@@ -1,9 +1,9 @@
 import { defineConfig } from "vitest/config";
 import path from "path";
-import dotenv from "dotenv";
+import dotenvFlow from "dotenv-flow";
 
-// Load environment variables
-dotenv.config();
+// Load environment variables based on NODE_ENV
+dotenvFlow.config();
 
 export default defineConfig({
   test: {
@@ -15,7 +15,9 @@ export default defineConfig({
       provider: "v8",
       reporter: ["text", "json", "html"],
     },
-    setupFiles: ["dotenv/config"],
+    env: {
+      NODE_ENV: "test",
+    },
   },
   resolve: {
     alias: {

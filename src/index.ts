@@ -4,7 +4,10 @@
  * 基于 Hono 框架的纯后端 API 服务
  */
 
-import 'dotenv/config';
+import dotenvFlow from 'dotenv-flow';
+dotenvFlow.config({
+  node_env: process.env.NODE_ENV || 'development',
+});
 import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
@@ -84,8 +87,10 @@ app.onError((err, c) => {
 const port = parseInt(process.env.PORT || '3000', 10);
 
 console.log(`🚀 八字算命 API 服务启动中...`);
+console.log(`🌍 运行环境: ${process.env.NODE_ENV || 'development'}`);
 console.log(`📍 监听端口: ${port}`);
 console.log(`🌐 CORS 来源: ${corsOrigin}`);
+console.log(`🗄️  数据库: ${process.env.DATABASE_URL?.replace(/:[^:@]+@/, ':****@') || '未配置'}`);
 
 // 验证数据库连接（schema 同步在构建阶段由 zeabur.json 处理）
 import { syncDatabase } from './lib/db/sync.js';

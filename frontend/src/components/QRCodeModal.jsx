@@ -45,11 +45,12 @@ export default function QRCodeModal({
     abortControllerRef.current = new AbortController()
 
     try {
-      const data = await api.get(`/payment/status/${orderNo}`, {
+      const response = await api.get(`/payment/status/${orderNo}`, {
         signal: abortControllerRef.current.signal,
       })
       
-      if (data.status === 'paid') {
+      // API 返回 { success: true, data: { status: 'paid', ... } }
+      if (response.data?.status === 'paid') {
         stopPolling()
         onSuccess?.()
       }

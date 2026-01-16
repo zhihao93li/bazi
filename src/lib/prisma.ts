@@ -1,4 +1,7 @@
-import "dotenv/config";
+import dotenvFlow from "dotenv-flow";
+dotenvFlow.config({
+  node_env: process.env.NODE_ENV || 'development',
+});
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import pg from "pg";

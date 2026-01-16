@@ -11,7 +11,6 @@ import Footer from '../components/Footer'
 import GradientBackground from '../components/GradientBackground'
 import QRCodeModal from '../components/QRCodeModal'
 import { api } from '../services/api'
-import { detectDevice } from '../utils/deviceDetector'
 import styles from './PointsPage.module.css'
 
 export default function PointsPage() {
@@ -62,26 +61,19 @@ export default function PointsPage() {
     setPurchasing(pkg.id)
 
     try {
-      // 检测设备类型
-      const device = detectDevice()
-      
-      // 调用后端创建码支付订单
+      // 调用后端创建码支付订单（统一使用扫码支付）
       const result = await api.post('/payment/create-mazfu', {
         packageId: pkg.id,
-        device,
       });
 
       if (result.success) {
-        if (device === 'pc' && result.qrcode) {
-          // PC 端显示二维码弹窗
+        if (result.qrcode) {
+          // 统一显示二维码弹窗
           setQrCodeUrl(result.qrcode)
           setCurrentOrderNo(result.orderNo)
           setCurrentAmount(pkg.price)
           setQrModalVisible(true)
           setPurchasing(null)
-        } else if (device === 'mobile' && result.payurl) {
-          // 移动端跳转 H5 支付页面
-          window.location.href = result.payurl
         } else {
           toast.error('获取支付信息失败')
           setPurchasing(null)
@@ -111,9 +103,9 @@ export default function PointsPage() {
   // 支付成功回调
   const handlePaymentSuccess = useCallback(() => {
     setQrModalVisible(false)
-    toast.success('支付成功，积分已到账！')
-    refreshBalance()
-  }, [toast, refreshBalance])
+    // 跳转到支付成功页面
+    navigate(`/payment/success?order_no=${currentOrderNo}`)
+  }, [navigate, currentOrderNo])
 
   // 支付超时回调
   const handlePaymentTimeout = useCallback(() => {

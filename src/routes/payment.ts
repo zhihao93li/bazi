@@ -431,7 +431,7 @@ paymentRoutes.post('/create-mazfu', authRequired, async (c) => {
       return c.json({ success: false, message: '请选择充值套餐' }, 400);
     }
 
-    // 验证设备类型
+    // 验证设备类型（保留兼容性，但实际不影响后端行为）
     if (device !== 'pc' && device !== 'mobile') {
       return c.json({ success: false, message: '无效的设备类型' }, 400);
     }
@@ -448,8 +448,8 @@ paymentRoutes.post('/create-mazfu', authRequired, async (c) => {
     // 生成订单号
     const orderNo = generateOrderNo();
 
-    // 确定支付方式
-    const paymentMethod: PaymentMethod = device === 'pc' ? 'alipay_qrcode' : 'alipay_h5';
+    // 统一使用扫码支付
+    const paymentMethod: PaymentMethod = 'alipay_qrcode';
 
     // 创建订单记录
     await prisma.paymentOrder.create({
@@ -499,14 +499,13 @@ paymentRoutes.post('/create-mazfu', authRequired, async (c) => {
       });
     }
 
-    // 返回结果
+    // 返回结果（统一返回二维码）
     const response: {
       success: boolean;
       orderNo: string;
       amount: number;
       points: number;
       qrcode?: string;
-      payurl?: string;
       money?: string;
     } = {
       success: true,
@@ -515,11 +514,8 @@ paymentRoutes.post('/create-mazfu', authRequired, async (c) => {
       points: pkg.points,
     };
 
-    if (device === 'pc' && mazfuResult.qrcode) {
+    if (mazfuResult.qrcode) {
       response.qrcode = mazfuResult.qrcode;
-    }
-    if (device === 'mobile' && mazfuResult.payurl) {
-      response.payurl = mazfuResult.payurl;
     }
     if (mazfuResult.money) {
       response.money = mazfuResult.money;
@@ -541,12 +537,9 @@ paymentRoutes.post('/create-mazfu', authRequired, async (c) => {
 });
 
 /**
- * 码支付异步通知回调
- * POST /api/payment/mazfu-notify
- * 
- * 需求: 3.1, 3.2, 3.3, 3.4, 3.6
+ * 码支付异步通知回调处理函数
  */
-paymentRoutes.post('/mazfu-notify', async (c) => {
+async function handleMazfuNotify(c: any) {
   try {
     // 获取配置
     const config = getMazfuConfig();
@@ -640,6 +633,102 @@ paymentRoutes.post('/mazfu-notify', async (c) => {
     return c.text('success');
   } catch (error) {
     console.error('Mazfu notify processing error:', error);
+    return c.text('fail', 500);
+  }
+}
+
+/**
+ * 码支付异步通知回调
+ * POST /api/payment/mazfu-notify
+ */
+paymentRoutes.post('/mazfu-notify', handleMazfuNotify);
+
+/**
+ * 码支付异步通知回调（GET 方式兼容）
+ * GET /api/payment/mazfu-notify
+ */
+paymentRoutes.get('/mazfu-notify', async (c) => {
+  try {
+    const config = getMazfuConfig();
+    if (!config.key) {
+      console.error('Mazfu key not configured');
+      return c.text('fail', 500);
+    }
+
+    const query = c.req.query();
+    const params: MazfuNotifyParams = {
+      pid: query.pid || '',
+      trade_no: query.trade_no || '',
+      out_trade_no: query.out_trade_no || '',
+      type: query.type || '',
+      name: query.name || '',
+      money: query.money || '',
+      trade_status: query.trade_status || '',
+      param: query.param,
+      sign: query.sign || '',
+      sign_type: query.sign_type || '',
+    };
+
+    console.log('Mazfu notify (GET) received:', {
+      out_trade_no: params.out_trade_no,
+      trade_no: params.trade_no,
+      trade_status: params.trade_status,
+      money: params.money,
+    });
+
+    // 验证签名
+    if (!verifySign(params, config.key)) {
+      console.error('Mazfu notify signature verification failed:', params.out_trade_no);
+      return c.text('fail', 403);
+    }
+
+    // 检查支付状态
+    if (params.trade_status !== 'TRADE_SUCCESS') {
+      console.log('Mazfu notify: trade not success:', params.trade_status);
+      return c.text('success');
+    }
+
+    const orderNo = params.out_trade_no;
+
+    // 查询订单
+    const order = await prisma.paymentOrder.findUnique({
+      where: { orderNo },
+    });
+
+    if (!order) {
+      console.error('Mazfu notify: order not found:', orderNo);
+      return c.text('fail', 404);
+    }
+
+    // 幂等处理
+    if (order.status === 'paid') {
+      console.log('Mazfu notify: order already paid:', orderNo);
+      return c.text('success');
+    }
+
+    // 更新订单状态
+    await prisma.paymentOrder.update({
+      where: { orderNo },
+      data: {
+        status: 'paid',
+        transactionId: params.trade_no,
+        paidAt: new Date(),
+      },
+    });
+
+    // 充值积分
+    await addPoints({
+      userId: order.userId,
+      amount: order.points,
+      type: 'recharge',
+      description: `充值套餐 - 订单号: ${orderNo}`,
+      orderId: order.id,
+    });
+
+    console.log('Mazfu notify (GET): payment processed successfully:', orderNo);
+    return c.text('success');
+  } catch (error) {
+    console.error('Mazfu notify (GET) processing error:', error);
     return c.text('fail', 500);
   }
 });

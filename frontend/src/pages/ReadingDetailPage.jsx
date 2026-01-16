@@ -92,6 +92,11 @@ export default function ReadingDetailPage() {
     // 验证主题是否合法
     const themeConfig = THEME_CONFIG[theme];
 
+    // 页面切换时滚动到顶部（解决移动端切换解读模块后页面不在顶部的问题）
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [theme]);
+
     useEffect(() => {
         if (!themeConfig) {
             navigate('/bazi', { replace: true });
