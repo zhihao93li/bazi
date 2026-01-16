@@ -24,6 +24,7 @@ const ProfilePage = lazy(() => import('./pages/ProfilePage'))
 const PointsPage = lazy(() => import('./pages/PointsPage'))
 const PaymentSuccessPage = lazy(() => import('./pages/PaymentSuccessPage'))
 const PaymentCancelPage = lazy(() => import('./pages/PaymentCancelPage'))
+const PaymentResultPage = lazy(() => import('./pages/PaymentResultPage'))
 const SubjectsPage = lazy(() => import('./pages/SubjectsPage'))
 const BaziInputPage = lazy(() => import('./pages/BaziInputPage'))
 const BaziResultPage = lazy(() => import('./pages/BaziResultPage'))
@@ -87,6 +88,10 @@ function App() {
                   <PaymentCancelPage />
                 </ProtectedRoute>
               }
+            />
+            <Route
+              path="/payment/result"
+              element={<PaymentResultPage />}
             />
             <Route
               path="/subjects"

@@ -54,6 +54,14 @@
   color: var(--grey-50);
 }
 
+.failIcon {
+  color: #ef4444;
+}
+
+.warningIcon {
+  color: #f59e0b;
+}
+
 .title {
   font-size: 28px;
   font-weight: 600;

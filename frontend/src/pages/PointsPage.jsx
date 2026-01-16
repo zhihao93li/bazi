@@ -1,15 +1,17 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { m } from 'framer-motion'
 import { Check, ArrowUp, ArrowDown, Gift } from '@phosphor-icons/react'
 import { useAuth } from '../context/AuthContext'
-import { useToast, Card, LoadingSpinner, LoadingOverlay } from '../components/common' // Import Loading
+import { useToast, Card, LoadingSpinner, LoadingOverlay } from '../components/common'
 import Button from '../components/Button'
 import Tag from '../components/Tag'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import GradientBackground from '../components/GradientBackground'
+import QRCodeModal from '../components/QRCodeModal'
 import { api } from '../services/api'
+import { detectDevice } from '../utils/deviceDetector'
 import styles from './PointsPage.module.css'
 
 export default function PointsPage() {
@@ -21,6 +23,12 @@ export default function PointsPage() {
   const [packages, setPackages] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [purchasing, setPurchasing] = useState(null)
+  
+  // 二维码弹窗状态
+  const [qrModalVisible, setQrModalVisible] = useState(false)
+  const [qrCodeUrl, setQrCodeUrl] = useState('')
+  const [currentOrderNo, setCurrentOrderNo] = useState('')
+  const [currentAmount, setCurrentAmount] = useState(0)
 
   // 检查登录状态
   useEffect(() => {
@@ -54,14 +62,30 @@ export default function PointsPage() {
     setPurchasing(pkg.id)
 
     try {
-      // 调用后端创建 Stripe Checkout Session
-      const result = await api.post('/payment/create-checkout', {
+      // 检测设备类型
+      const device = detectDevice()
+      
+      // 调用后端创建码支付订单
+      const result = await api.post('/payment/create-mazfu', {
         packageId: pkg.id,
+        device,
       });
 
-      if (result.success && result.checkoutUrl) {
-        // 跳转到 Stripe 支付页面
-        window.location.href = result.checkoutUrl;
+      if (result.success) {
+        if (device === 'pc' && result.qrcode) {
+          // PC 端显示二维码弹窗
+          setQrCodeUrl(result.qrcode)
+          setCurrentOrderNo(result.orderNo)
+          setCurrentAmount(pkg.price)
+          setQrModalVisible(true)
+          setPurchasing(null)
+        } else if (device === 'mobile' && result.payurl) {
+          // 移动端跳转 H5 支付页面
+          window.location.href = result.payurl
+        } else {
+          toast.error('获取支付信息失败')
+          setPurchasing(null)
+        }
       } else {
         toast.error(result.message || '创建支付失败');
         setPurchasing(null);
@@ -72,6 +96,37 @@ export default function PointsPage() {
       setPurchasing(null);
     }
   }
+
+  // 刷新积分余额
+  const refreshBalance = useCallback(async () => {
+    try {
+      const pointsRes = await api.get('/points')
+      setBalance(pointsRes.balance)
+      setTransactions(pointsRes.transactions)
+    } catch (err) {
+      console.error('刷新积分失败:', err)
+    }
+  }, [])
+
+  // 支付成功回调
+  const handlePaymentSuccess = useCallback(() => {
+    setQrModalVisible(false)
+    toast.success('支付成功，积分已到账！')
+    refreshBalance()
+  }, [toast, refreshBalance])
+
+  // 支付超时回调
+  const handlePaymentTimeout = useCallback(() => {
+    // 超时处理由 QRCodeModal 内部处理
+  }, [])
+
+  // 关闭二维码弹窗
+  const handleQrModalClose = useCallback(() => {
+    setQrModalVisible(false)
+    setQrCodeUrl('')
+    setCurrentOrderNo('')
+    setCurrentAmount(0)
+  }, [])
 
   const formatDate = (dateStr) => {
     const date = new Date(dateStr)
@@ -212,6 +267,17 @@ export default function PointsPage() {
         </div>
       </main>
       <Footer />
+      
+      {/* 二维码支付弹窗 */}
+      <QRCodeModal
+        visible={qrModalVisible}
+        qrCodeUrl={qrCodeUrl}
+        orderNo={currentOrderNo}
+        amount={currentAmount}
+        onClose={handleQrModalClose}
+        onSuccess={handlePaymentSuccess}
+        onTimeout={handlePaymentTimeout}
+      />
     </>
   )
 }

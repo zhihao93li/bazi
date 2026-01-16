@@ -1,0 +1,124 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--spacing-md) 0;
+}
+
+.qrCodeWrapper {
+  background: var(--absolute-white);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-md);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--light-90);
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-lg);
+  width: 100%;
+}
+
+.amount {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.amountLabel {
+  font-size: var(--text-small);
+  color: var(--grey-50);
+}
+
+.amountValue {
+  font-size: var(--heading-4);
+  font-weight: 600;
+  color: var(--dark-7);
+}
+
+.timer {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--light-96);
+  border-radius: var(--radius-full);
+}
+
+.timerLabel {
+  font-size: var(--text-small);
+  color: var(--grey-50);
+}
+
+.timerValue {
+  font-size: var(--text-medium);
+  font-weight: 600;
+  color: var(--accent-orange);
+  font-variant-numeric: tabular-nums;
+}
+
+.hint {
+  margin-top: var(--spacing-lg);
+  font-size: var(--text-small);
+  color: var(--grey-50);
+  text-align: center;
+}
+
+/* Expired State */
+.expiredContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--spacing-xl) 0;
+}
+
+.expiredIcon {
+  font-size: 48px;
+  margin-bottom: var(--spacing-md);
+}
+
+.expiredText {
+  font-size: var(--heading-5);
+  font-weight: 600;
+  color: var(--dark-7);
+  margin: 0;
+}
+
+.expiredHint {
+  font-size: var(--text-small);
+  color: var(--grey-50);
+  margin: var(--spacing-sm) 0 var(--spacing-lg);
+}
+
+.retryButton {
+  padding: var(--spacing-sm) var(--spacing-xl);
+  background: var(--dark-7);
+  color: var(--absolute-white);
+  border-radius: var(--radius-full);
+  font-size: var(--text-medium);
+  font-weight: 500;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.retryButton:hover {
+  background: var(--grey-24);
+}
+
+.retryButton:active {
+  transform: scale(0.98);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .qrCodeWrapper {
+    padding: var(--spacing-sm);
+  }
+
+  .amountValue {
+    font-size: var(--heading-5);
+  }
+}

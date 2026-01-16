@@ -15,7 +15,7 @@ import {
 } from '../transaction.js';
 
 // Mock prisma
-vi.mock('../prisma.js', () => ({
+vi.mock('../../prisma.js', () => ({
   default: {
     $transaction: vi.fn(),
   },
