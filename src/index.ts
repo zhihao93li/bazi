@@ -7,6 +7,7 @@
 import dotenvFlow from 'dotenv-flow';
 dotenvFlow.config({
   node_env: process.env.NODE_ENV || 'development',
+  silent: true, // 生产环境使用平台环境变量，不报错
 });
 import { serve } from '@hono/node-server';
 import { Hono } from 'hono';

@@ -39,7 +39,7 @@ export default function QRCodeModal({
 
   // 轮询订单状态
   const pollOrderStatus = useCallback(async () => {
-    if (!orderNo) return
+    if (!orderNo || !visible) return
 
     // 创建新的 AbortController
     abortControllerRef.current = new AbortController()
@@ -60,7 +60,7 @@ export default function QRCodeModal({
         console.error('轮询订单状态失败:', error)
       }
     }
-  }, [orderNo, onSuccess])
+  }, [orderNo, visible, onSuccess, stopPolling])
 
   // 停止轮询
   const stopPolling = useCallback(() => {
@@ -80,30 +80,39 @@ export default function QRCodeModal({
 
   // 开始轮询和倒计时
   useEffect(() => {
-    if (visible && orderNo && !isExpired) {
-      // 重置状态
-      setTimeLeft(300)
-      setIsExpired(false)
-
-      // 立即轮询一次
-      pollOrderStatus()
-
-      // 每3秒轮询一次
-      pollingRef.current = setInterval(pollOrderStatus, 3000)
-
-      // 倒计时
-      timerRef.current = setInterval(() => {
-        setTimeLeft((prev) => {
-          if (prev <= 1) {
-            setIsExpired(true)
-            stopPolling()
-            onTimeout?.()
-            return 0
-          }
-          return prev - 1
-        })
-      }, 1000)
+    // 只有 visible 且有 orderNo 时才开始轮询
+    if (!visible || !orderNo) {
+      // 不可见时立即停止轮询
+      stopPolling()
+      return
     }
+
+    if (isExpired) {
+      return
+    }
+
+    // 重置状态
+    setTimeLeft(300)
+    setIsExpired(false)
+
+    // 立即轮询一次
+    pollOrderStatus()
+
+    // 每3秒轮询一次
+    pollingRef.current = setInterval(pollOrderStatus, 3000)
+
+    // 倒计时
+    timerRef.current = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          setIsExpired(true)
+          stopPolling()
+          onTimeout?.()
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
 
     return () => {
       stopPolling()

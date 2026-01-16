@@ -149,9 +149,10 @@ export default function LoginPage() {
           <Link to="/" className={styles.logo}>
             <img
               src="https://framerusercontent.com/images/E65CrTfgroEJwcxOOIN1vzXb5w.svg"
-              alt="Prismo"
+              alt="她赋"
               className={styles.logoImage}
             />
+            <span className={styles.logoText}>她赋</span>
           </Link>
 
           {/* 表单卡片 */}
