@@ -22,7 +22,7 @@ export default function PointsPage() {
   const [packages, setPackages] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [purchasing, setPurchasing] = useState(null)
-  
+
   // 二维码弹窗状态
   const [qrModalVisible, setQrModalVisible] = useState(false)
   const [qrCodeUrl, setQrCodeUrl] = useState('')
@@ -184,35 +184,45 @@ export default function PointsPage() {
             <section className={styles.section}>
               <h2 className={styles.sectionTitle}>充值套餐</h2>
               <div className={styles.packagesGrid}>
-                {packages.map((pkg, index) => (
-                  <m.div
-                    key={pkg.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: index * 0.1 }}
-                  >
-                    <Card
-                      hover
-                      padding="medium"
+                {packages.map((pkg, index) => {
+                  // 根据索引选择不同的图标
+                  const iconIndex = (index % 3) + 1;
+                  return (
+                    <m.div
+                      key={pkg.id}
                       className={`${styles.packageCard} ${pkg.popular ? styles.popular : ''}`}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3, delay: index * 0.1 }}
                     >
                       {pkg.popular && (
                         <span className={styles.popularBadge}>推荐</span>
                       )}
-                      <span className={styles.packagePoints}>{pkg.points}</span>
-                      <span className={styles.packagePointsLabel}>积分</span>
-                      <span className={styles.packagePrice}>¥{pkg.price.toFixed(2)}</span>
-                      <Button
-                        size="small"
+                      <div className={styles.packageIcon}>
+                        <img
+                          src={`/icons/package-icon-${iconIndex}.svg`}
+                          alt=""
+                          width={48}
+                          height={48}
+                        />
+                      </div>
+                      <div className={styles.packageInfo}>
+                        <h3 className={styles.packageTitle}>{pkg.points} 积分</h3>
+                        <p className={styles.packageDesc}>解锁更多命理解读内容</p>
+                      </div>
+                      <div className={styles.packagePriceRow}>
+                        <span className={styles.packagePrice}>¥{pkg.price.toFixed(2)}</span>
+                      </div>
+                      <button
+                        className={styles.packageButton}
                         onClick={() => handlePurchase(pkg)}
                         disabled={purchasing === pkg.id}
-                        className={styles.packageButton}
                       >
-                        {purchasing === pkg.id ? <LoadingSpinner size="small" color="white" /> : '购买'}
-                      </Button>
-                    </Card>
-                  </m.div>
-                ))}
+                        {purchasing === pkg.id ? <LoadingSpinner size="small" color="white" /> : '立即购买'}
+                      </button>
+                    </m.div>
+                  );
+                })}
               </div>
             </section>
 
@@ -259,7 +269,7 @@ export default function PointsPage() {
         </div>
       </main>
       <Footer />
-      
+
       {/* 二维码支付弹窗 */}
       <QRCodeModal
         visible={qrModalVisible}
