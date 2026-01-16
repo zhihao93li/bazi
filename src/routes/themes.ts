@@ -108,11 +108,18 @@ themesRoutes.get('/:subjectId/:theme', authRequired, async (c) => {
  * Body: { subjectId: string, theme: string }
  */
 themesRoutes.post('/unlock', authRequired, async (c) => {
+  // #region agent log
+  const startTime = Date.now();
+  console.log(`[DEBUG] /unlock request received at ${new Date().toISOString()}`);
+  // #endregion
   try {
     const userId = requireUserId(c);
 
     const body = await c.req.json();
     const { subjectId, theme } = body as { subjectId: string; theme: string };
+    // #region agent log
+    console.log(`[DEBUG] /unlock params: userId=${userId}, subjectId=${subjectId}, theme=${theme}`);
+    // #endregion
 
     if (!subjectId) {
       return c.json({
@@ -138,7 +145,13 @@ themesRoutes.post('/unlock', authRequired, async (c) => {
       }, 400);
     }
 
+    // #region agent log
+    console.log(`[DEBUG] /unlock calling unlockTheme service...`);
+    // #endregion
     const result = await unlockTheme(userId, subjectId, theme);
+    // #region agent log
+    console.log(`[DEBUG] /unlock completed in ${Date.now() - startTime}ms, pointsDeducted=${result.pointsDeducted}`);
+    // #endregion
 
     return c.json({
       success: true,

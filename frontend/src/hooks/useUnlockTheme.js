@@ -22,12 +22,29 @@ export function useUnlockTheme({ onSuccess, onError, updateUser, currentSubjectI
   
   return useMutation({
     mutationFn: async ({ subjectId, theme }) => {
-      const res = await api.post('/themes/unlock', { subjectId, theme });
-      return { ...res, requestSubjectId: subjectId, requestTheme: theme };
+      // #region agent log
+      const startTime = Date.now();
+      fetch('http://127.0.0.1:7242/ingest/48c6779c-b33e-444b-aa07-30b4a3457b97',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useUnlockTheme.js:mutationFn:start',message:'Unlock mutation started',data:{subjectId,theme,startTime},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'A'})}).catch(()=>{});
+      // #endregion
+      try {
+        const res = await api.post('/themes/unlock', { subjectId, theme });
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/48c6779c-b33e-444b-aa07-30b4a3457b97',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useUnlockTheme.js:mutationFn:success',message:'Unlock API returned successfully',data:{subjectId,theme,duration:Date.now()-startTime,pointsDeducted:res.pointsDeducted,hasContent:!!res.content},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'A'})}).catch(()=>{});
+        // #endregion
+        return { ...res, requestSubjectId: subjectId, requestTheme: theme };
+      } catch (err) {
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/48c6779c-b33e-444b-aa07-30b4a3457b97',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useUnlockTheme.js:mutationFn:error',message:'Unlock API failed',data:{subjectId,theme,duration:Date.now()-startTime,errorName:err?.name,errorMessage:err?.message,errorCode:err?.code},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'A'})}).catch(()=>{});
+        // #endregion
+        throw err;
+      }
     },
     
     // 乐观更新：立即显示 loading 状态
     onMutate: async ({ subjectId, theme }) => {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/48c6779c-b33e-444b-aa07-30b4a3457b97',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useUnlockTheme.js:onMutate',message:'onMutate - setting optimistic loading state',data:{subjectId,theme},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'B'})}).catch(()=>{});
+      // #endregion
       // 取消该命盘该主题的查询，避免覆盖乐观更新
       await queryClient.cancelQueries({ queryKey: [THEME_STATUS_QUERY_KEY, subjectId] });
       
@@ -51,6 +68,9 @@ export function useUnlockTheme({ onSuccess, onError, updateUser, currentSubjectI
     
     // 错误时回滚
     onError: (error, { subjectId, theme }, context) => {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/48c6779c-b33e-444b-aa07-30b4a3457b97',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useUnlockTheme.js:onError',message:'onError - rolling back state',data:{subjectId,theme,errorName:error?.name,errorMessage:error?.message,errorCode:error?.code,hasPreviousData:!!context?.previousData},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'A,C,D'})}).catch(()=>{});
+      // #endregion
       // 回滚该主题的 loading 状态
       if (context?.previousData) {
         // 只回滚该主题的状态，保持其他主题的状态
@@ -74,6 +94,9 @@ export function useUnlockTheme({ onSuccess, onError, updateUser, currentSubjectI
     
     // 成功时更新缓存
     onSuccess: (data, { subjectId, theme }) => {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/48c6779c-b33e-444b-aa07-30b4a3457b97',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useUnlockTheme.js:onSuccess',message:'onSuccess - updating cache with result',data:{subjectId,theme,hasContent:!!data.content,pointsDeducted:data.pointsDeducted,remainingBalance:data.remainingBalance},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'A,E'})}).catch(()=>{});
+      // #endregion
       // 更新对应 subjectId 的主题缓存
       queryClient.setQueryData([THEME_STATUS_QUERY_KEY, subjectId], (old) => {
         if (!old) return old;

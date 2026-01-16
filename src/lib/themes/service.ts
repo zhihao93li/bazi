@@ -234,10 +234,17 @@ export async function unlockTheme(
 ): Promise<ThemeUnlockResult> {
   const lockKey = `${subjectId}_${theme}`;
   const orderId = `theme_${subjectId}_${theme}`;
+  // #region agent log
+  const serviceStartTime = Date.now();
+  console.log(`[DEBUG][Theme Service] unlockTheme called: userId=${userId}, subjectId=${subjectId}, theme=${theme}`);
+  // #endregion
 
   // 0. 检查是否有正在进行的解锁任务（防止并发重复解锁）
   const existingTask = themeUnlockLocks.get(lockKey);
   if (existingTask) {
+    // #region agent log
+    console.log(`[DEBUG][Theme Service] Found existing lock task, will wait for it: ${lockKey}`);
+    // #endregion
     console.log(`[Theme Service] Waiting for existing unlock task: ${lockKey}`);
     return existingTask;
   }
@@ -259,6 +266,9 @@ export async function unlockTheme(
   });
 
   if (existing) {
+    // #region agent log
+    console.log(`[DEBUG][Theme Service] Theme already unlocked in DB, returning existing content: ${lockKey}`);
+    // #endregion
     // 如果已解锁，直接返回已有内容
     const account = await prisma.pointsAccount.findUnique({
       where: { userId },
@@ -273,10 +283,16 @@ export async function unlockTheme(
     };
   }
 
+  // #region agent log
+  console.log(`[DEBUG][Theme Service] Creating new unlock task for: ${lockKey}`);
+  // #endregion
   // 创建解锁任务并加锁（防止并发重复调用 AI）
   const unlockTask = (async (): Promise<ThemeUnlockResult> => {
     let pointsDeducted = false;
     let deductResult: { balance?: number } = {};
+    // #region agent log
+    const taskStartTime = Date.now();
+    // #endregion
 
     try {
       // 3. 预扣积分（乐观锁 - 原子操作，自动检查余额）
@@ -288,6 +304,9 @@ export async function unlockTheme(
         orderId,
       });
       pointsDeducted = true;
+      // #region agent log
+      console.log(`[DEBUG][Theme Service] Points deducted: ${price}, time elapsed: ${Date.now() - taskStartTime}ms`);
+      // #endregion
       console.log(`[Theme Service] Points pre-deducted successfully, remaining: ${deductResult.balance}`);
 
       // 4. 获取测算对象信息
@@ -315,13 +334,24 @@ export async function unlockTheme(
       const baziData = subject.baziData as unknown as BaziData;
 
       // 5. 确保初步解读已生成
+      // #region agent log
+      const initialAnalysisStartTime = Date.now();
+      console.log(`[DEBUG][Theme Service] Starting initial analysis generation...`);
+      // #endregion
       const initialAnalysis = await ensureInitialAnalysis(
         subjectId,
         baziData,
         subject.gender
       );
+      // #region agent log
+      console.log(`[DEBUG][Theme Service] Initial analysis completed in ${Date.now() - initialAnalysisStartTime}ms`);
+      // #endregion
 
       // 6. 生成分主题解读
+      // #region agent log
+      const themeAnalysisStartTime = Date.now();
+      console.log(`[DEBUG][Theme Service] Starting theme analysis generation: ${theme}`);
+      // #endregion
       console.log(`[Theme Service] Generating theme analysis: ${theme}`);
       const content = await generateThemeAnalysis(
         theme,
@@ -329,6 +359,9 @@ export async function unlockTheme(
         initialAnalysis,
         subject.gender
       );
+      // #region agent log
+      console.log(`[DEBUG][Theme Service] Theme analysis completed in ${Date.now() - themeAnalysisStartTime}ms`);
+      // #endregion
 
       // 7. 存储解读结果
       try {
@@ -378,6 +411,9 @@ export async function unlockTheme(
       }
 
       console.log(`[Theme Service] Theme unlocked successfully: ${theme}`);
+      // #region agent log
+      console.log(`[DEBUG][Theme Service] Total unlock time: ${Date.now() - taskStartTime}ms`);
+      // #endregion
 
       return {
         success: true,
@@ -387,9 +423,12 @@ export async function unlockTheme(
         remainingBalance: deductResult.balance ?? 0,
       };
     } catch (error) {
+      // #region agent log
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.log(`[DEBUG][Theme Service] Unlock task failed after ${Date.now() - taskStartTime}ms, error: ${errorMessage}`);
+      // #endregion
       // 如果已经扣了积分但后续流程失败，需要退还
       if (pointsDeducted) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
         console.error(`[Theme Service] Operation failed after deducting points, initiating refund`);
         console.error(`[Theme Service] Failure reason: ${errorMessage}`);
 
