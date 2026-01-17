@@ -13,7 +13,7 @@ import styles from '../BaziChartCard.module.css';
  */
 function getShiShenClass(shiShen) {
   if (!shiShen) return '';
-  
+
   const shiShenMap = {
     '比肩': 'biJian',
     '劫财': 'jieCai',
@@ -27,7 +27,7 @@ function getShiShenClass(shiShen) {
     '正印': 'zhengYin',
     '日元': 'riYuan',
   };
-  
+
   return styles[shiShenMap[shiShen]] || '';
 }
 
@@ -37,16 +37,16 @@ function getShiShenClass(shiShen) {
 function getGanShiShen(dayStem, targetStem) {
   if (!dayStem || !targetStem) return '';
   if (dayStem.chinese === targetStem.chinese) return '日元';
-  
+
   const dayElement = dayStem.element;
   const dayYinYang = dayStem.yinYang;
   const targetElement = targetStem.element;
   const targetYinYang = targetStem.yinYang;
-  
+
   // 五行相生相克关系
   const generates = { wood: 'fire', fire: 'earth', earth: 'metal', metal: 'water', water: 'wood' };
   const restricts = { wood: 'earth', earth: 'water', water: 'fire', fire: 'metal', metal: 'wood' };
-  
+
   // 同我
   if (dayElement === targetElement) {
     return dayYinYang === targetYinYang ? '比肩' : '劫财';
@@ -67,8 +67,21 @@ function getGanShiShen(dayStem, targetStem) {
   if (generates[targetElement] === dayElement) {
     return dayYinYang === targetYinYang ? '偏印' : '正印';
   }
-  
+
   return '';
+}
+
+/**
+ * 从纳音名称中提取五行
+ */
+function getNaYinElement(naYin) {
+  if (!naYin) return null;
+  if (naYin.includes('金')) return 'metal';
+  if (naYin.includes('木')) return 'wood';
+  if (naYin.includes('水')) return 'water';
+  if (naYin.includes('火')) return 'fire';
+  if (naYin.includes('土')) return 'earth';
+  return null;
 }
 
 export default function PillarColumn({
@@ -85,28 +98,36 @@ export default function PillarColumn({
 }) {
   // 计算天干十神（如果未直接传入）
   const ganShiShen = shiShenGan || (isDayPillar ? '日元' : getGanShiShen(dayStem, stem));
-  
+
+  // 纳音五行颜色
+  const naYinElement = getNaYinElement(naYin);
+  const naYinStyle = naYinElement ? {
+    backgroundColor: `${ELEMENT_COLORS[naYinElement]}20`,
+    color: ELEMENT_COLORS[naYinElement],
+    borderColor: `${ELEMENT_COLORS[naYinElement]}40`,
+  } : {};
+
   return (
     <div className={styles.pillarColumn}>
       {/* 柱名 */}
       <span className={styles.pillarTitle}>{title}</span>
-      
+
       {/* 十神标签 */}
       <span className={`${styles.shiShenTag} ${getShiShenClass(ganShiShen)}`}>
         {ganShiShen || '-'}
       </span>
-      
+
       {/* 天干 */}
-      <div 
+      <div
         className={styles.ganBox}
         style={{ color: stem ? ELEMENT_COLORS[stem.element] : 'inherit' }}
       >
         {stem?.chinese || '-'}
       </div>
-      
+
       {/* 地支 + 空亡标记 */}
       <div className={styles.zhiWrapper}>
-        <div 
+        <div
           className={styles.zhiBox}
           style={{ color: branch ? ELEMENT_COLORS[branch.element] : 'inherit' }}
         >
@@ -114,7 +135,7 @@ export default function PillarColumn({
         </div>
         {isKongWang && <span className={styles.kongWangMark}>空</span>}
       </div>
-      
+
       {/* 藏干十神 */}
       <div className={styles.hiddenStemsArea}>
         {hiddenStems && hiddenStems.length > 0 ? (
@@ -122,7 +143,7 @@ export default function PillarColumn({
             const hsShiShen = shiShenZhi?.[idx] || getGanShiShen(dayStem, hs);
             return (
               <div key={idx} className={styles.hiddenStemRow}>
-                <span 
+                <span
                   className={styles.hiddenStemChar}
                   style={{ color: ELEMENT_COLORS[hs.element] }}
                 >
@@ -138,9 +159,9 @@ export default function PillarColumn({
           <div className={styles.hiddenStemRow}>-</div>
         )}
       </div>
-      
-      {/* 纳音标签 */}
-      <span className={styles.naYinTag}>{naYin || '-'}</span>
+
+      {/* 纳音标签 - 带五行颜色 */}
+      <span className={styles.naYinTag} style={naYinStyle}>{naYin || '-'}</span>
     </div>
   );
 }

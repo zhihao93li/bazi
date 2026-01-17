@@ -5,12 +5,12 @@ export default function BaziInfoCard({ data, className = '' }) {
   if (!data) return null;
 
   // New structure adaptation
-  const lunarStr = data.lunarDate ? 
-    `${data.lunarDate.yearGanZhi}年 ${data.lunarDate.monthInChinese} ${data.lunarDate.dayInChinese}` : 
+  const lunarStr = data.lunarDate ?
+    `${data.lunarDate.yearGanZhi}年 ${data.lunarDate.monthInChinese} ${data.lunarDate.dayInChinese}` :
     data.lunarDateStr; // fallback
 
   const ELEMENT_CHINESE = { fire: '火', water: '水', wood: '木', metal: '金', earth: '土' };
-  
+
   let dayMasterStr = '';
   if (data.dayMaster && data.dayMaster.stem) {
     const stem = data.dayMaster.stem.chinese;

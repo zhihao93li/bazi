@@ -18,19 +18,19 @@ function calculateCurrentFortune(yun, birthYear) {
   if (!yun?.daYunList || !birthYear) {
     return { currentDaYun: null, currentLiuNian: null };
   }
-  
+
   const currentYear = new Date().getFullYear();
   const currentAge = currentYear - birthYear;
-  
-  const currentDaYun = yun.daYunList.find(dy => 
+
+  const currentDaYun = yun.daYunList.find(dy =>
     currentAge >= dy.startAge && currentAge < dy.endAge
   );
-  
+
   let currentLiuNian = null;
   if (currentDaYun?.liuNian && currentDaYun.liuNian.length > 0) {
     currentLiuNian = currentDaYun.liuNian.find(ln => ln.year === currentYear);
   }
-  
+
   return { currentDaYun, currentLiuNian };
 }
 
@@ -48,7 +48,7 @@ function isXunKong(pillarType, branch, fourPillarsXunKong) {
  */
 function parseGanZhi(ganZhi) {
   if (!ganZhi || ganZhi.length < 2) return { stem: null, branch: null };
-  
+
   const ganMap = {
     '甲': { chinese: '甲', element: 'wood', yinYang: 'yang' },
     '乙': { chinese: '乙', element: 'wood', yinYang: 'yin' },
@@ -61,7 +61,7 @@ function parseGanZhi(ganZhi) {
     '壬': { chinese: '壬', element: 'water', yinYang: 'yang' },
     '癸': { chinese: '癸', element: 'water', yinYang: 'yin' },
   };
-  
+
   const zhiMap = {
     '子': { chinese: '子', element: 'water' },
     '丑': { chinese: '丑', element: 'earth' },
@@ -76,7 +76,7 @@ function parseGanZhi(ganZhi) {
     '戌': { chinese: '戌', element: 'earth' },
     '亥': { chinese: '亥', element: 'water' },
   };
-  
+
   return {
     stem: ganMap[ganZhi.charAt(0)] || null,
     branch: zhiMap[ganZhi.charAt(1)] || null,
@@ -88,7 +88,7 @@ function parseGanZhi(ganZhi) {
  */
 function getHiddenStemsForBranch(branch) {
   if (!branch) return [];
-  
+
   const hiddenStemsMap = {
     '子': [{ chinese: '癸', element: 'water' }],
     '丑': [{ chinese: '己', element: 'earth' }, { chinese: '癸', element: 'water' }, { chinese: '辛', element: 'metal' }],
@@ -103,7 +103,7 @@ function getHiddenStemsForBranch(branch) {
     '戌': [{ chinese: '戊', element: 'earth' }, { chinese: '辛', element: 'metal' }, { chinese: '丁', element: 'fire' }],
     '亥': [{ chinese: '壬', element: 'water' }, { chinese: '甲', element: 'wood' }],
   };
-  
+
   return hiddenStemsMap[branch] || [];
 }
 
@@ -112,7 +112,7 @@ function getHiddenStemsForBranch(branch) {
  */
 function calculateNaYin(ganZhi) {
   if (!ganZhi) return '';
-  
+
   const naYinMap = {
     '甲子': '海中金', '乙丑': '海中金', '丙寅': '炉中火', '丁卯': '炉中火',
     '戊辰': '大林木', '己巳': '大林木', '庚午': '路旁土', '辛未': '路旁土',
@@ -130,7 +130,7 @@ function calculateNaYin(ganZhi) {
     '丙辰': '沙中土', '丁巳': '沙中土', '戊午': '天上火', '己未': '天上火',
     '庚申': '石榴木', '辛酉': '石榴木', '壬戌': '大海水', '癸亥': '大海水',
   };
-  
+
   return naYinMap[ganZhi] || '';
 }
 
@@ -139,10 +139,10 @@ function calculateNaYin(ganZhi) {
  */
 function FiveElementsRing({ fiveElements }) {
   if (!fiveElements) return null;
-  
+
   const distribution = fiveElements.distribution || fiveElements;
   const total = Object.values(distribution).reduce((a, b) => a + b, 0);
-  
+
   const elements = [
     { key: 'wood', label: '木', value: distribution.wood },
     { key: 'fire', label: '火', value: distribution.fire },
@@ -164,11 +164,11 @@ function FiveElementsRing({ fiveElements }) {
     const startPercentage = accumulatedPercentage;
     const midPercentage = startPercentage + percentage / 2;
     accumulatedPercentage += percentage;
-    
+
     const midAngle = (-90 + midPercentage * 360) * (Math.PI / 180);
     const labelX = center + radius * Math.cos(midAngle);
     const labelY = center + radius * Math.sin(midAngle);
-    
+
     return {
       ...el,
       percentage,
@@ -240,10 +240,10 @@ function FiveElementsRing({ fiveElements }) {
  */
 function DaYunTimelineInline({ yun, birthYear }) {
   if (!yun?.daYunList) return null;
-  
+
   const currentYear = new Date().getFullYear();
   const currentAge = birthYear ? currentYear - birthYear : 0;
-  
+
   return (
     <div className={styles.daYunSection}>
       <div className={styles.sectionTitle}>十步大运</div>
@@ -264,22 +264,22 @@ function DaYunTimelineInline({ yun, birthYear }) {
   );
 }
 
-export default function BaziChartCard({ 
+export default function BaziChartCard({
   data,
   subject,
   trueSolarTime,
   isSaved = false,
-  className = '' 
+  className = ''
 }) {
   if (!data?.fourPillars) return null;
 
   const { fourPillars, fourPillarsShiShen, fourPillarsXunKong, fiveElements, yun } = data;
   const dayStem = fourPillars.day.heavenlyStem;
-  
+
   const { currentDaYun, currentLiuNian } = useMemo(() => {
     return calculateCurrentFortune(yun, subject?.birthYear);
   }, [yun, subject?.birthYear]);
-  
+
   const daYunParsed = useMemo(() => {
     if (!currentDaYun) return null;
     const { stem, branch } = parseGanZhi(currentDaYun.ganZhi);
@@ -290,7 +290,7 @@ export default function BaziChartCard({
       isKongWang: currentDaYun.xunKong?.includes(branch?.chinese),
     };
   }, [currentDaYun]);
-  
+
   const liuNianParsed = useMemo(() => {
     if (!currentLiuNian) return null;
     const { stem, branch } = parseGanZhi(currentLiuNian.ganZhi);
@@ -305,12 +305,13 @@ export default function BaziChartCard({
   return (
     <Card className={`${styles.card} ${className}`}>
       {/* 顶部基础信息 */}
-      <HeaderSection 
+      <HeaderSection
         subject={subject}
         trueSolarTime={trueSolarTime}
         isSaved={isSaved}
+        dayMasterStrength={data.dayMaster?.strength}
       />
-      
+
       {/* 六柱区域 */}
       <div className={styles.pillarsContainer}>
         <div className={styles.fourPillarsArea}>
@@ -331,9 +332,9 @@ export default function BaziChartCard({
             hiddenStems={fourPillars.hour.hiddenStems} naYin={fourPillars.hour.naYin}
             isKongWang={isXunKong('hour', fourPillars.hour.earthlyBranch.chinese, fourPillarsXunKong)} />
         </div>
-        
+
         <div className={styles.divider} />
-        
+
         <div className={styles.fortuneArea}>
           {daYunParsed ? (
             <PillarColumn title="运" stem={daYunParsed.stem} branch={daYunParsed.branch}
@@ -354,7 +355,7 @@ export default function BaziChartCard({
 
       {/* 五行分布 */}
       <FiveElementsRing fiveElements={fiveElements} />
-      
+
       {/* 十步大运 */}
       <DaYunTimelineInline yun={yun} birthYear={subject?.birthYear} />
     </Card>

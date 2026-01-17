@@ -55,6 +55,30 @@
   border-radius: var(--radius-sm);
 }
 
+.strengthBadge {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 2px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--light-94);
+  color: var(--grey-30);
+}
+
+.strengthBadge[data-strength="strong"] {
+  background: rgba(255, 47, 47, 0.12);
+  color: var(--accent-red);
+}
+
+.strengthBadge[data-strength="weak"] {
+  background: rgba(94, 106, 210, 0.12);
+  color: var(--accent-blue);
+}
+
+.strengthBadge[data-strength="balanced"] {
+  background: rgba(128, 128, 128, 0.12);
+  color: var(--grey-30);
+}
+
 .birthInfoRow {
   display: flex;
   align-items: center;
@@ -139,12 +163,40 @@
   white-space: nowrap;
 }
 
-.biJian, .jieCai { background: rgba(128, 128, 128, 0.15); color: var(--grey-30); }
-.shiShen, .shangGuan { background: rgba(39, 179, 44, 0.12); color: var(--accent-green); }
-.pianCai, .zhengCai { background: rgba(239, 123, 22, 0.12); color: var(--accent-orange); }
-.qiSha, .zhengGuan { background: rgba(94, 106, 210, 0.12); color: var(--accent-blue); }
-.pianYin, .zhengYin { background: rgba(138, 67, 225, 0.12); color: var(--accent-purple); }
-.riYuan { background: rgba(255, 47, 47, 0.12); color: var(--accent-red); }
+.biJian,
+.jieCai {
+  background: rgba(128, 128, 128, 0.15);
+  color: var(--grey-30);
+}
+
+.shiShen,
+.shangGuan {
+  background: rgba(39, 179, 44, 0.12);
+  color: var(--accent-green);
+}
+
+.pianCai,
+.zhengCai {
+  background: rgba(239, 123, 22, 0.12);
+  color: var(--accent-orange);
+}
+
+.qiSha,
+.zhengGuan {
+  background: rgba(94, 106, 210, 0.12);
+  color: var(--accent-blue);
+}
+
+.pianYin,
+.zhengYin {
+  background: rgba(138, 67, 225, 0.12);
+  color: var(--accent-purple);
+}
+
+.riYuan {
+  background: rgba(255, 47, 47, 0.12);
+  color: var(--accent-red);
+}
 
 .ganBox {
   width: 40px;
@@ -413,25 +465,25 @@
     padding: var(--spacing-md);
     gap: var(--spacing-sm);
   }
-  
+
   .headerSection {
     padding-bottom: var(--spacing-sm);
   }
-  
+
   .nameRow {
     gap: 6px;
   }
-  
+
   .subjectName {
     font-size: 18px;
   }
-  
+
   .birthInfoRow {
     flex-direction: column;
     align-items: flex-start;
     gap: 6px;
   }
-  
+
   /* 小屏幕：六柱横向滚动，运年需滑动查看 */
   .pillarsContainer {
     display: flex;
@@ -444,22 +496,22 @@
     -webkit-overflow-scrolling: touch;
     padding-bottom: var(--spacing-sm);
   }
-  
+
   /* 显示滚动条提示可滑动 */
   .pillarsContainer::-webkit-scrollbar {
     height: 3px;
   }
-  
+
   .pillarsContainer::-webkit-scrollbar-track {
     background: var(--light-94);
     border-radius: 2px;
   }
-  
+
   .pillarsContainer::-webkit-scrollbar-thumb {
     background: var(--grey-50);
     border-radius: 2px;
   }
-  
+
   .fourPillarsArea {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -468,7 +520,7 @@
     min-width: calc(100% - 8px);
     scroll-snap-align: start;
   }
-  
+
   .divider {
     width: 1px;
     align-self: stretch;
@@ -476,7 +528,7 @@
     margin: 0 4px;
     flex-shrink: 0;
   }
-  
+
   .fortuneArea {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -485,53 +537,54 @@
     min-width: 160px;
     scroll-snap-align: start;
   }
-  
+
   .pillarColumn {
     min-width: 0;
     flex-shrink: 0;
   }
-  
+
   .pillarColumn {
     padding: 8px 4px;
     gap: 4px;
   }
-  
-  .ganBox, .zhiBox {
+
+  .ganBox,
+  .zhiBox {
     width: 36px;
     height: 36px;
     font-size: 20px;
   }
-  
+
   .shiShenTag {
     font-size: 10px;
     padding: 1px 4px;
   }
-  
+
   .hiddenStemsArea {
     min-height: 48px;
   }
-  
+
   .hiddenStemRow {
     font-size: 10px;
   }
-  
+
   .naYinTag {
     font-size: 9px;
     padding: 1px 4px;
   }
-  
+
   .fiveElementsContent {
     flex-direction: column;
     gap: var(--spacing-md);
   }
-  
+
   .fiveElementsLegend {
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: center;
     gap: 6px var(--spacing-md);
   }
-  
+
   .daYunGanZhi {
     font-size: 13px;
   }
@@ -541,66 +594,68 @@
   .card {
     padding: var(--spacing-sm);
   }
-  
+
   .subjectName {
     font-size: 16px;
   }
-  
+
   .genderLabel {
     font-size: 12px;
     padding: 1px 6px;
   }
-  
+
   .infoItem {
     font-size: 12px;
   }
-  
+
   .fourPillarsArea {
     gap: 6px;
   }
-  
+
   .fortuneArea {
     gap: 6px;
   }
-  
+
   .pillarColumn {
     padding: 6px 4px;
     min-width: 60px;
   }
-  
+
   .pillarTitle {
     font-size: 11px;
   }
-  
-  .ganBox, .zhiBox {
+
+  .ganBox,
+  .zhiBox {
     width: 32px;
     height: 32px;
     font-size: 18px;
   }
-  
+
   .hiddenStemRow {
     font-size: 9px;
     gap: 2px;
   }
-  
+
   .hiddenStemChar {
     min-width: 12px;
   }
-  
+
   .hiddenStemShiShen {
     font-size: 9px;
     padding: 0 3px;
   }
-  
+
   .kongWangMark {
     right: -12px;
     font-size: 8px;
   }
-  
-  .daYunAge, .daYunYear {
+
+  .daYunAge,
+  .daYunYear {
     font-size: 10px;
   }
-  
+
   .daYunGanZhi {
     font-size: 12px;
   }

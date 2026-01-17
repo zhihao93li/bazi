@@ -36,6 +36,15 @@ export default function PointsPage() {
     }
   }, [authLoading, isLoggedIn, navigate])
 
+  // 检查是否有余额不足的提示消息
+  useEffect(() => {
+    const message = sessionStorage.getItem('insufficientPointsMessage')
+    if (message) {
+      toast.error(message)
+      sessionStorage.removeItem('insufficientPointsMessage')
+    }
+  }, [toast])
+
   // 获取数据
   useEffect(() => {
     if (isLoggedIn) {

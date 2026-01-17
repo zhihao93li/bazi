@@ -36,7 +36,7 @@ export default function Navbar() {
       <div className={styles.container}>
         <Link to="/" className={styles.logo}>
           <img
-            src="https://framerusercontent.com/images/E65CrTfgroEJwcxOOIN1vzXb5w.svg"
+            src="/favicon.svg"
             alt="她赋"
             className={styles.logoIcon}
           />

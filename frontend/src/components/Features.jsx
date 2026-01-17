@@ -17,24 +17,8 @@ export default function Features() {
         {/* AI Feature Block */}
         <div className={styles.featureBlock}>
           <m.div
-            className={styles.imageCard}
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-          >
-            <img
-              src="https://framerusercontent.com/images/wgGuBRTVLu8u6u3dSvRbJZCEgN0.png"
-              alt="AI Analysis"
-              className={styles.featureImage}
-              loading="lazy"
-              decoding="async"
-            />
-          </m.div>
-
-          <m.div
             className={styles.content}
-            initial={{ opacity: 0, x: 30 }}
+            initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
@@ -58,6 +42,22 @@ export default function Features() {
                 </div>
               ))}
             </div>
+          </m.div>
+
+          <m.div
+            className={styles.imageCard}
+            initial={{ opacity: 0, x: 30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >
+            <img
+              src="https://framerusercontent.com/images/wgGuBRTVLu8u6u3dSvRbJZCEgN0.png"
+              alt="AI Analysis"
+              className={styles.featureImage}
+              loading="lazy"
+              decoding="async"
+            />
           </m.div>
         </div>
       </div>

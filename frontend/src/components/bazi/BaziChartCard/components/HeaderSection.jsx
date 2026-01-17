@@ -12,13 +12,13 @@ import styles from '../BaziChartCard.module.css';
  */
 function formatBirthTime(subject) {
   if (!subject) return '';
-  
+
   const year = subject.birthYear;
   const month = subject.birthMonth;
   const day = subject.birthDay;
   const hour = subject.birthHour ?? 0;
   const minute = subject.birthMinute ?? 0;
-  
+
   return `${year}年${month}月${day}日 ${hour}时${minute}分`;
 }
 
@@ -37,20 +37,20 @@ function formatTrueSolarTime(hour, minute) {
  */
 function getShortLocation(location) {
   if (!location) return '';
-  
+
   // 如果是对象格式
   if (typeof location === 'object') {
     // 优先显示城市
     return location.city || location.province || '';
   }
-  
+
   // 如果是字符串格式 "省/市/区"
   if (typeof location === 'string') {
     const parts = location.split('/');
     // 返回城市部分
     return parts[1] || parts[0] || location;
   }
-  
+
   return location;
 }
 
@@ -58,19 +58,29 @@ export default function HeaderSection({
   subject,          // 当前对象信息
   trueSolarTime,    // 真太阳时 { hour, minute }
   isSaved,          // 是否已保存
+  dayMasterStrength, // 日主强弱: 'strong' | 'weak' | 'balanced'
 }) {
   const genderLabel = subject?.gender === 'male' ? '乾造(男)' : '坤造(女)';
   const shortLocation = getShortLocation(subject?.location);
-  
+
+  // 身强弱中文映射
+  const STRENGTH_TEXT = { strong: '身强', weak: '身弱', balanced: '中和' };
+  const strengthText = dayMasterStrength ? STRENGTH_TEXT[dayMasterStrength] : null;
+
   return (
     <div className={styles.headerSection}>
       {/* 标题行：命理天象 */}
       <div className={styles.cardTitle}>命理天象</div>
-      
+
       {/* 名字与性别行 */}
       <div className={styles.nameRow}>
         <span className={styles.subjectName}>{subject?.name || '未命名'}</span>
         <span className={styles.genderLabel}>{genderLabel}</span>
+        {strengthText && (
+          <span className={styles.strengthBadge} data-strength={dayMasterStrength}>
+            {strengthText}
+          </span>
+        )}
         {isSaved && (
           <span className={styles.savedBadge}>
             <Check size={12} weight="bold" />
@@ -78,7 +88,7 @@ export default function HeaderSection({
           </span>
         )}
       </div>
-      
+
       {/* 出生信息行 */}
       <div className={styles.birthInfoRow}>
         {/* 地点 */}
@@ -88,13 +98,13 @@ export default function HeaderSection({
             {shortLocation}
           </span>
         )}
-        
+
         {/* 出生时间（北京时间） */}
         <span className={styles.infoItem}>
           <Calendar size={14} weight="fill" className={styles.infoIcon} />
           {formatBirthTime(subject)}
         </span>
-        
+
         {/* 真太阳时 */}
         {trueSolarTime && (
           <span className={styles.infoItem}>
