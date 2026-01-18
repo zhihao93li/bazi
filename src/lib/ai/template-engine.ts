@@ -57,7 +57,7 @@ function formatDaYunDetailed(yun: YunInfo | undefined): string {
 
   for (const dy of yun.daYunList.filter(d => d.ganZhi)) {
     lines.push(`【${dy.ganZhi}】${dy.startAge}-${dy.endAge}岁（${dy.startYear}-${dy.endYear}年）`);
-    
+
     // 添加流年信息
     if (dy.liuNian && dy.liuNian.length > 0) {
       const liuNianStr = dy.liuNian
@@ -77,7 +77,7 @@ function formatCurrentLiuNian(yun: YunInfo | undefined): string {
   if (!yun || !yun.daYunList) return '暂无流年信息';
 
   const currentYear = new Date().getFullYear();
-  
+
   for (const dy of yun.daYunList) {
     if (dy.liuNian) {
       const currentLiuNian = dy.liuNian.find(ln => ln.year === currentYear);
@@ -85,19 +85,19 @@ function formatCurrentLiuNian(yun: YunInfo | undefined): string {
         const lines: string[] = [];
         lines.push(`当前大运：${dy.ganZhi}（${dy.startAge}-${dy.endAge}岁）`);
         lines.push(`当前流年：${currentYear}年 ${currentLiuNian.ganZhi}（${currentLiuNian.age}岁）`);
-        
+
         if (currentLiuNian.liuYue && currentLiuNian.liuYue.length > 0) {
           const liuYueStr = currentLiuNian.liuYue
             .map(ly => `${ly.monthInChinese}:${ly.ganZhi}`)
             .join('、');
           lines.push(`流月：${liuYueStr}`);
         }
-        
+
         return lines.join('\n');
       }
     }
   }
-  
+
   return '暂无当前流年信息';
 }
 
@@ -106,13 +106,13 @@ function formatCurrentLiuNian(yun: YunInfo | undefined): string {
  */
 function formatShenSha(shenSha: ShenShaInfo | undefined): string {
   if (!shenSha) return '暂无神煞信息';
-  
+
   const lines: string[] = [];
   if (shenSha.year?.length) lines.push(`年柱神煞：${shenSha.year.join('、')}`);
   if (shenSha.month?.length) lines.push(`月柱神煞：${shenSha.month.join('、')}`);
   if (shenSha.day?.length) lines.push(`日柱神煞：${shenSha.day.join('、')}`);
   if (shenSha.hour?.length) lines.push(`时柱神煞：${shenSha.hour.join('、')}`);
-  
+
   return lines.length > 0 ? lines.join('\n') : '暂无神煞信息';
 }
 
@@ -121,14 +121,14 @@ function formatShenSha(shenSha: ShenShaInfo | undefined): string {
  */
 function formatDirections(directions: DirectionsInfo | undefined): string {
   if (!directions) return '暂无方位信息';
-  
+
   const lines: string[] = [];
   if (directions.xi) lines.push(`喜神方位：${directions.xi}`);
   if (directions.yangGui) lines.push(`阳贵神方位：${directions.yangGui}`);
   if (directions.yinGui) lines.push(`阴贵神方位：${directions.yinGui}`);
   if (directions.fu) lines.push(`福神方位：${directions.fu}`);
   if (directions.cai) lines.push(`财神方位：${directions.cai}`);
-  
+
   return lines.length > 0 ? lines.join('\n') : '暂无方位信息';
 }
 
@@ -137,12 +137,12 @@ function formatDirections(directions: DirectionsInfo | undefined): string {
  */
 function formatJieQi(jieQi: JieQiInfo | undefined): string {
   if (!jieQi) return '暂无节气信息';
-  
+
   const lines: string[] = [];
   if (jieQi.current) lines.push(`当前节气：${jieQi.current}`);
   if (jieQi.prev) lines.push(`上一节气：${jieQi.prev}（${jieQi.prevDate}）`);
   if (jieQi.next) lines.push(`下一节气：${jieQi.next}（${jieQi.nextDate}）`);
-  
+
   return lines.length > 0 ? lines.join('\n') : '暂无节气信息';
 }
 
@@ -151,14 +151,14 @@ function formatJieQi(jieQi: JieQiInfo | undefined): string {
  */
 function formatXingXiu(xingXiu: XingXiuInfo | undefined): string {
   if (!xingXiu) return '暂无星宿信息';
-  
+
   const lines: string[] = [];
   if (xingXiu.xiu) lines.push(`星宿：${xingXiu.xiu}`);
   if (xingXiu.animal) lines.push(`星宿动物：${xingXiu.animal}`);
   if (xingXiu.gong) lines.push(`宫：${xingXiu.gong}`);
   if (xingXiu.shou) lines.push(`兽：${xingXiu.shou}`);
   if (xingXiu.luck) lines.push(`吉凶：${xingXiu.luck}`);
-  
+
   return lines.length > 0 ? lines.join('\n') : '暂无星宿信息';
 }
 
@@ -167,11 +167,11 @@ function formatXingXiu(xingXiu: XingXiuInfo | undefined): string {
  */
 function formatPengZu(pengZu: PengZuInfo | undefined): string {
   if (!pengZu) return '暂无彭祖百忌信息';
-  
+
   const lines: string[] = [];
   if (pengZu.gan) lines.push(`天干忌：${pengZu.gan}`);
   if (pengZu.zhi) lines.push(`地支忌：${pengZu.zhi}`);
-  
+
   return lines.length > 0 ? lines.join('\n') : '暂无彭祖百忌信息';
 }
 
@@ -180,11 +180,11 @@ function formatPengZu(pengZu: PengZuInfo | undefined): string {
  */
 function formatYiJi(yiJi: YiJiInfo | undefined): string {
   if (!yiJi) return '暂无宜忌信息';
-  
+
   const lines: string[] = [];
   if (yiJi.yi?.length) lines.push(`宜：${yiJi.yi.join('、')}`);
   if (yiJi.ji?.length) lines.push(`忌：${yiJi.ji.join('、')}`);
-  
+
   return lines.length > 0 ? lines.join('\n') : '暂无宜忌信息';
 }
 
@@ -198,7 +198,7 @@ function formatHiddenStems(baziData: BaziData): string {
     { name: '日支', pillar: baziData.fourPillars.day },
     { name: '时支', pillar: baziData.fourPillars.hour },
   ];
-  
+
   return pillars
     .map(({ name, pillar }) => {
       const stems = pillar.hiddenStems.map(s => s.chinese).join('、');
@@ -237,11 +237,11 @@ function formatDiShi(diShi: DiShiInfo | undefined): string {
  */
 function formatNineStars(nineStars: NineStarsInfo | undefined): string {
   if (!nineStars) return '暂无九星信息';
-  
+
   const formatStar = (name: string, star: { number: string; color: string; wuXing: string; name: string; luck: string }) => {
     return `${name}：${star.number}${star.color}${star.name}（${star.wuXing}，${star.luck}）`;
   };
-  
+
   return [
     formatStar('年九星', nineStars.year),
     formatStar('月九星', nineStars.month),
@@ -255,11 +255,11 @@ function formatNineStars(nineStars: NineStarsInfo | undefined): string {
  */
 function formatTianShen(tianShen: TianShenInfo | undefined): string {
   if (!tianShen) return '暂无天神信息';
-  
+
   const lines: string[] = [];
   if (tianShen.day) lines.push(`日天神：${tianShen.day}（${tianShen.dayType}，${tianShen.dayLuck}）`);
   if (tianShen.hour) lines.push(`时天神：${tianShen.hour}（${tianShen.hourType}，${tianShen.hourLuck}）`);
-  
+
   return lines.length > 0 ? lines.join('\n') : '暂无天神信息';
 }
 
@@ -268,11 +268,11 @@ function formatTianShen(tianShen: TianShenInfo | undefined): string {
  */
 function formatJiXiong(jiXiong: JiXiongInfo | undefined): string {
   if (!jiXiong) return '暂无吉神凶煞信息';
-  
+
   const lines: string[] = [];
   if (jiXiong.jiShen?.length) lines.push(`吉神：${jiXiong.jiShen.join('、')}`);
   if (jiXiong.xiongSha?.length) lines.push(`凶煞：${jiXiong.xiongSha.join('、')}`);
-  
+
   return lines.length > 0 ? lines.join('\n') : '暂无吉神凶煞信息';
 }
 
@@ -281,11 +281,11 @@ function formatJiXiong(jiXiong: JiXiongInfo | undefined): string {
  */
 function formatTimeYiJi(timeYiJi: TimeYiJiInfo | undefined): string {
   if (!timeYiJi) return '暂无时辰宜忌信息';
-  
+
   const lines: string[] = [];
   if (timeYiJi.yi?.length) lines.push(`时辰宜：${timeYiJi.yi.join('、')}`);
   if (timeYiJi.ji?.length) lines.push(`时辰忌：${timeYiJi.ji.join('、')}`);
-  
+
   return lines.length > 0 ? lines.join('\n') : '暂无时辰宜忌信息';
 }
 
@@ -294,13 +294,13 @@ function formatTimeYiJi(timeYiJi: TimeYiJiInfo | undefined): string {
  */
 function formatChongSha(chongSha: ChongShaInfo | undefined): string {
   if (!chongSha) return '暂无冲煞信息';
-  
+
   const lines: string[] = [];
   if (chongSha.dayChong) lines.push(`日冲：${chongSha.dayChongDesc || chongSha.dayChong}`);
   if (chongSha.daySha) lines.push(`日煞：${chongSha.daySha}`);
   if (chongSha.timeChong) lines.push(`时冲：${chongSha.timeChongDesc || chongSha.timeChong}`);
   if (chongSha.timeSha) lines.push(`时煞：${chongSha.timeSha}`);
-  
+
   return lines.length > 0 ? lines.join('\n') : '暂无冲煞信息';
 }
 
@@ -309,11 +309,11 @@ function formatChongSha(chongSha: ChongShaInfo | undefined): string {
  */
 function formatTaiShen(taiShen: TaiShenInfo | undefined): string {
   if (!taiShen) return '暂无胎神信息';
-  
+
   const lines: string[] = [];
   if (taiShen.day) lines.push(`日胎神：${taiShen.day}`);
   if (taiShen.month) lines.push(`月胎神：${taiShen.month}`);
-  
+
   return lines.length > 0 ? lines.join('\n') : '暂无胎神信息';
 }
 
@@ -322,7 +322,7 @@ function formatTaiShen(taiShen: TaiShenInfo | undefined): string {
  */
 function formatFourPillarsXunKong(xunKong: FourPillarsXunKongInfo | undefined): string {
   if (!xunKong) return '暂无四柱旬空信息';
-  
+
   return [
     `年柱：${xunKong.yearXun}旬，空亡${xunKong.yearXunKong}`,
     `月柱：${xunKong.monthXun}旬，空亡${xunKong.monthXunKong}`,
@@ -336,7 +336,7 @@ function formatFourPillarsXunKong(xunKong: FourPillarsXunKongInfo | undefined): 
  */
 function formatFourPillarsShiShen(shiShen: FourPillarsShiShenInfo | undefined): string {
   if (!shiShen) return '暂无四柱十神信息';
-  
+
   return [
     `年干十神：${shiShen.yearGan}，年支藏干十神：${shiShen.yearZhi?.join('、') || ''}`,
     `月干十神：${shiShen.monthGan}，月支藏干十神：${shiShen.monthZhi?.join('、') || ''}`,
@@ -350,7 +350,7 @@ function formatFourPillarsShiShen(shiShen: FourPillarsShiShenInfo | undefined): 
  */
 function formatGongNaYin(gongNaYin: GongNaYinInfo | undefined): string {
   if (!gongNaYin) return '暂无命宫身宫信息';
-  
+
   return [
     `胎元：${gongNaYin.taiYuan}（${gongNaYin.taiYuanNaYin}）`,
     `命宫：${gongNaYin.mingGong}（${gongNaYin.mingGongNaYin}）`,
@@ -364,7 +364,7 @@ function formatGongNaYin(gongNaYin: GongNaYinInfo | undefined): string {
  */
 function formatOtherInfo(otherInfo: OtherLunarInfo | undefined): string {
   if (!otherInfo) return '暂无其他信息';
-  
+
   const lines: string[] = [];
   if (otherInfo.liuYao) lines.push(`六曜：${otherInfo.liuYao}`);
   if (otherInfo.zhiXing) lines.push(`执星：${otherInfo.zhiXing}`);
@@ -374,7 +374,7 @@ function formatOtherInfo(otherInfo: OtherLunarInfo | undefined): string {
   if (otherInfo.dayLu) lines.push(`日禄：${otherInfo.dayLu}`);
   if (otherInfo.festivals?.length) lines.push(`节日：${otherInfo.festivals.join('、')}`);
   if (otherInfo.otherFestivals?.length) lines.push(`其他节日：${otherInfo.otherFestivals.join('、')}`);
-  
+
   return lines.length > 0 ? lines.join('\n') : '暂无其他信息';
 }
 
@@ -404,6 +404,233 @@ function valueToString(value: unknown): string {
   if (Array.isArray(value)) return value.map((v) => valueToString(v)).join(', ');
   if (typeof value === 'object') return JSON.stringify(value);
   return String(value);
+}
+
+/**
+ * 极简八字数据结构（用于 AI 调用，最小化 token 消耗）
+ */
+interface MinimalBaziData {
+  // 四柱（扁平化）
+  fourPillars: {
+    year: string;      // 如 "甲子"
+    month: string;
+    day: string;
+    hour: string;
+    naYin: {           // 纳音
+      year: string;
+      month: string;
+      day: string;
+      hour: string;
+    };
+  };
+  // 藏干（扁平化）
+  hiddenStems: {
+    year: string;      // 如 "癸"
+    month: string;     // 如 "甲、丙、戊"
+    day: string;
+    hour: string;
+  };
+  // 日主
+  dayMaster: {
+    stem: string;      // 如 "甲"
+    element: string;   // 如 "木"
+    strength: string;  // 如 "身强"
+    characteristics: string;
+  };
+  // 五行
+  fiveElements: {
+    distribution: string;  // 如 "金2 木3 水1 火2 土2"
+    strongest: string;
+    weakest: string;
+    favorable: string;     // 喜用神
+    unfavorable: string;   // 忌神
+  };
+  // 十神（简化）
+  tenGods: string;
+  // 大运（只保留相关的）
+  yun: {
+    startAge: number;
+    forward: boolean;
+    currentDaYun: string | null;      // 当前大运干支
+    currentDaYunAge: string | null;   // 如 "31-40岁"
+    adjacentDaYun: string[];          // 前后各1步大运
+    currentLiuNian: string | null;    // 当前流年干支
+  };
+  // 神煞（扁平化）
+  shenSha: {
+    year: string;
+    month: string;
+    day: string;
+    hour: string;
+  };
+  // 基础信息
+  shengXiao: string;
+  lunarDate: string;
+  taiYuan: string;
+  mingGong: string;
+  shenGong: string;
+  xunKong: string;
+}
+
+/**
+ * 构建极简版八字数据（深度优化，最小化 token 消耗）
+ * 优化措施：
+ * 1. 扁平化四柱结构（移除 pinyin、element、yinYang 等）
+ * 2. 扁平化藏干（只保留中文字符）
+ * 3. 移除所有流月数据
+ * 4. 只保留当前大运 + 前后各1步
+ * 5. 简化十神为字符串
+ */
+function buildMinimalBaziData(baziData: BaziData): MinimalBaziData {
+  const currentYear = new Date().getFullYear();
+  const dist = baziData.fiveElements.distribution;
+
+  // 查找当前大运
+  let currentDaYunIndex = -1;
+  let currentDaYun: { ganZhi: string; startAge: number; endAge: number } | null = null;
+  let currentLiuNian: string | null = null;
+
+  if (baziData.yun?.daYunList) {
+    for (let i = 0; i < baziData.yun.daYunList.length; i++) {
+      const dy = baziData.yun.daYunList[i];
+      if (dy.startYear <= currentYear && dy.endYear >= currentYear) {
+        currentDaYunIndex = i;
+        currentDaYun = { ganZhi: dy.ganZhi, startAge: dy.startAge, endAge: dy.endAge };
+        // 查找当前流年
+        const liuNian = dy.liuNian?.find(ln => ln.year === currentYear);
+        if (liuNian) {
+          currentLiuNian = liuNian.ganZhi;
+        }
+        break;
+      }
+    }
+  }
+
+  // 获取相邻大运（前后各1步）
+  const adjacentDaYun: string[] = [];
+  if (baziData.yun?.daYunList && currentDaYunIndex >= 0) {
+    if (currentDaYunIndex > 0) {
+      const prev = baziData.yun.daYunList[currentDaYunIndex - 1];
+      if (prev.ganZhi) adjacentDaYun.push(`${prev.ganZhi}(${prev.startAge}-${prev.endAge}岁)`);
+    }
+    if (currentDaYunIndex < baziData.yun.daYunList.length - 1) {
+      const next = baziData.yun.daYunList[currentDaYunIndex + 1];
+      if (next.ganZhi) adjacentDaYun.push(`${next.ganZhi}(${next.startAge}-${next.endAge}岁)`);
+    }
+  }
+
+  return {
+    fourPillars: {
+      year: `${baziData.fourPillars.year.heavenlyStem.chinese}${baziData.fourPillars.year.earthlyBranch.chinese}`,
+      month: `${baziData.fourPillars.month.heavenlyStem.chinese}${baziData.fourPillars.month.earthlyBranch.chinese}`,
+      day: `${baziData.fourPillars.day.heavenlyStem.chinese}${baziData.fourPillars.day.earthlyBranch.chinese}`,
+      hour: `${baziData.fourPillars.hour.heavenlyStem.chinese}${baziData.fourPillars.hour.earthlyBranch.chinese}`,
+      naYin: {
+        year: baziData.fourPillars.year.naYin,
+        month: baziData.fourPillars.month.naYin,
+        day: baziData.fourPillars.day.naYin,
+        hour: baziData.fourPillars.hour.naYin,
+      },
+    },
+    hiddenStems: {
+      year: baziData.fourPillars.year.hiddenStems.map(s => s.chinese).join('、'),
+      month: baziData.fourPillars.month.hiddenStems.map(s => s.chinese).join('、'),
+      day: baziData.fourPillars.day.hiddenStems.map(s => s.chinese).join('、'),
+      hour: baziData.fourPillars.hour.hiddenStems.map(s => s.chinese).join('、'),
+    },
+    dayMaster: {
+      stem: baziData.dayMaster.stem.chinese,
+      element: FIVE_ELEMENTS_CHINESE[baziData.dayMaster.stem.element],
+      strength: baziData.dayMaster.strength === 'strong' ? '身强' :
+        baziData.dayMaster.strength === 'weak' ? '身弱' : '中和',
+      characteristics: baziData.dayMaster.characteristics.join('、'),
+    },
+    fiveElements: {
+      distribution: `金${dist.metal} 木${dist.wood} 水${dist.water} 火${dist.fire} 土${dist.earth}`,
+      strongest: FIVE_ELEMENTS_CHINESE[baziData.fiveElements.strongest],
+      weakest: FIVE_ELEMENTS_CHINESE[baziData.fiveElements.weakest],
+      favorable: baziData.fiveElements.favorable.map(e => FIVE_ELEMENTS_CHINESE[e]).join('、'),
+      unfavorable: baziData.fiveElements.unfavorable.map(e => FIVE_ELEMENTS_CHINESE[e]).join('、'),
+    },
+    tenGods: formatTenGods(baziData.tenGods),
+    yun: {
+      startAge: baziData.yun?.startAge ?? 0,
+      forward: baziData.yun?.forward ?? true,
+      currentDaYun: currentDaYun?.ganZhi ?? null,
+      currentDaYunAge: currentDaYun ? `${currentDaYun.startAge}-${currentDaYun.endAge}岁` : null,
+      adjacentDaYun,
+      currentLiuNian,
+    },
+    shenSha: {
+      year: baziData.shenSha?.year?.join('、') ?? '',
+      month: baziData.shenSha?.month?.join('、') ?? '',
+      day: baziData.shenSha?.day?.join('、') ?? '',
+      hour: baziData.shenSha?.hour?.join('、') ?? '',
+    },
+    shengXiao: baziData.shengXiao,
+    lunarDate: `${baziData.lunarDate.yearInChinese}年${baziData.lunarDate.monthInChinese}月${baziData.lunarDate.dayInChinese}`,
+    taiYuan: baziData.taiYuan,
+    mingGong: baziData.mingGong,
+    shenGong: baziData.shenGong,
+    xunKong: baziData.xunKong,
+  };
+}
+
+/**
+ * 构建精简版八字数据（排除择日类字段，用于 AI 解读）
+ * 移除的字段：彭祖百忌、宜忌、九星、天神、吉凶、时辰宜忌、冲煞、胎神、其他信息
+ * 这些字段主要用于择日选时，与命理性格/运势解读无关
+ */
+function buildCoreBaziData(baziData: BaziData): Partial<BaziData> {
+  return {
+    // 核心四柱信息
+    fourPillars: baziData.fourPillars,
+    // 日主信息（命理核心）
+    dayMaster: baziData.dayMaster,
+    // 五行分析（喜忌神等）
+    fiveElements: baziData.fiveElements,
+    // 十神关系（人事关系核心）
+    tenGods: baziData.tenGods,
+    // 藏干信息
+    hiddenStems: baziData.hiddenStems,
+    // 农历信息
+    lunarDate: baziData.lunarDate,
+    // 大运信息（运势核心）
+    yun: baziData.yun,
+    // 神煞信息（贵人、桃花等）
+    shenSha: baziData.shenSha,
+    // 吉神方位
+    directions: baziData.directions,
+    // 节气信息
+    jieQi: baziData.jieQi,
+    // 星宿信息
+    xingXiu: baziData.xingXiu,
+    // 十二长生
+    diShi: baziData.diShi,
+    // 四柱旬空
+    fourPillarsXunKong: baziData.fourPillarsXunKong,
+    // 四柱十神
+    fourPillarsShiShen: baziData.fourPillarsShiShen,
+    // 命宫身宫纳音
+    gongNaYin: baziData.gongNaYin,
+    // 基础信息
+    shengXiao: baziData.shengXiao,
+    xun: baziData.xun,
+    xunKong: baziData.xunKong,
+    taiYuan: baziData.taiYuan,
+    mingGong: baziData.mingGong,
+    shenGong: baziData.shenGong,
+    // 排除以下择日类字段：
+    // - pengZu (彭祖百忌)
+    // - yiJi (宜忌)
+    // - nineStars (九星)
+    // - tianShen (天神)
+    // - jiXiong (吉凶)
+    // - timeYiJi (时辰宜忌)
+    // - chongSha (冲煞)
+    // - taiShen (胎神)
+    // - otherInfo (六曜、物候等)
+  };
 }
 
 /**
@@ -443,8 +670,8 @@ function buildVariableMap(context: TemplateContext): Record<string, unknown> {
     // ==================== 日主信息 ====================
     dayMaster: baziData.dayMaster.stem.chinese,
     dayMasterElement: FIVE_ELEMENTS_CHINESE[baziData.dayMaster.stem.element],
-    dayMasterStrength: baziData.dayMaster.strength === 'strong' ? '身强' : 
-                       baziData.dayMaster.strength === 'weak' ? '身弱' : '中和',
+    dayMasterStrength: baziData.dayMaster.strength === 'strong' ? '身强' :
+      baziData.dayMaster.strength === 'weak' ? '身弱' : '中和',
     dayMasterCharacteristics: baziData.dayMaster.characteristics.join('、'),
 
     // ==================== 五行分布 ====================
@@ -513,38 +740,44 @@ function buildVariableMap(context: TemplateContext): Record<string, unknown> {
     // ==================== 新增信息 ====================
     // 十二长生
     diShi: formatDiShi(baziData.diShi),
-    
+
     // 九星
     nineStars: formatNineStars(baziData.nineStars),
-    
+
     // 天神
     tianShen: formatTianShen(baziData.tianShen),
-    
+
     // 吉神凶煞
     jiXiong: formatJiXiong(baziData.jiXiong),
-    
+
     // 时辰宜忌
     timeYiJi: formatTimeYiJi(baziData.timeYiJi),
-    
+
     // 冲煞
     chongSha: formatChongSha(baziData.chongSha),
-    
+
     // 胎神
     taiShen: formatTaiShen(baziData.taiShen),
-    
+
     // 四柱旬空
     fourPillarsXunKong: formatFourPillarsXunKong(baziData.fourPillarsXunKong),
-    
+
     // 四柱十神
     fourPillarsShiShen: formatFourPillarsShiShen(baziData.fourPillarsShiShen),
-    
+
     // 命宫身宫纳音
     gongNaYin: formatGongNaYin(baziData.gongNaYin),
-    
+
     // 其他信息
     otherInfo: formatOtherInfo(baziData.otherInfo),
 
-    // ==================== 完整八字数据（JSON格式，供高级分析使用）====================
+    // ==================== 极简八字数据（深度优化，最小化 token）====================
+    baziMinimalJson: JSON.stringify(buildMinimalBaziData(baziData), null, 2),
+
+    // ==================== 精简八字数据（排除择日类字段，用于 AI 解读）====================
+    baziCoreJson: JSON.stringify(buildCoreBaziData(baziData), null, 2),
+
+    // ==================== 完整八字数据（JSON格式，备用）====================
     fullBaziJson: JSON.stringify(baziData, null, 2),
 
     // ==================== 第二轮 LLM 专用变量 ====================
