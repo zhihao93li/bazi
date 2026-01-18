@@ -33,8 +33,8 @@ export {
   useLoadingThemes
 } from './useUnlockTheme';
 
-// 流式主题解锁
-export { useUnlockThemeStream } from './useUnlockThemeStream';
+// 异步主题解锁（任务队列模式）
+export { useAsyncUnlock } from './useAsyncUnlock';
 
 // 命盘切换（请求取消和竞态处理）
 export {

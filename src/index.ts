@@ -23,7 +23,7 @@ import { pointsRoutes } from './routes/points.js';
 import { reportsRoutes } from './routes/reports.js';
 import { subjectsRoutes } from './routes/subjects.js';
 import { themesRoutes } from './routes/themes.js';
-import { themesStreamRoutes } from './routes/themes-stream.js';
+import { tasksRoutes } from './routes/tasks.js';
 
 const app = new Hono();
 
@@ -70,7 +70,7 @@ app.route('/api/points', pointsRoutes);
 app.route('/api/reports', reportsRoutes);
 app.route('/api/subjects', subjectsRoutes);
 app.route('/api/themes', themesRoutes);
-app.route('/api/themes', themesStreamRoutes);
+app.route('/api/tasks', tasksRoutes);
 
 // 404 处理
 app.notFound((c) => {

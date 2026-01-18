@@ -60,6 +60,7 @@ function getOpenAIClient(): OpenAI {
     openaiClient = new OpenAI({
       apiKey,
       baseURL,
+      maxRetries: 3, // 自动重试 3 次，解决网络不稳定问题
     });
   }
 
