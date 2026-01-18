@@ -127,7 +127,6 @@ prompts:
       description: 探索生命本质与核心特质的书信式解读
       category: standalone
       word_count: 1500-2000
-      model: gpt-5.2
 
       # ─────────────────────────────────────────────────────────────────────
       # System Prompt

@@ -6,11 +6,12 @@
  * 2. 轮询任务状态 → 直到完成或失败
  */
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { api } from '../services/api';
+import { THEME_STATUS_QUERY_KEY } from './useThemes';
 
-const POLL_INTERVAL = 3000; // 3 秒轮询一次
+const POLL_INTERVAL = 2000; // 2 秒轮询一次
 const MAX_POLL_TIME = 5 * 60 * 1000; // 最长轮询 5 分钟
 
 export function useAsyncUnlock({
@@ -21,20 +22,33 @@ export function useAsyncUnlock({
     const queryClient = useQueryClient();
     const [status, setStatus] = useState('idle'); // idle | pending | processing | completed | failed
     const [taskId, setTaskId] = useState(null);
+    const [subjectId, setSubjectId] = useState(null);
     const pollTimerRef = useRef(null);
     const startTimeRef = useRef(null);
+    const isPollingRef = useRef(false);
+
+    // 保存回调的 ref，避免依赖变化导致问题
+    const callbacksRef = useRef({ onSuccess, onError, updateUser });
+    callbacksRef.current = { onSuccess, onError, updateUser };
 
     // 清理轮询
     const stopPolling = useCallback(() => {
+        console.log('[useAsyncUnlock] Stopping polling');
         if (pollTimerRef.current) {
-            clearInterval(pollTimerRef.current);
+            clearTimeout(pollTimerRef.current);
             pollTimerRef.current = null;
         }
+        isPollingRef.current = false;
     }, []);
 
-    // 轮询任务状态
-    const pollTaskStatus = useCallback(async (taskId, subjectId) => {
+    // 轮询任务状态（使用 setTimeout 而非 setInterval，避免堆积）
+    const pollOnce = useCallback(async () => {
+        if (!isPollingRef.current || !taskId || !subjectId) {
+            return;
+        }
+
         try {
+            console.log('[useAsyncUnlock] Polling task:', taskId);
             const response = await api.get(`/tasks/${taskId}`);
 
             if (!response.success) {
@@ -42,56 +56,85 @@ export function useAsyncUnlock({
             }
 
             const { status: taskStatus, content, error } = response;
-            setStatus(taskStatus);
+            console.log('[useAsyncUnlock] Task status:', taskStatus);
 
             if (taskStatus === 'completed') {
                 stopPolling();
+                setStatus('completed');
 
-                // 更新缓存
-                queryClient.invalidateQueries({ queryKey: ['themes', subjectId] });
+                // 更新缓存，强制刷新
+                await queryClient.invalidateQueries({ queryKey: [THEME_STATUS_QUERY_KEY, subjectId] });
+                await queryClient.refetchQueries({ queryKey: [THEME_STATUS_QUERY_KEY, subjectId] });
 
-                onSuccess?.({ content });
+                callbacksRef.current.onSuccess?.({ content });
                 return;
             }
 
             if (taskStatus === 'failed') {
                 stopPolling();
-                onError?.({ message: error || '解锁失败，积分已退还', code: 'TASK_FAILED' });
+                setStatus('failed');
+                callbacksRef.current.onError?.({ message: error || '解锁失败，积分已退还', code: 'TASK_FAILED' });
                 return;
             }
 
             // 检查是否超时
             if (Date.now() - startTimeRef.current > MAX_POLL_TIME) {
                 stopPolling();
-                onError?.({ message: '任务超时，请稍后刷新页面查看', code: 'POLL_TIMEOUT' });
+                setStatus('failed');
+                callbacksRef.current.onError?.({ message: '任务超时，请稍后刷新页面查看', code: 'POLL_TIMEOUT' });
+                return;
+            }
+
+            // 继续轮询（使用 setTimeout 而非 setInterval）
+            if (isPollingRef.current) {
+                pollTimerRef.current = setTimeout(pollOnce, POLL_INTERVAL);
             }
 
         } catch (err) {
             console.error('[useAsyncUnlock] Poll error:', err);
-            // 网络错误时继续轮询，不中断
+            // 网络错误时继续轮询
+            if (isPollingRef.current) {
+                pollTimerRef.current = setTimeout(pollOnce, POLL_INTERVAL);
+            }
         }
-    }, [queryClient, stopPolling, onSuccess, onError]);
+    }, [taskId, subjectId, queryClient, stopPolling]);
 
     // 开始轮询
-    const startPolling = useCallback((taskId, subjectId) => {
+    const startPolling = useCallback(() => {
+        // 先清理之前的轮询
+        stopPolling();
+
         startTimeRef.current = Date.now();
+        isPollingRef.current = true;
 
-        // 立即执行一次
-        pollTaskStatus(taskId, subjectId);
+        console.log('[useAsyncUnlock] Starting polling for task:', taskId);
 
-        // 设置定时轮询
-        pollTimerRef.current = setInterval(() => {
-            pollTaskStatus(taskId, subjectId);
-        }, POLL_INTERVAL);
-    }, [pollTaskStatus]);
+        // 立即执行第一次轮询
+        pollOnce();
+    }, [pollOnce, stopPolling, taskId]);
+
+    // 当 taskId 变化时开始轮询
+    useEffect(() => {
+        if (taskId && subjectId && status === 'processing') {
+            startPolling();
+        }
+
+        return () => {
+            stopPolling();
+        };
+    }, [taskId, subjectId, status, startPolling, stopPolling]);
 
     // 解锁主题
-    const unlock = useCallback(async ({ subjectId, theme }) => {
+    const unlock = useCallback(async ({ subjectId: sid, theme }) => {
         try {
+            // 先清理之前的状态
+            stopPolling();
             setStatus('pending');
             setTaskId(null);
+            setSubjectId(sid);
 
-            const response = await api.post('/themes/unlock', { subjectId, theme });
+            console.log('[useAsyncUnlock] Submitting unlock request:', { subjectId: sid, theme });
+            const response = await api.post('/themes/unlock', { subjectId: sid, theme });
 
             if (!response.success) {
                 throw { message: response.message, code: response.code };
@@ -99,34 +142,36 @@ export function useAsyncUnlock({
 
             // 如果已解锁，直接完成
             if (response.alreadyUnlocked) {
+                console.log('[useAsyncUnlock] Already unlocked');
                 setStatus('completed');
-                queryClient.invalidateQueries({ queryKey: ['themes', subjectId] });
-                onSuccess?.({ content: response.content, alreadyUnlocked: true });
+                await queryClient.invalidateQueries({ queryKey: [THEME_STATUS_QUERY_KEY, sid] });
+                await queryClient.refetchQueries({ queryKey: [THEME_STATUS_QUERY_KEY, sid] });
+                callbacksRef.current.onSuccess?.({ content: response.content, alreadyUnlocked: true });
                 return;
             }
 
             // 更新用户余额
-            if (updateUser && response.remainingBalance !== undefined) {
-                updateUser({ points: response.remainingBalance });
+            if (callbacksRef.current.updateUser && response.remainingBalance !== undefined) {
+                callbacksRef.current.updateUser({ points: response.remainingBalance });
             }
 
-            // 开始轮询任务状态
-            const { taskId } = response;
-            setTaskId(taskId);
+            // 设置任务 ID，触发轮询（通过 useEffect）
+            console.log('[useAsyncUnlock] Task created:', response.taskId);
+            setTaskId(response.taskId);
             setStatus('processing');
-            startPolling(taskId, subjectId);
 
         } catch (err) {
+            console.error('[useAsyncUnlock] Unlock error:', err);
             setStatus('failed');
-            onError?.(err);
+            callbacksRef.current.onError?.(err);
         }
-    }, [queryClient, startPolling, updateUser, onSuccess, onError]);
+    }, [queryClient, stopPolling]);
 
     // 组件卸载时清理
-    const cleanup = useCallback(() => {
-        stopPolling();
-        setStatus('idle');
-        setTaskId(null);
+    useEffect(() => {
+        return () => {
+            stopPolling();
+        };
     }, [stopPolling]);
 
     return {
@@ -134,7 +179,6 @@ export function useAsyncUnlock({
         status,
         taskId,
         isUnlocking: status === 'pending' || status === 'processing',
-        cleanup,
     };
 }
 
