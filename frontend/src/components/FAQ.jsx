@@ -66,7 +66,7 @@ export default function FAQ() {
   return (
     <section className={styles.faq}>
       <div className={styles.container}>
-        <m.div 
+        <m.div
           className={styles.header}
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -100,7 +100,7 @@ export default function FAQ() {
           </div>
         </div>
 
-        <m.div 
+        <m.div
           className={styles.cta}
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -111,7 +111,7 @@ export default function FAQ() {
             <h3>准备好探索您的命运了吗？</h3>
             <p>立即开始免费排盘，发现未知的自己。</p>
           </div>
-          <Button to="/bazi/input">立即体验</Button>
+          <Button to="/bazi">立即体验</Button>
         </m.div>
       </div>
     </section>

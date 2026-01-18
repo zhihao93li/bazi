@@ -46,7 +46,7 @@ export default function Hero() {
           </div>
 
           <div className={styles.cta}>
-            <Button to="/bazi/input" size="large">
+            <Button to="/bazi" size="large">
               开始探索
             </Button>
 

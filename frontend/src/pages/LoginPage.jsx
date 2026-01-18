@@ -7,8 +7,6 @@ import { useToast } from '../components/common'
 import { FormInput, ButtonGroup, Card } from '../components/common'
 import Button from '../components/Button'
 import GradientBackground from '../components/GradientBackground'
-import { api } from '../services/api'
-import { getLocalSubjects } from '../utils/localSubjects'
 import styles from './LoginPage.module.css'
 
 export default function LoginPage() {
@@ -88,31 +86,8 @@ export default function LoginPage() {
         // 如果有明确的 callbackUrl，直接跳转
         navigate(callbackUrl, { replace: true })
       } else {
-        // 没有 callbackUrl，根据是否有命盘数据决定跳转
-        try {
-          // 检查本地命盘
-          const localSubjects = getLocalSubjects()
-          if (localSubjects.length > 0) {
-            navigate('/bazi', { replace: true })
-            return
-          }
-
-          // 检查云端命盘（已登录状态）
-          const res = await api.get('/subjects')
-          if (res.subjects && res.subjects.length > 0) {
-            navigate('/bazi', { replace: true })
-          } else {
-            navigate('/bazi/input', { replace: true })
-          }
-        } catch {
-          // API 失败时检查本地
-          const localSubjects = getLocalSubjects()
-          if (localSubjects.length > 0) {
-            navigate('/bazi', { replace: true })
-          } else {
-            navigate('/bazi/input', { replace: true })
-          }
-        }
+        // 统一跳转到命理解读页，由结果页判断是否需要重定向到输入页
+        navigate('/bazi', { replace: true })
       }
     } catch (error) {
       toast.error(error.message)

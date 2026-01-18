@@ -171,7 +171,7 @@ export function isSubjectUnlocking(subjectId: string): boolean {
  * 如果已存在则直接返回，否则生成新的
  * 使用内存锁防止并发请求重复生成
  */
-async function ensureInitialAnalysis(
+export async function ensureInitialAnalysis(
   subjectId: string,
   baziData: BaziData,
   gender?: string

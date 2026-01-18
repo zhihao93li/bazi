@@ -19,38 +19,21 @@ import { THEME_STATUS_QUERY_KEY } from './useThemes';
  */
 export function useUnlockTheme({ onSuccess, onError, updateUser, currentSubjectId } = {}) {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async ({ subjectId, theme }) => {
-      // #region agent log
-      const startTime = Date.now();
-      fetch('http://127.0.0.1:7242/ingest/48c6779c-b33e-444b-aa07-30b4a3457b97',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useUnlockTheme.js:mutationFn:start',message:'Unlock mutation started',data:{subjectId,theme,startTime},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'A'})}).catch(()=>{});
-      // #endregion
-      try {
-        const res = await api.post('/themes/unlock', { subjectId, theme });
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/48c6779c-b33e-444b-aa07-30b4a3457b97',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useUnlockTheme.js:mutationFn:success',message:'Unlock API returned successfully',data:{subjectId,theme,duration:Date.now()-startTime,pointsDeducted:res.pointsDeducted,hasContent:!!res.content},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'A'})}).catch(()=>{});
-        // #endregion
-        return { ...res, requestSubjectId: subjectId, requestTheme: theme };
-      } catch (err) {
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/48c6779c-b33e-444b-aa07-30b4a3457b97',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useUnlockTheme.js:mutationFn:error',message:'Unlock API failed',data:{subjectId,theme,duration:Date.now()-startTime,errorName:err?.name,errorMessage:err?.message,errorCode:err?.code},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'A'})}).catch(()=>{});
-        // #endregion
-        throw err;
-      }
+      const res = await api.post('/themes/unlock', { subjectId, theme });
+      return { ...res, requestSubjectId: subjectId, requestTheme: theme };
     },
-    
+
     // 乐观更新：立即显示 loading 状态
     onMutate: async ({ subjectId, theme }) => {
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/48c6779c-b33e-444b-aa07-30b4a3457b97',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useUnlockTheme.js:onMutate',message:'onMutate - setting optimistic loading state',data:{subjectId,theme},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'B'})}).catch(()=>{});
-      // #endregion
       // 取消该命盘该主题的查询，避免覆盖乐观更新
       await queryClient.cancelQueries({ queryKey: [THEME_STATUS_QUERY_KEY, subjectId] });
-      
+
       // 保存之前的数据用于回滚
       const previousData = queryClient.getQueryData([THEME_STATUS_QUERY_KEY, subjectId]);
-      
+
       // 乐观更新：设置 loading 状态
       queryClient.setQueryData([THEME_STATUS_QUERY_KEY, subjectId], (old) => {
         if (!old) return old;
@@ -62,15 +45,12 @@ export function useUnlockTheme({ onSuccess, onError, updateUser, currentSubjectI
           },
         };
       });
-      
+
       return { previousData, subjectId, theme };
     },
-    
+
     // 错误时回滚
     onError: (error, { subjectId, theme }, context) => {
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/48c6779c-b33e-444b-aa07-30b4a3457b97',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useUnlockTheme.js:onError',message:'onError - rolling back state',data:{subjectId,theme,errorName:error?.name,errorMessage:error?.message,errorCode:error?.code,hasPreviousData:!!context?.previousData},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'A,C,D'})}).catch(()=>{});
-      // #endregion
       // 回滚该主题的 loading 状态
       if (context?.previousData) {
         // 只回滚该主题的状态，保持其他主题的状态
@@ -87,16 +67,13 @@ export function useUnlockTheme({ onSuccess, onError, updateUser, currentSubjectI
           };
         });
       }
-      
+
       // 调用错误回调
       onError?.(error, { subjectId, theme });
     },
-    
+
     // 成功时更新缓存
     onSuccess: (data, { subjectId, theme }) => {
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/48c6779c-b33e-444b-aa07-30b4a3457b97',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useUnlockTheme.js:onSuccess',message:'onSuccess - updating cache with result',data:{subjectId,theme,hasContent:!!data.content,pointsDeducted:data.pointsDeducted,remainingBalance:data.remainingBalance},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'A,E'})}).catch(()=>{});
-      // #endregion
       // 更新对应 subjectId 的主题缓存
       queryClient.setQueryData([THEME_STATUS_QUERY_KEY, subjectId], (old) => {
         if (!old) return old;
@@ -110,17 +87,17 @@ export function useUnlockTheme({ onSuccess, onError, updateUser, currentSubjectI
           },
         };
       });
-      
+
       // 同步到本地存储
       if (data.content) {
         setThemeCache(subjectId, theme, data.content);
       }
-      
+
       // 更新用户余额（无论当前显示哪个命盘都更新）
       if (updateUser && data.remainingBalance !== undefined) {
         updateUser({ balance: data.remainingBalance });
       }
-      
+
       // 调用外部成功回调
       onSuccess?.(data, { subjectId, theme });
     },
@@ -134,9 +111,9 @@ export function useUnlockTheme({ onSuccess, onError, updateUser, currentSubjectI
 export function useLoadingThemes(subjectId) {
   const queryClient = useQueryClient();
   const themesData = queryClient.getQueryData([THEME_STATUS_QUERY_KEY, subjectId]);
-  
+
   if (!themesData) return [];
-  
+
   return Object.entries(themesData)
     .filter(([_, data]) => data.isLoading)
     .map(([theme]) => theme);

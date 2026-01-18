@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { m } from 'framer-motion';
 import { useToast, Card } from '../components/common';
@@ -14,6 +14,8 @@ import {
   getLocalSubjects,
   saveLocalSubject
 } from '../utils/localSubjects';
+import { useAuth } from '../context/AuthContext';
+import { useSubjects } from '../hooks';
 import styles from './BaziInputPage.module.css';
 
 const INITIAL_FORM = {
@@ -33,10 +35,21 @@ export default function BaziInputPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const toast = useToast();
+  const { isLoggedIn } = useAuth();
 
   const [formData, setFormData] = useState(INITIAL_FORM);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
+
+  // 获取已有的命盘列表（用于检查名称重复）
+  const { data: cloudSubjects = [] } = useSubjects(isLoggedIn);
+
+  // 合并云端和本地命盘的名称列表
+  const existingNames = useMemo(() => {
+    const localSubjects = getLocalSubjects();
+    const allSubjects = [...cloudSubjects, ...localSubjects];
+    return allSubjects.map(s => s.name?.trim()).filter(Boolean);
+  }, [cloudSubjects]);
 
   // 检查 URL 参数是否有 subjectId
   useEffect(() => {
@@ -59,8 +72,16 @@ export default function BaziInputPage() {
 
   const validate = () => {
     const newErrors = {};
-    if (!formData.name.trim()) newErrors.name = '请输入称呼';
-    if (formData.name.length > 10) newErrors.name = '称呼不能超过10个字';
+    const trimmedName = formData.name.trim();
+
+    if (!trimmedName) {
+      newErrors.name = '请输入称呼';
+    } else if (trimmedName.length > 10) {
+      newErrors.name = '称呼不能超过10个字';
+    } else if (existingNames.includes(trimmedName)) {
+      newErrors.name = '该称呼已存在，请使用其他名称';
+    }
+
     if (!formData.birthYear) newErrors.birthYear = '请选择年份';
     if (!formData.location?.province) newErrors.province = '请选择省份';
     if (!formData.location?.city) newErrors.city = '请选择城市';
@@ -150,7 +171,13 @@ export default function BaziInputPage() {
                   label="称呼"
                   name="name"
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) => {
+                    setFormData({ ...formData, name: e.target.value });
+                    // 清除名称错误，等待提交时重新验证
+                    if (errors.name) {
+                      setErrors(prev => ({ ...prev, name: undefined }));
+                    }
+                  }}
                   error={errors.name}
                   placeholder="请输入称呼"
                   maxLength={10}

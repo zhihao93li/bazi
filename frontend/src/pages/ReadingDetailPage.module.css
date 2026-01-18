@@ -326,6 +326,56 @@
     }
 }
 
+/* 流式输出样式 */
+.streamingWrapper {
+    position: relative;
+}
+
+.streaming {
+    min-height: 200px;
+}
+
+.streamingIndicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background: var(--light-96);
+    border-radius: var(--radius-md);
+    margin-top: 16px;
+    font-size: var(--text-small);
+    color: var(--grey-50);
+}
+
+.streamingDot {
+    width: 8px;
+    height: 8px;
+    background: var(--accent-green);
+    border-radius: 50%;
+    animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.5;
+        transform: scale(0.8);
+    }
+}
+
+/* 打字光标效果 */
+.content :global(.streaming-cursor)::after {
+    content: '▌';
+    animation: blink 0.8s infinite;
+    color: var(--grey-50);
+}
+
 /* 响应式 - 平板 */
 @media (max-width: 1024px) {
     .container {

@@ -200,6 +200,17 @@ themesRoutes.post('/unlock', authRequired, async (c) => {
         );
       }
 
+      if (error.message.includes('was deleted during analysis')) {
+        return c.json(
+          {
+            success: false,
+            message: '测算对象在生成过程中被删除，积分已退还',
+            code: 'SUBJECT_DELETED',
+          },
+          400
+        );
+      }
+
       if (error.message.includes('Unauthorized')) {
         return c.json(
           {
@@ -221,10 +232,71 @@ themesRoutes.post('/unlock', authRequired, async (c) => {
           400
         );
       }
+
+      // AI 服务商相关错误 - 转化为用户友好的提示
+      if (error.message.includes('insufficient') && error.message.includes('balance')) {
+        // AIHubMix 余额不足
+        return c.json(
+          {
+            success: false,
+            message: 'AI 服务暂时不可用，请稍后再试。积分已退还。',
+            code: 'AI_SERVICE_UNAVAILABLE',
+          },
+          503
+        );
+      }
+
+      if (error.message.includes('rate limit') || error.message.includes('429')) {
+        // API 限流
+        return c.json(
+          {
+            success: false,
+            message: '服务繁忙，请稍后再试。积分已退还。',
+            code: 'AI_RATE_LIMITED',
+          },
+          503
+        );
+      }
+
+      if (error.message.includes('timeout') || error.message.includes('ETIMEDOUT')) {
+        // 请求超时
+        return c.json(
+          {
+            success: false,
+            message: '请求超时，请稍后再试。积分已退还。',
+            code: 'AI_TIMEOUT',
+          },
+          503
+        );
+      }
+    }
+
+    // 检查是否是 OpenAI SDK 抛出的错误对象
+    const err = error as { status?: number; code?: string };
+    if (err.status === 403 || err.code === 'insufficient_user_quota') {
+      return c.json(
+        {
+          success: false,
+          message: 'AI 服务暂时不可用，请稍后再试。积分已退还。',
+          code: 'AI_SERVICE_UNAVAILABLE',
+        },
+        503
+      );
+    }
+
+    if (err.status === 429) {
+      return c.json(
+        {
+          success: false,
+          message: '服务繁忙，请稍后再试。积分已退还。',
+          code: 'AI_RATE_LIMITED',
+        },
+        503
+      );
     }
 
     return c.json(
-      { success: false, message: '解锁失败，请稍后重试' },
+      { success: false, message: '解锁失败，请稍后重试。如多次失败请联系客服。' },
       500
     );
   }

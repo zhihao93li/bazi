@@ -123,9 +123,10 @@ export default function BaziResultPage() {
   useEffect(() => {
     if (isSubjectError) {
       toast.error('获取命盘失败');
-      navigate('/bazi/input');
+      // 清除URL参数，让下面的自动导航逻辑处理（选择第一个命盘或跳转到输入页）
+      setSearchParams({}, { replace: true });
     }
-  }, [isSubjectError, toast, navigate]);
+  }, [isSubjectError, toast, setSearchParams]);
 
   // 自动导航到第一个命盘或输入页（当没有选中任何命盘时）
   useEffect(() => {
@@ -200,7 +201,8 @@ export default function BaziResultPage() {
         onSuccess: () => {
           toast.success('删除成功');
           if (currentSubject?.id === id) {
-            navigate('/bazi/input');
+            // 清除URL参数，让自动导航逻辑处理（选择其他命盘或跳转到输入页）
+            setSearchParams({}, { replace: true });
           }
         },
         onError: (error) => {
@@ -208,7 +210,7 @@ export default function BaziResultPage() {
         },
       }
     );
-  }, [subjects, currentSubject, deleteSubjectMutation, toast, navigate]);
+  }, [subjects, currentSubject, deleteSubjectMutation, toast, setSearchParams]);
 
   // ==================== 计算派生数据 ====================
 

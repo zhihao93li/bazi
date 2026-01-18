@@ -20,7 +20,7 @@ import {
     useSubjectDetail,
     useThemePricing,
     useThemes,
-    useUnlockTheme,
+    useUnlockThemeStream,
 } from '../hooks';
 import styles from './ReadingDetailPage.module.css';
 
@@ -112,21 +112,27 @@ export default function ReadingDetailPage() {
     // 获取数据
     const { data: currentSubject, isLoading: isLoadingSubject } = useSubjectDetail(subjectId, null, {});
     const { data: themePricing = {} } = useThemePricing();
-    const { data: themesData = {} } = useThemes(subjectId, isLoggedIn, themePricing);
+    const { data: themesData = {}, refetch: refetchThemes } = useThemes(subjectId, isLoggedIn, themePricing);
 
-    // 解锁mutation
-    const unlockThemeMutation = useUnlockTheme({
-        onSuccess: (data, { theme: themeKey }) => {
-            toast.success(`解锁成功`);
+    // 流式内容状态（用于显示打字效果）
+    const [streamingTheme, setStreamingTheme] = useState(null);
+
+    // 流式解锁
+    const { startStream, isStreaming, streamingContent } = useUnlockThemeStream({
+        onSuccess: (data) => {
+            toast.success('解锁成功');
+            setStreamingTheme(null);
         },
         onError: (error) => {
-            if (error.code === 'INSUFFICIENT_POINTS') {
-                // 存储提示消息，在积分页显示
+            setStreamingTheme(null);
+            if (error.code === 'INSUFFICIENT_POINTS' || error.message?.includes('积分不足')) {
                 sessionStorage.setItem('insufficientPointsMessage', '积分不足，请先充值');
-                // 将当前页面路径存入 sessionStorage，支付成功后读取
                 const currentPath = window.location.pathname + window.location.search;
                 sessionStorage.setItem('paymentReturnUrl', currentPath);
                 navigate('/points');
+            } else if (error.code === 'NETWORK_ERROR' || error.message?.includes('load failed')) {
+                toast.info('请求超时，正在检查状态...');
+                setTimeout(() => refetchThemes(), 1000);
             } else {
                 toast.error(error.message || '解锁失败');
             }
@@ -172,11 +178,14 @@ export default function ReadingDetailPage() {
 
         if (!currentThemeData?.themeKey) return;
 
-        unlockThemeMutation.mutate({
+        // 设置正在流式输出的主题
+        setStreamingTheme(currentThemeData.themeKey);
+
+        startStream({
             subjectId,
             theme: currentThemeData.themeKey,
         });
-    }, [isLoggedIn, subjectId, currentThemeData, unlockThemeMutation, navigate, toast]);
+    }, [isLoggedIn, subjectId, currentThemeData, startStream, navigate, toast]);
 
     // 处理Tab切换
     const handleTabChange = useCallback((tabId) => {
@@ -248,7 +257,21 @@ export default function ReadingDetailPage() {
 
                     {/* 内容区域 */}
                     <Card className={styles.contentCard}>
-                        {currentThemeData?.isLoading ? (
+                        {/* 流式输出中：显示实时内容 */}
+                        {isStreaming && streamingTheme === currentThemeData?.themeKey ? (
+                            <div className={styles.streamingWrapper}>
+                                <div
+                                    className={`${styles.content} ${styles.streaming}`}
+                                    dangerouslySetInnerHTML={{
+                                        __html: parseSimpleMarkdown(streamingContent) || '<span class="streaming-cursor">正在生成...</span>'
+                                    }}
+                                />
+                                <div className={styles.streamingIndicator}>
+                                    <span className={styles.streamingDot} />
+                                    <span>AI 正在生成中...</span>
+                                </div>
+                            </div>
+                        ) : currentThemeData?.isLoading ? (
                             <div className={styles.loading}>
                                 <div className={styles.spinner} />
                                 <span>AI 正在解读中...</span>
@@ -278,7 +301,7 @@ export default function ReadingDetailPage() {
                                 <button
                                     className={styles.unlockButton}
                                     onClick={handleUnlock}
-                                    disabled={unlockThemeMutation.isPending}
+                                    disabled={isStreaming}
                                 >
                                     <Sparkle weight="fill" size={18} />
                                     <span>解锁解读</span>

@@ -8,16 +8,16 @@
  */
 
 import OpenAI from 'openai';
-import { 
-  loadAIConfig, 
-  loadNewAIConfig, 
+import {
+  loadAIConfig,
+  loadNewAIConfig,
   getPromptTemplate,
   getInitialPromptTemplate,
   getThemePromptTemplate,
 } from './config-loader.js';
 import { replaceTemplateVariables, TemplateContext } from './template-engine.js';
-import type { 
-  AnalysisSection, 
+import type {
+  AnalysisSection,
   FortuneAnalysis,
   AnalysisTheme,
 } from './types.js';
@@ -90,7 +90,7 @@ export async function generateInitialAnalysis(
   // 获取初步解读模板（包含 system 和 user）
   const promptTemplate = getInitialPromptTemplate();
   const context: TemplateContext = { baziData, gender };
-  
+
   // 替换模板变量
   const systemPrompt = replaceTemplateVariables(promptTemplate.system, context);
   const userPrompt = replaceTemplateVariables(promptTemplate.user, context);
@@ -117,9 +117,9 @@ export async function generateInitialAnalysis(
     // 详细记录 API 响应
     const finishReason = response.choices[0]?.finish_reason;
     console.log(`[AI Service] API response received, choices count: ${response.choices?.length || 0}, finish_reason: ${finishReason}`);
-    
+
     const content = response.choices[0]?.message?.content;
-    
+
     // 如果因为长度截断但有内容，仍然返回（虽然不完整）
     if (!content) {
       // 记录更多调试信息
@@ -129,14 +129,14 @@ export async function generateInitialAnalysis(
         usage: response.usage,
         responseId: response.id,
       });
-      
+
       // 如果是因为长度限制，给出更明确的错误提示
       if (finishReason === 'length') {
         throw new Error(`AI response truncated due to max_tokens limit (${config.maxTokens}). Please increase maxTokens in config.`);
       }
       throw new Error(`AI response is empty for initial analysis (model: ${config.model}, finish_reason: ${finishReason})`);
     }
-    
+
     // 如果内容被截断，记录警告但仍返回
     if (finishReason === 'length') {
       console.warn(`[AI Service] Warning: Initial analysis was truncated (max_tokens: ${config.maxTokens}). Consider increasing the limit.`);
@@ -179,13 +179,13 @@ export async function generateThemeAnalysis(
 
   // 获取主题模板（包含 system 和 user，可能有专属 model）
   const promptTemplate = getThemePromptTemplate(theme);
-  const context: TemplateContext = { 
-    baziData, 
+  const context: TemplateContext = {
+    baziData,
     gender,
     initialAnalysis,
     currentYear: new Date().getFullYear(),
   };
-  
+
   // 替换模板变量
   const systemPrompt = replaceTemplateVariables(promptTemplate.system, context);
   const userPrompt = replaceTemplateVariables(promptTemplate.user, context);
@@ -221,6 +221,76 @@ export async function generateThemeAnalysis(
     return content;
   } catch (error) {
     console.error(`[AI Service] Error generating ${theme} analysis:`, error);
+    throw error;
+  }
+}
+
+/**
+ * 生成分主题解读（流式版本）
+ * 
+ * 基于初步解读结果，流式生成特定主题的深度分析
+ * 
+ * @param theme - 主题类型
+ * @param baziData - 八字排盘结果
+ * @param initialAnalysis - 初步解读结果
+ * @param gender - 性别
+ * @yields 解读内容片段
+ */
+export async function* generateThemeAnalysisStream(
+  theme: AnalysisTheme,
+  baziData: BaziData,
+  initialAnalysis: string,
+  gender?: string
+): AsyncGenerator<string, void, unknown> {
+  const config = loadNewAIConfig();
+  const client = getOpenAIClient();
+
+  // 获取主题模板（包含 system 和 user，可能有专属 model）
+  const promptTemplate = getThemePromptTemplate(theme);
+  const context: TemplateContext = {
+    baziData,
+    gender,
+    initialAnalysis,
+    currentYear: new Date().getFullYear(),
+  };
+
+  // 替换模板变量
+  const systemPrompt = replaceTemplateVariables(promptTemplate.system, context);
+  const userPrompt = replaceTemplateVariables(promptTemplate.user, context);
+
+  // 使用主题专属模型（如果有），否则使用全局配置
+  const modelToUse = promptTemplate.model || config.model;
+
+  console.log(`[AI Service] Generating theme analysis (Streaming): ${theme}, model: ${modelToUse}...`);
+
+  try {
+    const stream = await client.chat.completions.create({
+      model: modelToUse,
+      messages: [
+        {
+          role: 'system',
+          content: systemPrompt,
+        },
+        {
+          role: 'user',
+          content: userPrompt,
+        },
+      ],
+      temperature: config.temperature,
+      ...buildTokenLimitParam(modelToUse, config.maxTokens),
+      stream: true,
+    });
+
+    for await (const chunk of stream) {
+      const content = chunk.choices[0]?.delta?.content;
+      if (content) {
+        yield content;
+      }
+    }
+
+    console.log(`[AI Service] Theme analysis stream completed: ${theme}`);
+  } catch (error) {
+    console.error(`[AI Service] Error in streaming ${theme} analysis:`, error);
     throw error;
   }
 }

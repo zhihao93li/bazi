@@ -3,35 +3,38 @@
  */
 
 // 命盘列表
-export { 
-  useSubjects, 
-  useSyncLocalSubject, 
+export {
+  useSubjects,
+  useSyncLocalSubject,
   useDeleteSubject,
-  SUBJECTS_QUERY_KEY 
+  SUBJECTS_QUERY_KEY
 } from './useSubjects';
 
 // 命盘详情
-export { 
-  useSubjectDetail, 
+export {
+  useSubjectDetail,
   usePrefetchSubjectDetail,
-  SUBJECT_DETAIL_QUERY_KEY 
+  SUBJECT_DETAIL_QUERY_KEY
 } from './useSubjectDetail';
 
 // 主题相关
-export { 
-  useThemePricing, 
-  useThemes, 
+export {
+  useThemePricing,
+  useThemes,
   useResetThemes,
   useUpdateThemeCache,
   THEME_PRICING_QUERY_KEY,
-  THEME_STATUS_QUERY_KEY 
+  THEME_STATUS_QUERY_KEY
 } from './useThemes';
 
 // 主题解锁
-export { 
+export {
   useUnlockTheme,
-  useLoadingThemes 
+  useLoadingThemes
 } from './useUnlockTheme';
+
+// 流式主题解锁
+export { useUnlockThemeStream } from './useUnlockThemeStream';
 
 // 命盘切换（请求取消和竞态处理）
 export {
