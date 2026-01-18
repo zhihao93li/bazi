@@ -197,6 +197,17 @@ subjectsRoutes.delete('/:id', authRequired, async (c) => {
     const userId = requireUserId(c);
 
     const id = c.req.param('id');
+
+    // 检查是否正在解锁主题（防止删除导致外键约束错误和积分丢失）
+    const { isSubjectUnlocking } = await import('../lib/themes/service.js');
+    if (isSubjectUnlocking(id)) {
+      return c.json({
+        success: false,
+        message: '该命盘正在生成解读中，请稍后再试',
+        code: 'SUBJECT_UNLOCKING',
+      }, 400);
+    }
+
     const success = await deleteSubject(id, userId);
 
     if (!success) {

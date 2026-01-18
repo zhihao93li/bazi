@@ -149,6 +149,24 @@ const initialAnalysisLocks = new Map<string, Promise<string>>();
 const themeUnlockLocks = new Map<string, Promise<ThemeUnlockResult>>();
 
 /**
+ * 检查某个 Subject 是否正在进行主题解锁
+ * 用于在删除 Subject 前检查，防止解锁过程中删除导致外键约束错误
+ */
+export function isSubjectUnlocking(subjectId: string): boolean {
+  // 检查是否有任何以该 subjectId 开头的锁
+  for (const key of themeUnlockLocks.keys()) {
+    if (key.startsWith(`${subjectId}_`)) {
+      return true;
+    }
+  }
+  // 也检查初步解读锁
+  if (initialAnalysisLocks.has(subjectId)) {
+    return true;
+  }
+  return false;
+}
+
+/**
  * 检查并生成初步解读
  * 如果已存在则直接返回，否则生成新的
  * 使用内存锁防止并发请求重复生成
@@ -295,21 +313,7 @@ export async function unlockTheme(
     // #endregion
 
     try {
-      // 3. 预扣积分（乐观锁 - 原子操作，自动检查余额）
-      console.log(`[Theme Service] Pre-deducting points for theme: ${theme}, amount: ${price}`);
-      deductResult = await deductPoints({
-        userId,
-        amount: price,
-        description: `解锁主题解读 - ${theme}`,
-        orderId,
-      });
-      pointsDeducted = true;
-      // #region agent log
-      console.log(`[DEBUG][Theme Service] Points deducted: ${price}, time elapsed: ${Date.now() - taskStartTime}ms`);
-      // #endregion
-      console.log(`[Theme Service] Points pre-deducted successfully, remaining: ${deductResult.balance}`);
-
-      // 4. 获取测算对象信息
+      // 3. 先验证测算对象是否存在且有效（在扣积分之前）
       const subject = await prisma.subject.findUnique({
         where: { id: subjectId },
         select: {
@@ -332,6 +336,20 @@ export async function unlockTheme(
       }
 
       const baziData = subject.baziData as unknown as BaziData;
+
+      // 4. 预扣积分（乐观锁 - 原子操作，自动检查余额）
+      console.log(`[Theme Service] Pre-deducting points for theme: ${theme}, amount: ${price}`);
+      deductResult = await deductPoints({
+        userId,
+        amount: price,
+        description: `解锁主题解读 - ${theme}`,
+        orderId,
+      });
+      pointsDeducted = true;
+      // #region agent log
+      console.log(`[DEBUG][Theme Service] Points deducted: ${price}, time elapsed: ${Date.now() - taskStartTime}ms`);
+      // #endregion
+      console.log(`[Theme Service] Points pre-deducted successfully, remaining: ${deductResult.balance}`);
 
       // 5. 确保初步解读已生成
       // #region agent log
@@ -363,8 +381,18 @@ export async function unlockTheme(
       console.log(`[DEBUG][Theme Service] Theme analysis completed in ${Date.now() - themeAnalysisStartTime}ms`);
       // #endregion
 
-      // 7. 存储解读结果
+      // 7. 存储解读结果（先验证 Subject 仍然存在）
       try {
+        // 再次验证 Subject 是否仍然存在（防止 AI 生成期间被删除）
+        const subjectStillExists = await prisma.subject.findUnique({
+          where: { id: subjectId },
+          select: { id: true },
+        });
+
+        if (!subjectStillExists) {
+          throw new Error('Subject was deleted during analysis generation');
+        }
+
         await prisma.themeAnalysis.create({
           data: {
             userId,
@@ -406,6 +434,11 @@ export async function unlockTheme(
             pointsDeducted: 0, // 已退还
             remainingBalance: account?.balance || 0,
           };
+        }
+        // 捕获外键约束冲突（Subject 在 AI 生成期间被删除）
+        if (error && typeof error === 'object' && 'code' in error && error.code === 'P2003') {
+          console.log(`[Theme Service] Subject was deleted during analysis, handling gracefully`);
+          throw new Error('Subject was deleted during analysis generation');
         }
         throw error;
       }
