@@ -26,7 +26,7 @@ export const THEME_NAMES = {
     relationship: '情感关系',
     career_wealth: '事业财富',
     health: '健康运势',
-    life_lesson: '人生功课',
+    life_lesson: '贵人小人',
     yearly_fortune: '流年运势',
 };
 
@@ -38,7 +38,7 @@ export const THEME_ICONS = {
     relationship: 'Heart',
     career_wealth: 'CurrencyCircleDollar',
     health: 'FirstAid',
-    life_lesson: 'BookOpen',
+    life_lesson: 'Users',
     yearly_fortune: 'Calendar',
 };
 

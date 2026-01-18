@@ -13,7 +13,7 @@ export type AnalysisTheme =
     | 'relationship'     // 情感关系
     | 'career_wealth'    // 事业财富
     | 'health'           // 健康运势
-    | 'life_lesson'      // 人生功课
+    | 'life_lesson'      // 贵人小人
     | 'yearly_fortune';  // 流年运势
 
 /**
@@ -38,7 +38,7 @@ export const THEME_NAMES: Record<AnalysisTheme, string> = {
     relationship: '情感关系',
     career_wealth: '事业财富',
     health: '健康运势',
-    life_lesson: '人生功课',
+    life_lesson: '贵人小人',
     yearly_fortune: '流年运势',
 };
 

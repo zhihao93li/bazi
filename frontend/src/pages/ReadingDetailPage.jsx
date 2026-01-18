@@ -9,7 +9,7 @@
 
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useParams, useSearchParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Lock, Sparkle, Coins, Palette, MagnifyingGlass, CalendarBlank, Heart, CurrencyCircleDollar, FirstAidKit, BookOpen } from '@phosphor-icons/react';
+import { ArrowLeft, Lock, Sparkle, Coins, Palette, MagnifyingGlass, CalendarBlank, Heart, CurrencyCircleDollar, FirstAidKit, Users } from '@phosphor-icons/react';
 import { useAuth } from '../context/AuthContext';
 import { useToast, LoadingOverlay } from '../components/common';
 import Navbar from '../components/Navbar';
@@ -41,7 +41,7 @@ const THEME_CONFIG = {
             { id: 'relationship', key: 'relationship', name: '亲密关系', Icon: Heart },
             { id: 'career', key: 'career_wealth', name: '事业财富', Icon: CurrencyCircleDollar },
             { id: 'health', key: 'health', name: '身心健康', Icon: FirstAidKit },
-            { id: 'life-lesson', key: 'life_lesson', name: '人生课题', Icon: BookOpen },
+            { id: 'life-lesson', key: 'life_lesson', name: '贵人小人', Icon: Users },
         ],
     },
     'yearly': {

@@ -10,7 +10,7 @@ const SPECIAL_THEMES = [
   { id: 'relationship', name: '亲密关系' },
   { id: 'career_wealth', name: '事业财富' },
   { id: 'health', name: '身心健康' },
-  { id: 'life_lesson', name: '人生课题' },
+  { id: 'life_lesson', name: '贵人小人' },
 ];
 
 /**

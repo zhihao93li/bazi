@@ -14,7 +14,7 @@ export type AnalysisTheme =
   | 'relationship'    // 亲密关系
   | 'career_wealth'   // 事业财富
   | 'health'          // 身心健康
-  | 'life_lesson'     // 人生课题
+  | 'life_lesson'     // 贵人小人
   | 'yearly_fortune'  // 流年解读
   | 'synastry';       // 合盘分析
 
@@ -68,10 +68,10 @@ export const THEME_METADATA: Record<AnalysisTheme, ThemeMeta> = {
   },
   life_lesson: {
     id: 'life_lesson',
-    name: '人生课题',
-    description: '洞察生命成长与人生使命',
+    name: '贵人小人',
+    description: '解读命局中的贵人助力与小人防范',
     category: 'special_analysis',
-    icon: 'book',
+    icon: 'users',
   },
   yearly_fortune: {
     id: 'yearly_fortune',

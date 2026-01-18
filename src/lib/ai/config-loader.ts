@@ -85,8 +85,8 @@ const DEFAULT_NEW_AI_CONFIG: NewAIConfig = {
         user: '请分析此人的身心健康状况。',
       },
       life_lesson: {
-        system: '你是一位资深的命理分析师，专注于人生课题与成长方向分析。',
-        user: '请分析此人的人生课题。',
+        system: '你是一位资深的命理分析师，专注于解读命局中的贵人与小人。',
+        user: '请分析此人命局中的贵人与小人。',
       },
       yearly_fortune: {
         system: '你是一位资深的命理分析师，专注于流年运势分析。',

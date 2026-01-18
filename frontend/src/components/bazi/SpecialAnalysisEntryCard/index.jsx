@@ -5,7 +5,7 @@
  */
 
 import { Link } from 'react-router-dom';
-import { Lock, Heart, CurrencyCircleDollar, FirstAidKit, BookOpen, MagnifyingGlass } from '@phosphor-icons/react';
+import { Lock, Heart, CurrencyCircleDollar, FirstAidKit, Users, MagnifyingGlass } from '@phosphor-icons/react';
 import Card from '../../common/Card';
 import styles from './SpecialAnalysisEntryCard.module.css';
 
@@ -14,7 +14,7 @@ const SPECIAL_THEMES = [
     { id: 'relationship', key: 'relationship', name: '亲密关系', Icon: Heart },
     { id: 'career', key: 'career_wealth', name: '事业财富', Icon: CurrencyCircleDollar },
     { id: 'health', key: 'health', name: '身心健康', Icon: FirstAidKit },
-    { id: 'life-lesson', key: 'life_lesson', name: '人生课题', Icon: BookOpen },
+    { id: 'life-lesson', key: 'life_lesson', name: '贵人小人', Icon: Users },
 ];
 
 export default function SpecialAnalysisEntryCard({

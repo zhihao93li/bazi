@@ -37,32 +37,7 @@ export default function QRCodeModal({
     return `${mins}:${secs.toString().padStart(2, '0')}`
   }
 
-  // 轮询订单状态
-  const pollOrderStatus = useCallback(async () => {
-    if (!orderNo || !visible) return
-
-    // 创建新的 AbortController
-    abortControllerRef.current = new AbortController()
-
-    try {
-      const response = await api.get(`/payment/status/${orderNo}`, {
-        signal: abortControllerRef.current.signal,
-      })
-      
-      // API 返回 { success: true, data: { status: 'paid', ... } }
-      if (response.data?.status === 'paid') {
-        stopPolling()
-        onSuccess?.()
-      }
-    } catch (error) {
-      // 忽略取消请求的错误
-      if (!isAbortError(error)) {
-        console.error('轮询订单状态失败:', error)
-      }
-    }
-  }, [orderNo, visible, onSuccess, stopPolling])
-
-  // 停止轮询
+  // 停止轮询 - 必须在 pollOrderStatus 之前定义，因为 pollOrderStatus 依赖它
   const stopPolling = useCallback(() => {
     if (pollingRef.current) {
       clearInterval(pollingRef.current)
@@ -77,6 +52,31 @@ export default function QRCodeModal({
       abortControllerRef.current = null
     }
   }, [])
+
+  // 轮询订单状态
+  const pollOrderStatus = useCallback(async () => {
+    if (!orderNo || !visible) return
+
+    // 创建新的 AbortController
+    abortControllerRef.current = new AbortController()
+
+    try {
+      const response = await api.get(`/payment/status/${orderNo}`, {
+        signal: abortControllerRef.current.signal,
+      })
+
+      // API 返回 { success: true, data: { status: 'paid', ... } }
+      if (response.data?.status === 'paid') {
+        stopPolling()
+        onSuccess?.()
+      }
+    } catch (error) {
+      // 忽略取消请求的错误
+      if (!isAbortError(error)) {
+        console.error('轮询订单状态失败:', error)
+      }
+    }
+  }, [orderNo, visible, onSuccess, stopPolling])
 
   // 开始轮询和倒计时
   useEffect(() => {
@@ -161,13 +161,13 @@ export default function QRCodeModal({
                 />
               )}
             </div>
-            
+
             <div className={styles.info}>
               <div className={styles.amount}>
                 <span className={styles.amountLabel}>支付金额</span>
                 <span className={styles.amountValue}>¥{amount?.toFixed(2)}</span>
               </div>
-              
+
               <div className={styles.timer}>
                 <span className={styles.timerLabel}>剩余时间</span>
                 <span className={styles.timerValue}>{formatTime(timeLeft)}</span>

@@ -48,7 +48,7 @@ const themePricingData = [
     },
     {
         theme: 'life_lesson',
-        name: '人生课题',
+        name: '贵人小人',
         description: '洞察生命成长与人生使命',
         price: 100,
         originalPrice: null as number | null,
@@ -160,7 +160,7 @@ async function syncPointsPackages() {
  */
 export async function bootstrapDatabase() {
     console.log('[Bootstrap] 同步种子数据...');
-    
+
     try {
         await syncThemePricing();
         await syncPointsPackages();
