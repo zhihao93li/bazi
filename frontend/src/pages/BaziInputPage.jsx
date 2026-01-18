@@ -112,11 +112,8 @@ export default function BaziInputPage() {
 
       const baziData = calculateBazi(birthData);
 
-      // 2. 统一保存到本地，立即跳转（后台异步同步到云端）
-      // 这样可以避免等待网络请求，提升用户体验
-      const localSubject = {
-        id: generateLocalId(),
-        name: formData.name,
+      const subjectData = {
+        name: formData.name.trim(),
         gender: formData.gender,
         calendarType: formData.calendarType,
         birthYear: formData.birthYear,
@@ -127,17 +124,45 @@ export default function BaziInputPage() {
         isLeapMonth: formData.isLeapMonth,
         location: `${formData.location.province}/${formData.location.city}/${formData.location.district}`,
         baziData,
-        isLocal: true,
-        createdAt: new Date().toISOString(),
       };
 
-      saveLocalSubject(localSubject);
+      if (isLoggedIn) {
+        // 已登录：直接调用后端 API 创建命盘，等待完成后跳转
+        const response = await fetch('/api/subjects', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          },
+          body: JSON.stringify(subjectData),
+        });
 
-      // 立即跳转到结果页（如果已登录，结果页会自动同步到云端）
-      navigate(`/bazi?localId=${localSubject.id}`);
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message || '创建命盘失败');
+        }
+
+        const data = await response.json();
+
+        // 跳转到结果页（使用后端返回的真实 subjectId）
+        navigate(`/bazi?subjectId=${data.subject.id}`);
+      } else {
+        // 未登录：保存到本地，后续登录时再同步
+        const localSubject = {
+          id: generateLocalId(),
+          ...subjectData,
+          isLocal: true,
+          createdAt: new Date().toISOString(),
+        };
+
+        saveLocalSubject(localSubject);
+
+        // 跳转到结果页
+        navigate(`/bazi?localId=${localSubject.id}`);
+      }
     } catch (error) {
       console.error(error);
-      toast.error('排盘计算失败，请检查输入');
+      toast.error(error.message || '排盘计算失败，请检查输入');
       setIsSubmitting(false);
     }
   };

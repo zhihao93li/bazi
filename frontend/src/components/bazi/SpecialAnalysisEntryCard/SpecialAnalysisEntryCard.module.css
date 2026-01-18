@@ -87,6 +87,17 @@
     opacity: 0.6;
 }
 
+/* 禁用状态（同步中） */
+.disabled {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.itemDisabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 /* 响应式 */
 @media (max-width: 480px) {
     .grid {

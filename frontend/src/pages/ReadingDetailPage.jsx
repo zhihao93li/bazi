@@ -114,10 +114,21 @@ export default function ReadingDetailPage() {
     const { data: themePricing = {} } = useThemePricing();
     const { data: themesData = {}, refetch: refetchThemes } = useThemes(subjectId, isLoggedIn, themePricing);
 
-    // 异步解锁（任务队列模式）
-    const { unlock, isUnlocking } = useAsyncUnlock({
+    // 主题名称映射
+    const themeNameMap = {
+        'life_color': '生命底色',
+        'relationship': '亲密关系',
+        'career_wealth': '事业财富',
+        'health': '身心健康',
+        'life_lesson': '贵人小人',
+        'yearly_fortune': '流年运势',
+    };
+
+    // 异步解锁（任务队列模式）- 每个主题独立状态
+    const { unlock, isThemeUnlocking } = useAsyncUnlock({
         onSuccess: (data) => {
-            toast.success('解锁成功');
+            const themeName = themeNameMap[data.theme] || '解读';
+            toast.success(`「${themeName}」解锁成功`);
         },
         onError: (error) => {
             if (error.code === 'INSUFFICIENT_POINTS' || error.message?.includes('积分不足')) {
@@ -162,6 +173,11 @@ export default function ReadingDetailPage() {
             };
         }
     }, [theme, themeConfig, themesData, activeTab, themePricing]);
+
+    // 检查当前主题是否正在解锁（放在 currentThemeData 之后）
+    const isCurrentThemeUnlocking = currentThemeData?.themeKey
+        ? isThemeUnlocking(subjectId, currentThemeData.themeKey)
+        : false;
 
     // 处理解锁
     const handleUnlock = useCallback(() => {
@@ -249,8 +265,8 @@ export default function ReadingDetailPage() {
 
                     {/* 内容区域 */}
                     <Card className={styles.contentCard}>
-                        {/* 加载中 */}
-                        {currentThemeData?.isLoading || isUnlocking ? (
+                        {/* 加载中 - 使用当前主题的独立状态 */}
+                        {currentThemeData?.isLoading || isCurrentThemeUnlocking ? (
                             <div className={styles.loading}>
                                 <div className={styles.spinner} />
                                 <span>AI 正在解读中...</span>
@@ -280,7 +296,7 @@ export default function ReadingDetailPage() {
                                 <button
                                     className={styles.unlockButton}
                                     onClick={handleUnlock}
-                                    disabled={isUnlocking}
+                                    disabled={isCurrentThemeUnlocking}
                                 >
                                     <Sparkle weight="fill" size={18} />
                                     <span>解锁解读</span>

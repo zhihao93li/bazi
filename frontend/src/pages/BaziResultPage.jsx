@@ -226,11 +226,17 @@ export default function BaziResultPage() {
     'rgba(239, 123, 22, 0.4)',
   ];
 
+  // 使用有效的 subjectId（优先云端，其次本地）
+  const effectiveSubjectId = subjectId || localId;
+
+  // 检查是否正在同步本地命盘
+  const isSyncingLocal = isLoggedIn && localId && !subjectId && syncLocalSubject.isPending;
+
   // ==================== 渲染 ====================
 
-  // 加载中状态
-  if (isLoadingSubjects || isLoadingSubject || !baziResult) {
-    return <LoadingOverlay fixed text="加载中..." />;
+  // 加载中状态（包括同步中）
+  if (isLoadingSubjects || isLoadingSubject || !baziResult || isSyncingLocal) {
+    return <LoadingOverlay fixed text={isSyncingLocal ? "正在同步命盘..." : "加载中..."} />;
   }
 
   return (
@@ -300,13 +306,13 @@ export default function BaziResultPage() {
                   description={READING_DESCRIPTIONS.life_color}
                   isUnlocked={themesDataWithPricing.life_color.isUnlocked}
                   price={themesDataWithPricing.life_color.price}
-                  subjectId={subjectId}
+                  subjectId={effectiveSubjectId}
                 />
 
                 {/* 专项分析入口（2x2网格） */}
                 <SpecialAnalysisEntryCard
                   themesData={themesDataWithPricing}
-                  subjectId={subjectId}
+                  subjectId={effectiveSubjectId}
                 />
 
                 {/* 流年解读入口 */}
@@ -319,7 +325,7 @@ export default function BaziResultPage() {
                   isUnlocked={themesDataWithPricing.yearly_fortune.isUnlocked}
                   price={themesDataWithPricing.yearly_fortune.price}
                   originalPrice={themesDataWithPricing.yearly_fortune.originalPrice}
-                  subjectId={subjectId}
+                  subjectId={effectiveSubjectId}
                 />
 
                 {/* 合盘分析入口 (即将推出) */}
@@ -330,7 +336,7 @@ export default function BaziResultPage() {
                   description={READING_DESCRIPTIONS.synastry}
                   price={themesDataWithPricing.synastry.price}
                   comingSoon={true}
-                  subjectId={subjectId}
+                  subjectId={effectiveSubjectId}
                 />
               </div>
             </m.div>

@@ -4,8 +4,10 @@
  * 用于在命盘主页显示解读入口，点击跳转到落地页
  */
 
+import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { Lock, ArrowRight } from '@phosphor-icons/react';
+import { useToast } from '../../common';
 import Card from '../../common/Card';
 import styles from './ReadingEntryCard.module.css';
 
@@ -39,13 +41,30 @@ export default function ReadingEntryCard({
     subjectId,
     className = '',
 }) {
+    const navigate = useNavigate();
+    const toast = useToast();
     const summary = truncateSummary(content);
-    // 如果是即将推出，不需要链接
-    const linkTo = comingSoon ? '#' : `/bazi/reading/${theme}?subjectId=${subjectId}`;
+
+    // 检查是否是本地命盘（未登录用户）
+    const isLocalSubject = subjectId?.startsWith('local_');
+    const isDisabled = comingSoon || isLocalSubject;
+    const linkTo = isDisabled ? '#' : `/bazi/reading/${theme}?subjectId=${subjectId}`;
+
+    const handleClick = (e) => {
+        if (comingSoon) {
+            e.preventDefault();
+            return;
+        }
+        if (isLocalSubject) {
+            e.preventDefault();
+            toast.info('请先登录以使用解读功能');
+            navigate('/login?callbackUrl=' + encodeURIComponent(window.location.pathname + window.location.search));
+        }
+    };
 
     return (
         <Card className={`${styles.card} ${className} ${comingSoon ? styles.disabled : ''}`}>
-            <Link to={linkTo} className={styles.link} onClick={e => comingSoon && e.preventDefault()}>
+            <Link to={linkTo} className={styles.link} onClick={handleClick}>
                 <div className={styles.header}>
                     <span className={styles.icon}>
                         {IconComponent && <IconComponent size={22} weight="duotone" />}
@@ -80,3 +99,4 @@ export default function ReadingEntryCard({
         </Card>
     );
 }
+

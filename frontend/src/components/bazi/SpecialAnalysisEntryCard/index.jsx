@@ -4,8 +4,10 @@
  * 显示4个子主题的2x2网格，点击各自跳转到对应Tab
  */
 
+import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { Lock, Heart, CurrencyCircleDollar, FirstAidKit, Users, MagnifyingGlass } from '@phosphor-icons/react';
+import { useToast } from '../../common';
 import Card from '../../common/Card';
 import styles from './SpecialAnalysisEntryCard.module.css';
 
@@ -22,10 +24,24 @@ export default function SpecialAnalysisEntryCard({
     subjectId,
     className = '',
 }) {
+    const navigate = useNavigate();
+    const toast = useToast();
+
+    // 检查是否是本地命盘（未登录用户）
+    const isLocalSubject = subjectId?.startsWith('local_');
+
     // 计算解锁数量
     const unlockedCount = SPECIAL_THEMES.filter(
         t => themesData[t.key]?.isUnlocked
     ).length;
+
+    const handleClick = (e) => {
+        if (isLocalSubject) {
+            e.preventDefault();
+            toast.info('请先登录以使用解读功能');
+            navigate('/login?callbackUrl=' + encodeURIComponent(window.location.pathname + window.location.search));
+        }
+    };
 
     return (
         <Card className={`${styles.card} ${className}`}>
@@ -41,7 +57,7 @@ export default function SpecialAnalysisEntryCard({
                 {SPECIAL_THEMES.map((theme) => {
                     const data = themesData[theme.key] || {};
                     const isUnlocked = data.isUnlocked;
-                    const linkTo = `/bazi/reading/special?subjectId=${subjectId}&tab=${theme.id}`;
+                    const linkTo = isLocalSubject ? '#' : `/bazi/reading/special?subjectId=${subjectId}&tab=${theme.id}`;
                     const ThemeIcon = theme.Icon;
 
                     return (
@@ -49,6 +65,7 @@ export default function SpecialAnalysisEntryCard({
                             key={theme.id}
                             to={linkTo}
                             className={`${styles.item} ${isUnlocked ? styles.unlocked : ''}`}
+                            onClick={handleClick}
                         >
                             <span className={styles.itemIcon}>
                                 <ThemeIcon size={24} weight="duotone" />
@@ -64,3 +81,4 @@ export default function SpecialAnalysisEntryCard({
         </Card>
     );
 }
+
