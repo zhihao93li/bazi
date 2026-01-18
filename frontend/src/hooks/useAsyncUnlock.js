@@ -98,11 +98,15 @@ export function useAsyncUnlock({
 
             if (taskStatus === 'completed') {
                 stopPolling(themeKey);
-                updateTaskState(themeKey, null);
                 clearStoredTask(themeKey);
 
+                // 先 refetch 数据，确保新数据加载完成后再清除任务状态
+                // 这样可以避免在数据返回前短暂显示"未解锁"状态
                 await queryClient.invalidateQueries({ queryKey: [THEME_STATUS_QUERY_KEY, subjectId] });
                 await queryClient.refetchQueries({ queryKey: [THEME_STATUS_QUERY_KEY, subjectId] });
+
+                // 数据加载完成后，再清除任务状态
+                updateTaskState(themeKey, null);
 
                 callbacksRef.current.onSuccess?.({ content, theme });
                 return;
