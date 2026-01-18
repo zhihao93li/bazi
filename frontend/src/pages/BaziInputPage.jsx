@@ -16,6 +16,7 @@ import {
 } from '../utils/localSubjects';
 import { useAuth } from '../context/AuthContext';
 import { useSubjects } from '../hooks';
+import { api } from '../services/api';
 import styles from './BaziInputPage.module.css';
 
 const INITIAL_FORM = {
@@ -128,24 +129,10 @@ export default function BaziInputPage() {
 
       if (isLoggedIn) {
         // 已登录：直接调用后端 API 创建命盘，等待完成后跳转
-        const response = await fetch('/api/subjects', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          },
-          body: JSON.stringify(subjectData),
-        });
-
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.message || '创建命盘失败');
-        }
-
-        const data = await response.json();
+        const res = await api.post('/subjects', subjectData);
 
         // 跳转到结果页（使用后端返回的真实 subjectId）
-        navigate(`/bazi?subjectId=${data.subject.id}`);
+        navigate(`/bazi?subjectId=${res.subject.id}`);
       } else {
         // 未登录：保存到本地，后续登录时再同步
         const localSubject = {
