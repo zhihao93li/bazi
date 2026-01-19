@@ -9,7 +9,6 @@ import Footer from '../components/Footer';
 import GradientBackground from '../components/GradientBackground';
 import BirthInfoForm from '../components/bazi/BirthInfoForm';
 import FormInput from '../components/common/FormInput';
-// calculateBazi 将在需要时动态导入，减少首屏加载体积
 import {
   generateLocalId,
   getLocalSubjects,
@@ -100,10 +99,7 @@ export default function BaziInputPage() {
     setIsSubmitting(true);
 
     try {
-      // 1. 动态导入八字计算器（只在需要时加载，节省首屏 591KB）
-      const { calculateBazi } = await import('../utils/bazi/calculator');
-
-      // 2. 前端计算八字
+      // 调用后端 API 计算八字
       const birthData = {
         gender: formData.gender,
         calendarType: formData.calendarType,
@@ -113,10 +109,16 @@ export default function BaziInputPage() {
         hour: formData.birthHour,
         minute: formData.birthMinute,
         isLeapMonth: formData.isLeapMonth,
-        location: formData.location,
+        location: `${formData.location.province}/${formData.location.city}/${formData.location.district}`,
       };
 
-      const baziData = calculateBazi(birthData);
+      const result = await api.post('/bazi/calculate', birthData);
+
+      if (!result.success) {
+        throw new Error(result.message || '排盘计算失败');
+      }
+
+      const baziData = result.baziData;
 
       const subjectData = {
         name: formData.name.trim(),
