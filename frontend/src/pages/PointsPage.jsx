@@ -196,6 +196,28 @@ export default function PointsPage() {
                 {packages.map((pkg, index) => {
                   // 根据索引选择不同的图标
                   const iconIndex = (index % 3) + 1;
+
+                  // 计算折扣信息
+                  let discount = null;
+                  let originalPrice = null;
+                  if (pkg.points === 500) {
+                    discount = 95; // 95折
+                    originalPrice = pkg.price / 0.95;
+                  } else if (pkg.points === 1000) {
+                    discount = 88; // 88折
+                    originalPrice = pkg.price / 0.88;
+                  }
+
+                  // 根据积分数量设置描述
+                  let description = '解锁更多命理解读内容';
+                  if (pkg.points === 100) {
+                    description = '支持解锁 1-2 份报告';
+                  } else if (pkg.points === 500) {
+                    description = '支持解锁 3-4 份报告';
+                  } else if (pkg.points === 1000) {
+                    description = '一键解锁所有报告';
+                  }
+
                   return (
                     <m.div
                       key={pkg.id}
@@ -207,6 +229,9 @@ export default function PointsPage() {
                       {pkg.popular && (
                         <span className={styles.popularBadge}>推荐</span>
                       )}
+                      {discount && (
+                        <span className={styles.discountBadge}>{discount}折</span>
+                      )}
                       <div className={styles.packageIcon}>
                         <img
                           src={`/icons/package-icon-${iconIndex}.svg`}
@@ -217,9 +242,12 @@ export default function PointsPage() {
                       </div>
                       <div className={styles.packageInfo}>
                         <h3 className={styles.packageTitle}>{pkg.points} 积分</h3>
-                        <p className={styles.packageDesc}>解锁更多命理解读内容</p>
+                        <p className={styles.packageDesc}>{description}</p>
                       </div>
                       <div className={styles.packagePriceRow}>
+                        {discount && (
+                          <span className={styles.originalPrice}>¥{originalPrice.toFixed(2)}</span>
+                        )}
                         <span className={styles.packagePrice}>¥{pkg.price.toFixed(2)}</span>
                       </div>
                       <button
