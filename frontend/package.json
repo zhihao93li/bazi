@@ -12,10 +12,8 @@
   "dependencies": {
     "@ant-design/icons": "^6.1.0",
     "@phosphor-icons/react": "^2.1.7",
-    "@pikaz/location": "^1.0.10",
     "@tanstack/react-query": "^5.90.16",
     "antd": "^6.2.0",
-    "china-location": "^2.1.0",
     "framer-motion": "^11.0.0",
     "lunar-typescript": "^1.8.6",
     "province-city-china": "^8.5.8",

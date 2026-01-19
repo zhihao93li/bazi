@@ -4,10 +4,6 @@ import citiesData from 'province-city-china/dist/city.json';
 import areasData from 'province-city-china/dist/area.json';
 import hkMoTwData from '../../../docs/HK-MO-TW.json';
 
-export const GENDER_OPTIONS = [
-  { value: 'female', label: '女' }
-];
-
 export const CALENDAR_OPTIONS = [
   { value: 'solar', label: '公历' },
   { value: 'lunar', label: '农历' }
