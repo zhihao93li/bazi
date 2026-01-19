@@ -1,6 +1,6 @@
 /**
  * 八字算命 API 服务入口
- * 
+ *
  * 基于 Hono 框架的纯后端 API 服务
  */
 
@@ -13,6 +13,10 @@ import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
+import { setupGracefulShutdown, registerShutdownResource } from './lib/shutdown.js';
+
+// 设置优雅关闭（尽早注册）
+setupGracefulShutdown();
 
 // 路由导入
 import { authRoutes } from './routes/auth.js';
@@ -112,11 +116,31 @@ try {
   console.error('Failed to bootstrap database:', error);
 }
 
-serve({
+// 恢复未完成的任务
+import { recoverPendingTasks, stopPolling } from './lib/tasks/index.js';
+try {
+  const recoveredCount = await recoverPendingTasks();
+  if (recoveredCount > 0) {
+    console.log(`📋 恢复了 ${recoveredCount} 个中断的任务`);
+  }
+  // 注册任务轮询停止函数
+  registerShutdownResource('stopTasks', stopPolling);
+} catch (error) {
+  console.error('Failed to recover pending tasks:', error);
+}
+
+// 注册数据库断开连接函数
+registerShutdownResource('disconnectDb', () => prisma.$disconnect());
+
+// 启动服务器
+const server = serve({
   fetch: app.fetch,
   port,
 }, (info) => {
   console.log(`✅ 服务已启动: http://localhost:${info.port}`);
 });
+
+// 注册服务器实例（用于优雅关闭）
+registerShutdownResource('server', server);
 
 export default app;

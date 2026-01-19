@@ -16,12 +16,26 @@ import {
   getThemePromptTemplate,
 } from './config-loader.js';
 import { replaceTemplateVariables, TemplateContext } from './template-engine.js';
+import { AIError, AIErrorCode, wrapAIError } from './errors.js';
+import { createAILogger } from './logger.js';
 import type {
   AnalysisSection,
   FortuneAnalysis,
   AnalysisTheme,
 } from './types.js';
 import type { BaziData } from '../bazi/types.js';
+
+/**
+ * 超时配置（毫秒）
+ */
+const TIMEOUT_CONFIG = {
+  /** OpenAI 客户端全局超时 */
+  global: 60000,
+  /** 初步解读超时（内容较长） */
+  initialAnalysis: 90000,
+  /** 主题解读超时 */
+  themeAnalysis: 60000,
+};
 
 // AI 服务单例
 let openaiClient: OpenAI | null = null;
@@ -54,13 +68,17 @@ function getOpenAIClient(): OpenAI {
     const baseURL = process.env.AIHUBMIX_BASE_URL || 'https://aihubmix.com/v1';
 
     if (!apiKey) {
-      throw new Error('AIHUBMIX_API_KEY environment variable is not set');
+      throw new AIError(
+        AIErrorCode.AI_SERVICE_UNAVAILABLE,
+        'AIHUBMIX_API_KEY environment variable is not set'
+      );
     }
 
     openaiClient = new OpenAI({
       apiKey,
       baseURL,
       maxRetries: 3, // 自动重试 3 次，解决网络不稳定问题
+      timeout: TIMEOUT_CONFIG.global, // 全局超时设置
     });
   }
 
@@ -73,20 +91,30 @@ function getOpenAIClient(): OpenAI {
 
 /**
  * 生成初步解读（第一轮 LLM）
- * 
+ *
  * 用于生成后台参考资料，不直接展示给用户
  * 结果存储在 Subject.initialAnalysis 中
- * 
+ *
  * @param baziData - 八字排盘结果
  * @param gender - 性别
+ * @param subjectId - Subject ID（用于日志）
  * @returns 初步解读内容
+ * @throws AIError
  */
 export async function generateInitialAnalysis(
   baziData: BaziData,
-  gender?: string
+  gender?: string,
+  subjectId?: string
 ): Promise<string> {
   const config = loadNewAIConfig();
   const client = getOpenAIClient();
+
+  // 创建日志记录器
+  const logger = createAILogger({
+    operation: 'initial_analysis',
+    model: config.model,
+    subjectId,
+  });
 
   // 获取初步解读模板（包含 system 和 user）
   const promptTemplate = getInitialPromptTemplate();
@@ -96,7 +124,8 @@ export async function generateInitialAnalysis(
   const systemPrompt = replaceTemplateVariables(promptTemplate.system, context);
   const userPrompt = replaceTemplateVariables(promptTemplate.user, context);
 
-  console.log(`[AI Service] Generating initial analysis (Round 1), model: ${config.model}...`);
+  // 记录请求开始
+  logger.start(userPrompt.substring(0, 200));
 
   try {
     const response = await client.chat.completions.create({
@@ -113,29 +142,32 @@ export async function generateInitialAnalysis(
       ],
       temperature: config.temperature,
       ...buildTokenLimitParam(config.model, config.maxTokens),
+    }, {
+      timeout: TIMEOUT_CONFIG.initialAnalysis, // 初步解读允许更长时间
     });
 
     // 详细记录 API 响应
     const finishReason = response.choices[0]?.finish_reason;
-    console.log(`[AI Service] API response received, choices count: ${response.choices?.length || 0}, finish_reason: ${finishReason}`);
-
     const content = response.choices[0]?.message?.content;
 
     // 如果因为长度截断但有内容，仍然返回（虽然不完整）
     if (!content) {
-      // 记录更多调试信息
-      console.error('[AI Service] Empty response details:', {
-        model: config.model,
-        finishReason,
-        usage: response.usage,
-        responseId: response.id,
-      });
-
       // 如果是因为长度限制，给出更明确的错误提示
       if (finishReason === 'length') {
-        throw new Error(`AI response truncated due to max_tokens limit (${config.maxTokens}). Please increase maxTokens in config.`);
+        const error = new AIError(
+          AIErrorCode.AI_INVALID_RESPONSE,
+          `AI response truncated due to max_tokens limit (${config.maxTokens})`
+        );
+        logger.failure({ code: error.code, message: error.message });
+        throw error;
       }
-      throw new Error(`AI response is empty for initial analysis (model: ${config.model}, finish_reason: ${finishReason})`);
+
+      const error = new AIError(
+        AIErrorCode.AI_INVALID_RESPONSE,
+        `AI response is empty for initial analysis (model: ${config.model}, finish_reason: ${finishReason})`
+      );
+      logger.failure({ code: error.code, message: error.message });
+      throw error;
     }
 
     // 如果内容被截断，记录警告但仍返回
@@ -143,37 +175,47 @@ export async function generateInitialAnalysis(
       console.warn(`[AI Service] Warning: Initial analysis was truncated (max_tokens: ${config.maxTokens}). Consider increasing the limit.`);
     }
 
-    console.log('[AI Service] Initial analysis generated successfully');
+    // 记录成功
+    logger.success(response.usage);
     return content;
+
   } catch (error) {
-    console.error('[AI Service] Error generating initial analysis:', error);
-    // 如果是 OpenAI API 错误，记录更多信息
-    if (error && typeof error === 'object' && 'status' in error) {
-      console.error('[AI Service] API error details:', {
-        status: (error as { status?: number }).status,
-        message: (error as { message?: string }).message,
-      });
+    // 如果已经是 AIError，直接抛出
+    if (error instanceof AIError) {
+      throw error;
     }
-    throw error;
+
+    // 包装为 AIError
+    const aiError = wrapAIError(error);
+    logger.failure({
+      code: aiError.code,
+      message: aiError.message,
+      httpStatus: aiError.httpStatus,
+      stack: aiError.stack,
+    });
+    throw aiError;
   }
 }
 
 /**
  * 生成分主题解读（第二轮 LLM）
- * 
+ *
  * 基于初步解读结果，生成特定主题的深度分析
- * 
+ *
  * @param theme - 主题类型
  * @param baziData - 八字排盘结果
  * @param initialAnalysis - 初步解读结果
  * @param gender - 性别
+ * @param subjectId - Subject ID（用于日志）
  * @returns 主题解读内容
+ * @throws AIError
  */
 export async function generateThemeAnalysis(
   theme: AnalysisTheme,
   baziData: BaziData,
   initialAnalysis: string,
-  gender?: string
+  gender?: string,
+  subjectId?: string
 ): Promise<string> {
   const config = loadNewAIConfig();
   const client = getOpenAIClient();
@@ -187,14 +229,23 @@ export async function generateThemeAnalysis(
     currentYear: new Date().getFullYear(),
   };
 
+  // 使用主题专属模型（如果有），否则使用全局配置
+  const modelToUse = promptTemplate.model || config.model;
+
+  // 创建日志记录器
+  const logger = createAILogger({
+    operation: 'theme_analysis',
+    theme,
+    model: modelToUse,
+    subjectId,
+  });
+
   // 替换模板变量
   const systemPrompt = replaceTemplateVariables(promptTemplate.system, context);
   const userPrompt = replaceTemplateVariables(promptTemplate.user, context);
 
-  // 使用主题专属模型（如果有），否则使用全局配置
-  const modelToUse = promptTemplate.model || config.model;
-
-  console.log(`[AI Service] Generating theme analysis (Round 2): ${theme}, model: ${modelToUse}...`);
+  // 记录请求开始
+  logger.start(userPrompt.substring(0, 200));
 
   try {
     const response = await client.chat.completions.create({
@@ -211,37 +262,61 @@ export async function generateThemeAnalysis(
       ],
       temperature: config.temperature,
       ...buildTokenLimitParam(modelToUse, config.maxTokens),
+    }, {
+      timeout: TIMEOUT_CONFIG.themeAnalysis,
     });
 
     const content = response.choices[0]?.message?.content;
     if (!content) {
-      throw new Error(`AI response is empty for theme: ${theme}`);
+      const error = new AIError(
+        AIErrorCode.AI_INVALID_RESPONSE,
+        `AI response is empty for theme: ${theme}`
+      );
+      logger.failure({ code: error.code, message: error.message });
+      throw error;
     }
 
-    console.log(`[AI Service] Theme analysis generated successfully: ${theme}`);
+    // 记录成功
+    logger.success(response.usage);
     return content;
+
   } catch (error) {
-    console.error(`[AI Service] Error generating ${theme} analysis:`, error);
-    throw error;
+    // 如果已经是 AIError，直接抛出
+    if (error instanceof AIError) {
+      throw error;
+    }
+
+    // 包装为 AIError
+    const aiError = wrapAIError(error);
+    logger.failure({
+      code: aiError.code,
+      message: aiError.message,
+      httpStatus: aiError.httpStatus,
+      stack: aiError.stack,
+    });
+    throw aiError;
   }
 }
 
 /**
  * 生成分主题解读（流式版本）
- * 
+ *
  * 基于初步解读结果，流式生成特定主题的深度分析
- * 
+ *
  * @param theme - 主题类型
  * @param baziData - 八字排盘结果
  * @param initialAnalysis - 初步解读结果
  * @param gender - 性别
+ * @param subjectId - Subject ID（用于日志）
  * @yields 解读内容片段
+ * @throws AIError
  */
 export async function* generateThemeAnalysisStream(
   theme: AnalysisTheme,
   baziData: BaziData,
   initialAnalysis: string,
-  gender?: string
+  gender?: string,
+  subjectId?: string
 ): AsyncGenerator<string, void, unknown> {
   const config = loadNewAIConfig();
   const client = getOpenAIClient();
@@ -255,14 +330,25 @@ export async function* generateThemeAnalysisStream(
     currentYear: new Date().getFullYear(),
   };
 
+  // 使用主题专属模型（如果有），否则使用全局配置
+  const modelToUse = promptTemplate.model || config.model;
+
+  // 创建日志记录器
+  const logger = createAILogger({
+    operation: 'theme_analysis_stream',
+    theme,
+    model: modelToUse,
+    subjectId,
+  });
+
   // 替换模板变量
   const systemPrompt = replaceTemplateVariables(promptTemplate.system, context);
   const userPrompt = replaceTemplateVariables(promptTemplate.user, context);
 
-  // 使用主题专属模型（如果有），否则使用全局配置
-  const modelToUse = promptTemplate.model || config.model;
+  // 记录流式请求开始
+  logger.streamStart();
 
-  console.log(`[AI Service] Generating theme analysis (Streaming): ${theme}, model: ${modelToUse}...`);
+  let contentLength = 0;
 
   try {
     const stream = await client.chat.completions.create({
@@ -280,19 +366,33 @@ export async function* generateThemeAnalysisStream(
       temperature: config.temperature,
       ...buildTokenLimitParam(modelToUse, config.maxTokens),
       stream: true,
+    }, {
+      timeout: TIMEOUT_CONFIG.themeAnalysis,
     });
 
     for await (const chunk of stream) {
       const content = chunk.choices[0]?.delta?.content;
       if (content) {
+        contentLength += content.length;
         yield content;
       }
     }
 
-    console.log(`[AI Service] Theme analysis stream completed: ${theme}`);
+    // 记录流式请求结束
+    logger.streamEnd(contentLength, true);
+
   } catch (error) {
-    console.error(`[AI Service] Error in streaming ${theme} analysis:`, error);
-    throw error;
+    // 记录失败
+    logger.streamEnd(contentLength, false);
+
+    // 如果已经是 AIError，直接抛出
+    if (error instanceof AIError) {
+      throw error;
+    }
+
+    // 包装为 AIError
+    const aiError = wrapAIError(error);
+    throw aiError;
   }
 }
 
@@ -434,3 +534,7 @@ export async function generateFullAnalysis(
 export function resetAIClient(): void {
   openaiClient = null;
 }
+
+// 导出错误类型，便于外部使用
+export { AIError, AIErrorCode, wrapAIError } from './errors.js';
+

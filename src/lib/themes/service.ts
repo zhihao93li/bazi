@@ -143,25 +143,62 @@ export async function getThemeContent(
   };
 }
 
+// 锁配置
+const LOCK_TTL = 5 * 60 * 1000; // 锁超时时间：5分钟
+const LOCK_CLEANUP_INTERVAL = 60 * 1000; // 清理间隔：1分钟
+
+// 带超时的锁记录
+interface LockRecord<T> {
+  promise: Promise<T>;
+  createdAt: number;
+}
+
 // 内存锁：防止同一个 subject 的 initial analysis 被并发生成
-const initialAnalysisLocks = new Map<string, Promise<string>>();
+const initialAnalysisLocks = new Map<string, LockRecord<string>>();
 
 // 内存锁：防止同一个 subject + theme 被并发解锁
-const themeUnlockLocks = new Map<string, Promise<ThemeUnlockResult>>();
+const themeUnlockLocks = new Map<string, LockRecord<ThemeUnlockResult>>();
+
+/**
+ * 清理过期的锁
+ */
+function cleanupExpiredLocks(): void {
+  const now = Date.now();
+
+  for (const [key, record] of initialAnalysisLocks.entries()) {
+    if (now - record.createdAt > LOCK_TTL) {
+      console.warn(`[Theme Service] Cleaning up expired initial analysis lock: ${key}`);
+      initialAnalysisLocks.delete(key);
+    }
+  }
+
+  for (const [key, record] of themeUnlockLocks.entries()) {
+    if (now - record.createdAt > LOCK_TTL) {
+      console.warn(`[Theme Service] Cleaning up expired theme unlock lock: ${key}`);
+      themeUnlockLocks.delete(key);
+    }
+  }
+}
+
+// 定期清理过期锁
+setInterval(cleanupExpiredLocks, LOCK_CLEANUP_INTERVAL);
 
 /**
  * 检查某个 Subject 是否正在进行主题解锁
  * 用于在删除 Subject 前检查，防止解锁过程中删除导致外键约束错误
  */
 export function isSubjectUnlocking(subjectId: string): boolean {
-  // 检查是否有任何以该 subjectId 开头的锁
-  for (const key of themeUnlockLocks.keys()) {
-    if (key.startsWith(`${subjectId}_`)) {
+  const now = Date.now();
+
+  // 检查是否有任何以该 subjectId 开头的锁（排除过期的）
+  for (const [key, record] of themeUnlockLocks.entries()) {
+    if (key.startsWith(`${subjectId}_`) && now - record.createdAt < LOCK_TTL) {
       return true;
     }
   }
   // 也检查初步解读锁
-  if (initialAnalysisLocks.has(subjectId)) {
+  const initialLock = initialAnalysisLocks.get(subjectId);
+  if (initialLock && now - initialLock.createdAt < LOCK_TTL) {
     return true;
   }
   return false;
@@ -188,11 +225,11 @@ export async function ensureInitialAnalysis(
     return subject.initialAnalysis as string;
   }
 
-  // 检查是否有正在进行的生成任务（内存锁）
-  const existingTask = initialAnalysisLocks.get(subjectId);
-  if (existingTask) {
+  // 检查是否有正在进行的生成任务（内存锁，排除过期的）
+  const existingLock = initialAnalysisLocks.get(subjectId);
+  if (existingLock && Date.now() - existingLock.createdAt < LOCK_TTL) {
     console.log(`[Theme Service] Waiting for existing initial analysis task: ${subjectId}`);
-    return existingTask;
+    return existingLock.promise;
   }
 
   // 创建生成任务并加锁
@@ -209,7 +246,7 @@ export async function ensureInitialAnalysis(
 
       // 生成新的初步解读
       console.log(`[Theme Service] Generating new initial analysis for subject: ${subjectId}`);
-      const initialAnalysis = await generateInitialAnalysis(baziData, gender);
+      const initialAnalysis = await generateInitialAnalysis(baziData, gender, subjectId);
 
       // 存储初步解读
       await prisma.subject.update({
@@ -227,8 +264,11 @@ export async function ensureInitialAnalysis(
     }
   })();
 
-  // 注册锁
-  initialAnalysisLocks.set(subjectId, generateTask);
+  // 注册锁（带时间戳）
+  initialAnalysisLocks.set(subjectId, {
+    promise: generateTask,
+    createdAt: Date.now(),
+  });
 
   return generateTask;
 }
@@ -258,14 +298,14 @@ export async function unlockTheme(
   console.log(`[DEBUG][Theme Service] unlockTheme called: userId=${userId}, subjectId=${subjectId}, theme=${theme}`);
   // #endregion
 
-  // 0. 检查是否有正在进行的解锁任务（防止并发重复解锁）
-  const existingTask = themeUnlockLocks.get(lockKey);
-  if (existingTask) {
+  // 0. 检查是否有正在进行的解锁任务（防止并发重复解锁，排除过期的）
+  const existingLock = themeUnlockLocks.get(lockKey);
+  if (existingLock && Date.now() - existingLock.createdAt < LOCK_TTL) {
     // #region agent log
     console.log(`[DEBUG][Theme Service] Found existing lock task, will wait for it: ${lockKey}`);
     // #endregion
     console.log(`[Theme Service] Waiting for existing unlock task: ${lockKey}`);
-    return existingTask;
+    return existingLock.promise;
   }
 
   // 1. 获取主题价格
@@ -376,7 +416,8 @@ export async function unlockTheme(
         theme,
         baziData,
         initialAnalysis,
-        subject.gender
+        subject.gender,
+        subjectId
       );
       // #region agent log
       console.log(`[DEBUG][Theme Service] Theme analysis completed in ${Date.now() - themeAnalysisStartTime}ms`);
@@ -488,8 +529,11 @@ export async function unlockTheme(
     }
   })();
 
-  // 注册锁
-  themeUnlockLocks.set(lockKey, unlockTask);
+  // 注册锁（带时间戳）
+  themeUnlockLocks.set(lockKey, {
+    promise: unlockTask,
+    createdAt: Date.now(),
+  });
 
   return unlockTask;
 }

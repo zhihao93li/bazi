@@ -173,3 +173,21 @@ model ThemePricing {
   isActive      Boolean @default(true)
   sortOrder     Int     @default(0)
 }
+
+// 异步任务（持久化存储）
+model Task {
+  id          String    @id @default(cuid())
+  type        String    // 任务类型：theme_unlock
+  status      String    @default("pending") // pending, processing, completed, failed
+  payload     Json      // 任务参数
+  result      String?   // 任务结果（成功时）
+  error       String?   // 错误信息（失败时）
+  userId      String    // 任务所属用户
+  createdAt   DateTime  @default(now())
+  startedAt   DateTime? // 开始处理时间
+  completedAt DateTime? // 完成时间
+
+  @@index([userId, createdAt])
+  @@index([status])
+  @@index([type, status])
+}

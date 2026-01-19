@@ -1,6 +1,6 @@
 /**
  * 任务 API 路由
- * 
+ *
  * GET /api/tasks/:id - 查询任务状态
  */
 
@@ -18,7 +18,7 @@ tasksRoutes.get('/:id', authRequired, async (c) => {
     const userId = requireUserId(c);
     const taskId = c.req.param('id');
 
-    const task = getTask(taskId);
+    const task = await getTask(taskId);
 
     if (!task) {
         return c.json({ success: false, message: '任务不存在' }, 404);

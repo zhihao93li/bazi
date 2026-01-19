@@ -1,6 +1,6 @@
 /**
  * 主题解读 API 路由
- * 
+ *
  * GET /pricing - 获取所有主题价格配置
  * GET /status/:subjectId - 获取某对象各主题解锁状态
  * GET /:subjectId/:theme - 获取已解锁主题的内容
@@ -9,6 +9,7 @@
 
 import { Hono } from 'hono';
 import { authRequired, requireUserId } from '../middleware/auth.js';
+import { themeUnlockRateLimit } from '../middleware/rate-limiter.js';
 import {
   getAllThemePricing,
   getThemeUnlockStatus,
@@ -110,10 +111,10 @@ themesRoutes.get('/:subjectId/:theme', authRequired, async (c) => {
  * 解锁指定主题（异步任务模式）
  * POST /api/themes/unlock
  * Body: { subjectId: string, theme: string }
- * 
+ *
  * 返回任务 ID，前端轮询 /api/tasks/:id 获取结果
  */
-themesRoutes.post('/unlock', authRequired, async (c) => {
+themesRoutes.post('/unlock', authRequired, themeUnlockRateLimit(), async (c) => {
   try {
     const userId = requireUserId(c);
 
@@ -227,7 +228,7 @@ themesRoutes.post('/unlock', authRequired, async (c) => {
     }
 
     // 创建异步任务
-    const task = createThemeUnlockTask({
+    const task = await createThemeUnlockTask({
       subjectId,
       theme,
       userId,

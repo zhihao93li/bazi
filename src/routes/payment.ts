@@ -464,14 +464,18 @@ paymentRoutes.post('/create-mazfu', authRequired, async (c) => {
     });
 
     // 获取客户端 IP
-    const clientIp = c.req.header('x-forwarded-for')?.split(',')[0]?.trim() 
-      || c.req.header('x-real-ip') 
+    const clientIp = c.req.header('x-forwarded-for')?.split(',')[0]?.trim()
+      || c.req.header('x-real-ip')
       || undefined;
+
+    // 扫码支付优惠：实际支付金额减少 0.5 元（50分）
+    const qrcodeDiscount = 50; // 单位：分
+    const actualPayAmount = Math.max(pkg.price - qrcodeDiscount, 1); // 最低 1 分
 
     // 调用码支付创建支付请求
     const mazfuResult = await createMazfuPayment({
       orderNo,
-      amount: pkg.price,
+      amount: actualPayAmount,
       productName: pkg.name,
       device,
       clientIp,

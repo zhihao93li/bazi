@@ -1,17 +1,18 @@
 /**
  * 流式主题解锁 API 路由
- * 
+ *
  * POST /unlock/stream - 流式解锁主题（SSE）
  */
 
 import { Hono } from 'hono';
 import { streamSSE } from 'hono/streaming';
 import { authRequired, requireUserId } from '../middleware/auth.js';
+import { themeUnlockRateLimit } from '../middleware/rate-limiter.js';
 import { isValidTheme, THEME_NAMES } from '../lib/themes/constants.js';
 import { getThemePrice, ensureInitialAnalysis } from '../lib/themes/service.js';
 import { deductPoints, refundPoints } from '../lib/points/service.js';
 import { PointsError, PointsErrorCode } from '../lib/points/types.js';
-import { generateThemeAnalysisStream } from '../lib/ai/service.js';
+import { generateThemeAnalysisStream, AIError } from '../lib/ai/service.js';
 import prisma from '../lib/prisma.js';
 import type { BaziData } from '../lib/bazi/types.js';
 import type { AnalysisTheme } from '../lib/ai/types.js';
@@ -22,14 +23,14 @@ export const themesStreamRoutes = new Hono();
  * 流式解锁主题
  * POST /api/themes/unlock/stream
  * Body: { subjectId: string, theme: string }
- * 
+ *
  * SSE Events:
  * - init: 开始生成
  * - chunk: 内容片段
  * - done: 完成，返回积分信息
  * - error: 错误信息
  */
-themesStreamRoutes.post('/unlock/stream', authRequired, async (c) => {
+themesStreamRoutes.post('/unlock/stream', authRequired, themeUnlockRateLimit(), async (c) => {
     const userId = requireUserId(c);
 
     let body: { subjectId: string; theme: string };
@@ -121,6 +122,41 @@ themesStreamRoutes.post('/unlock/stream', authRequired, async (c) => {
         let fullContent = '';
 
         try {
+            // 【并发保护】在开始生成前再次检查是否已解锁
+            // 防止两个请求同时通过初始检查后重复生成
+            const alreadyUnlocked = await prisma.themeAnalysis.findUnique({
+                where: { subjectId_theme: { subjectId, theme } },
+            });
+
+            if (alreadyUnlocked) {
+                // 已被其他请求完成，退款并返回已有内容
+                console.log(`[Theme Stream] Already unlocked by another request, refunding...`);
+                try {
+                    await refundPoints({
+                        userId,
+                        amount: price,
+                        description: `解锁主题解读 - ${THEME_NAMES[theme as keyof typeof THEME_NAMES]}`,
+                        orderId,
+                        reason: '重复解锁，已由其他请求完成',
+                    });
+                } catch (refundError) {
+                    console.error('[Theme Stream] Failed to refund duplicate request:', refundError);
+                }
+
+                // 发送已有内容
+                await stream.writeSSE({ event: 'init', data: JSON.stringify({ message: '已解锁' }) });
+                await stream.writeSSE({ event: 'chunk', data: JSON.stringify({ content: alreadyUnlocked.content }) });
+                await stream.writeSSE({
+                    event: 'done',
+                    data: JSON.stringify({
+                        pointsDeducted: 0,
+                        remainingBalance: deductResult.balance,
+                        alreadyUnlocked: true,
+                    }),
+                });
+                return;
+            }
+
             // 发送初始化事件
             await stream.writeSSE({ event: 'init', data: JSON.stringify({ message: '开始生成' }) });
 
@@ -132,7 +168,8 @@ themesStreamRoutes.post('/unlock/stream', authRequired, async (c) => {
                 theme as AnalysisTheme,
                 baziData,
                 initialAnalysis,
-                subject.gender
+                subject.gender,
+                subjectId
             );
 
             for await (const chunk of generator) {
@@ -191,10 +228,18 @@ themesStreamRoutes.post('/unlock/stream', authRequired, async (c) => {
                 }
             }
 
-            // 发送错误事件（不暴露技术细节给用户）
+            // 获取用户友好的错误信息
+            const userMessage = error instanceof AIError
+                ? error.userMessage
+                : '生成失败，请稍后重试';
+            const errorCode = error instanceof AIError
+                ? error.code
+                : 'STREAM_ERROR';
+
+            // 发送错误事件
             await stream.writeSSE({
                 event: 'error',
-                data: JSON.stringify({ message: '生成失败，请稍后重试', code: 'STREAM_ERROR' }),
+                data: JSON.stringify({ message: userMessage, code: errorCode }),
             });
         }
     });
