@@ -116,7 +116,13 @@ export function calculateBazi(birthData) {
 
     solar = Solar.fromYmdHms(adjustedYear, adjustedMonth, adjustedDay, trueSolar.hour, trueSolar.minute, 0);
     lunar = solar.getLunar();
-    trueSolarTimeResult = { hour: trueSolar.hour, minute: trueSolar.minute };
+    trueSolarTimeResult = {
+      year: adjustedYear,
+      month: adjustedMonth,
+      day: adjustedDay,
+      hour: trueSolar.hour,
+      minute: trueSolar.minute
+    };
   } else {
     // 农历输入 - 使用 Lunar.fromYmd 处理闰月
     let lunarMonth = birthData.month;
@@ -148,7 +154,13 @@ export function calculateBazi(birthData) {
 
     solar = Solar.fromYmdHms(adjustedYear, adjustedMonth, adjustedDay, trueSolar.hour, trueSolar.minute, 0);
     lunar = solar.getLunar();
-    trueSolarTimeResult = { hour: trueSolar.hour, minute: trueSolar.minute };
+    trueSolarTimeResult = {
+      year: adjustedYear,
+      month: adjustedMonth,
+      day: adjustedDay,
+      hour: trueSolar.hour,
+      minute: trueSolar.minute
+    };
   }
 
   const eightChar = lunar.getEightChar();

@@ -446,6 +446,9 @@ export interface BaziData {
   shenGong: string;             // 身宫
   // 真太阳时
   trueSolarTime?: {
+    year: number;
+    month: number;
+    day: number;
     hour: number;
     minute: number;
   };

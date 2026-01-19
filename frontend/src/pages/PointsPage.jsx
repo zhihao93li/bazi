@@ -210,7 +210,7 @@ export default function PointsPage() {
 
                   // 根据积分数量设置描述
                   let description = '解锁更多命理解读内容';
-                  if (pkg.points === 100) {
+                  if (pkg.points === 200) {
                     description = '支持解锁 1-2 份报告';
                   } else if (pkg.points === 500) {
                     description = '支持解锁 3-4 份报告';

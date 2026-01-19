@@ -25,11 +25,16 @@ function formatBirthTime(subject) {
 /**
  * 格式化真太阳时
  */
-function formatTrueSolarTime(hour, minute) {
-  if (hour === undefined || hour === null) return null;
-  const h = String(hour).padStart(2, '0');
-  const m = String(minute || 0).padStart(2, '0');
-  return `${h}时${m}分`;
+function formatTrueSolarTime(trueSolarTime) {
+  if (!trueSolarTime || trueSolarTime.hour === undefined || trueSolarTime.hour === null) return null;
+
+  const year = trueSolarTime.year;
+  const month = trueSolarTime.month;
+  const day = trueSolarTime.day;
+  const h = String(trueSolarTime.hour).padStart(2, '0');
+  const m = String(trueSolarTime.minute || 0).padStart(2, '0');
+
+  return `${year}年${month}月${day}日 ${h}时${m}分`;
 }
 
 /**
@@ -102,7 +107,7 @@ export default function HeaderSection({
           {formatBirthTime(subject)}
           {trueSolarTime && (
             <span className={styles.trueSolarTime}>
-              （真太阳时 {formatTrueSolarTime(trueSolarTime.hour, trueSolarTime.minute)}）
+              （真太阳时 {formatTrueSolarTime(trueSolarTime)}）
             </span>
           )}
         </span>

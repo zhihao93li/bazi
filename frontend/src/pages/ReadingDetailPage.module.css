@@ -38,6 +38,32 @@
     margin: 0;
 }
 
+/* 出生信息行 */
+.birthInfoRow {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    flex-wrap: wrap;
+    margin-top: 12px;
+}
+
+.infoItem {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 13px;
+    color: var(--grey-30);
+}
+
+.infoIcon {
+    color: var(--grey-50);
+}
+
+.trueSolarTime {
+    color: var(--grey-50);
+    margin-left: 4px;
+}
+
 /* Tab导航 */
 .tabs {
     display: flex;

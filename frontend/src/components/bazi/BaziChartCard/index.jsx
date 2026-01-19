@@ -4,12 +4,30 @@
  * 整合：四柱命盘 + 五行分布 + 十步大运
  */
 
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
+import { CaretDown } from '@phosphor-icons/react';
 import Card from '../../common/Card';
 import { ELEMENT_COLORS } from '../../../mock/bazi';
 import HeaderSection from './components/HeaderSection';
 import PillarColumn from './components/PillarColumn';
 import styles from './BaziChartCard.module.css';
+
+// 判断是否是小屏幕
+function useIsMobile(breakpoint = 768) {
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== 'undefined' ? window.innerWidth <= breakpoint : false
+  );
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= breakpoint);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [breakpoint]);
+
+  return isMobile;
+}
 
 /**
  * 计算当前大运和流年
@@ -271,6 +289,15 @@ export default function BaziChartCard({
   isSaved = false,
   className = ''
 }) {
+  const isMobile = useIsMobile();
+  // 小屏幕默认折叠五行和大运部分
+  const [isDetailExpanded, setIsDetailExpanded] = useState(!isMobile);
+
+  // 当屏幕尺寸变化时更新折叠状态
+  useEffect(() => {
+    setIsDetailExpanded(!isMobile);
+  }, [isMobile]);
+
   if (!data?.fourPillars) return null;
 
   const { fourPillars, fourPillarsShiShen, fourPillarsXunKong, fiveElements, yun } = data;
@@ -353,11 +380,32 @@ export default function BaziChartCard({
         </div>
       </div>
 
-      {/* 五行分布 */}
-      <FiveElementsRing fiveElements={fiveElements} />
+      {/* 小屏幕展开/收起按钮 */}
+      {isMobile && (
+        <button
+          className={styles.expandToggle}
+          onClick={() => setIsDetailExpanded(!isDetailExpanded)}
+          type="button"
+        >
+          <span>{isDetailExpanded ? '收起详情' : '展开五行与大运'}</span>
+          <CaretDown
+            size={16}
+            weight="bold"
+            className={`${styles.expandIcon} ${isDetailExpanded ? styles.expanded : ''}`}
+          />
+        </button>
+      )}
 
-      {/* 十步大运 */}
-      <DaYunTimelineInline yun={yun} birthYear={subject?.birthYear} />
+      {/* 可折叠的详情区域（五行 + 大运） */}
+      <div className={`${styles.collapsibleSection} ${isDetailExpanded ? styles.sectionExpanded : ''}`}>
+        <div className={styles.collapsibleInner}>
+          {/* 五行分布 */}
+          <FiveElementsRing fiveElements={fiveElements} />
+
+          {/* 十步大运 */}
+          <DaYunTimelineInline yun={yun} birthYear={subject?.birthYear} />
+        </div>
+      </div>
     </Card>
   );
 }

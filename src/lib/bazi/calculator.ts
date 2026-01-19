@@ -125,7 +125,7 @@ export function calculateBazi(birthData: BaziBirthData): BaziData {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let lunar: any;
   // 保存真太阳时用于返回
-  let trueSolarTimeResult: { hour: number; minute: number } | undefined;
+  let trueSolarTimeResult: { year: number; month: number; day: number; hour: number; minute: number } | undefined;
 
   if (birthData.calendarType === 'solar') {
     const trueSolar = toTrueSolarTime(
@@ -149,7 +149,13 @@ export function calculateBazi(birthData: BaziBirthData): BaziData {
 
     solar = Solar.fromYmdHms(adjustedYear, adjustedMonth, adjustedDay, trueSolar.hour, trueSolar.minute, 0);
     lunar = solar.getLunar();
-    trueSolarTimeResult = { hour: trueSolar.hour, minute: trueSolar.minute };
+    trueSolarTimeResult = {
+      year: adjustedYear,
+      month: adjustedMonth,
+      day: adjustedDay,
+      hour: trueSolar.hour,
+      minute: trueSolar.minute
+    };
   } else {
     // 农历输入 - 使用 Lunar.fromYmd 处理闰月
     let lunarMonth = birthData.month;
@@ -181,7 +187,13 @@ export function calculateBazi(birthData: BaziBirthData): BaziData {
 
     solar = Solar.fromYmdHms(adjustedYear, adjustedMonth, adjustedDay, trueSolar.hour, trueSolar.minute, 0);
     lunar = solar.getLunar();
-    trueSolarTimeResult = { hour: trueSolar.hour, minute: trueSolar.minute };
+    trueSolarTimeResult = {
+      year: adjustedYear,
+      month: adjustedMonth,
+      day: adjustedDay,
+      hour: trueSolar.hour,
+      minute: trueSolar.minute
+    };
   }
 
   const eightChar = lunar.getEightChar();
