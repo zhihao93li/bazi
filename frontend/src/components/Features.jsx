@@ -52,7 +52,7 @@ export default function Features() {
             transition={{ duration: 0.5 }}
           >
             <img
-              src="https://framerusercontent.com/images/wgGuBRTVLu8u6u3dSvRbJZCEgN0.png"
+              src="/images/intro.png"
               alt="AI Analysis"
               className={styles.featureImage}
               loading="lazy"
