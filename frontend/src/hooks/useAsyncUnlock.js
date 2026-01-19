@@ -217,7 +217,7 @@ export function useAsyncUnlock({
             }
 
             if (callbacksRef.current.updateUser && response.remainingBalance !== undefined) {
-                callbacksRef.current.updateUser({ points: response.remainingBalance });
+                callbacksRef.current.updateUser({ balance: response.remainingBalance });
             }
 
             const taskInfo = {
