@@ -14,7 +14,8 @@ export type AnalysisTheme =
     | 'career_wealth'    // 事业财富
     | 'health'           // 健康运势
     | 'life_lesson'      // 贵人小人
-    | 'yearly_fortune';  // 流年运势
+    | 'yearly_fortune'   // 流年运势
+    | 'synastry';        // 合盘分析
 
 /**
  * 有效主题列表
@@ -28,6 +29,7 @@ export const VALID_THEMES: readonly AnalysisTheme[] = [
     'health',
     'life_lesson',
     'yearly_fortune',
+    'synastry',
 ] as const;
 
 /**
@@ -40,6 +42,7 @@ export const THEME_NAMES: Record<AnalysisTheme, string> = {
     health: '健康运势',
     life_lesson: '贵人小人',
     yearly_fortune: '流年运势',
+    synastry: '合盘分析',
 };
 
 /**

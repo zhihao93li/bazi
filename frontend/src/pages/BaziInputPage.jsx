@@ -8,7 +8,7 @@ import Footer from '../components/Footer';
 import GradientBackground from '../components/GradientBackground';
 import BirthInfoForm from '../components/bazi/BirthInfoForm';
 import FormInput from '../components/common/FormInput';
-import { calculateBazi } from '../utils/bazi/calculator';
+// calculateBazi 将在需要时动态导入，减少首屏加载体积
 import {
   generateLocalId,
   getLocalSubjects,
@@ -98,7 +98,10 @@ export default function BaziInputPage() {
     setIsSubmitting(true);
 
     try {
-      // 1. 前端计算八字
+      // 1. 动态导入八字计算器（只在需要时加载，节省首屏 591KB）
+      const { calculateBazi } = await import('../utils/bazi/calculator');
+
+      // 2. 前端计算八字
       const birthData = {
         gender: formData.gender,
         calendarType: formData.calendarType,

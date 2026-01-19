@@ -18,6 +18,7 @@ import {
 } from '../lib/themes/index.js';
 import { PointsError, PointsErrorCode } from '../lib/points/types.js';
 import { deductPoints } from '../lib/points/service.js';
+import { THEME_NAMES } from '../lib/themes/constants.js';
 import { isValidTheme } from '../lib/themes/constants.js';
 import { createThemeUnlockTask } from '../lib/tasks/index.js';
 import prisma from '../lib/prisma.js';
@@ -211,14 +212,14 @@ themesRoutes.post('/unlock', authRequired, async (c) => {
       deductResult = await deductPoints({
         userId,
         amount: price,
-        description: `解锁主题解读 - ${theme}`,
+        description: `解锁主题解读 - ${THEME_NAMES[theme as keyof typeof THEME_NAMES]}`,
         orderId,
       });
     } catch (error) {
       if (error instanceof PointsError && error.code === PointsErrorCode.INSUFFICIENT_BALANCE) {
         return c.json({
           success: false,
-          message: error.message,
+          message: '积分不足，请先充值',
           code: 'INSUFFICIENT_POINTS',
         }, 402);
       }

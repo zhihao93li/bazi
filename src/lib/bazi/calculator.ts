@@ -49,19 +49,15 @@ import {
   getEarthlyBranch,
   getHiddenStems,
   FIVE_ELEMENTS,
-  CITY_LONGITUDES,
 } from './constants.js';
+import { getLongitude } from './geo-utils.js';
 
 /**
  * 从地点字符串中提取经度
+ * 使用完整的城市经纬度数据库
  */
 function getLongitudeFromLocation(location: string): number {
-  for (const [city, longitude] of Object.entries(CITY_LONGITUDES)) {
-    if (location.includes(city)) {
-      return longitude;
-    }
-  }
-  return 116.4; // 默认北京
+  return getLongitude(location);
 }
 
 /**
@@ -98,10 +94,10 @@ function toTrueSolarTime(
   const dayOfYear = getDayOfYear(year, month, day);
   const eot = equationOfTime(dayOfYear);
   const totalCorrection = longitudeCorrection + eot;
-  
+
   let totalMinutes = hour * 60 + minute + totalCorrection;
   let dayOffset = 0;
-  
+
   if (totalMinutes < 0) {
     totalMinutes += 24 * 60;
     dayOffset = -1;
@@ -109,11 +105,11 @@ function toTrueSolarTime(
     totalMinutes -= 24 * 60;
     dayOffset = 1;
   }
-  
-  return { 
-    hour: Math.floor(totalMinutes / 60), 
-    minute: Math.round(totalMinutes % 60), 
-    dayOffset 
+
+  return {
+    hour: Math.floor(totalMinutes / 60),
+    minute: Math.round(totalMinutes % 60),
+    dayOffset
   };
 }
 
@@ -123,22 +119,24 @@ function toTrueSolarTime(
  */
 export function calculateBazi(birthData: BaziBirthData): BaziData {
   const longitude = getLongitudeFromLocation(birthData.location);
-  
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let solar: any;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let lunar: any;
+  // 保存真太阳时用于返回
+  let trueSolarTimeResult: { hour: number; minute: number } | undefined;
 
   if (birthData.calendarType === 'solar') {
     const trueSolar = toTrueSolarTime(
       birthData.year, birthData.month, birthData.day,
       birthData.hour, birthData.minute, longitude
     );
-    
+
     let adjustedDay = birthData.day + trueSolar.dayOffset;
     let adjustedMonth = birthData.month;
     let adjustedYear = birthData.year;
-    
+
     if (adjustedDay < 1) {
       adjustedMonth -= 1;
       if (adjustedMonth < 1) { adjustedMonth = 12; adjustedYear -= 1; }
@@ -148,9 +146,10 @@ export function calculateBazi(birthData: BaziBirthData): BaziData {
       adjustedMonth += 1;
       if (adjustedMonth > 12) { adjustedMonth = 1; adjustedYear += 1; }
     }
-    
+
     solar = Solar.fromYmdHms(adjustedYear, adjustedMonth, adjustedDay, trueSolar.hour, trueSolar.minute, 0);
     lunar = solar.getLunar();
+    trueSolarTimeResult = { hour: trueSolar.hour, minute: trueSolar.minute };
   } else {
     // 农历输入 - 使用 Lunar.fromYmd 处理闰月
     let lunarMonth = birthData.month;
@@ -159,17 +158,17 @@ export function calculateBazi(birthData: BaziBirthData): BaziData {
     }
     const tempLunar = Lunar.fromYmd(birthData.year, lunarMonth, birthData.day);
     const tempSolar = tempLunar.getSolar();
-    
+
     const solarYear = tempSolar.getYear();
     const solarMonth = tempSolar.getMonth();
     const solarDay = tempSolar.getDay();
-    
+
     const trueSolar = toTrueSolarTime(solarYear, solarMonth, solarDay, birthData.hour, birthData.minute, longitude);
-    
+
     let adjustedDay = solarDay + trueSolar.dayOffset;
     let adjustedMonth = solarMonth;
     let adjustedYear = solarYear;
-    
+
     if (adjustedDay < 1) {
       adjustedMonth -= 1;
       if (adjustedMonth < 1) { adjustedMonth = 12; adjustedYear -= 1; }
@@ -179,9 +178,10 @@ export function calculateBazi(birthData: BaziBirthData): BaziData {
       adjustedMonth += 1;
       if (adjustedMonth > 12) { adjustedMonth = 1; adjustedYear += 1; }
     }
-    
+
     solar = Solar.fromYmdHms(adjustedYear, adjustedMonth, adjustedDay, trueSolar.hour, trueSolar.minute, 0);
     lunar = solar.getLunar();
+    trueSolarTimeResult = { hour: trueSolar.hour, minute: trueSolar.minute };
   }
 
   const eightChar = lunar.getEightChar();
@@ -202,10 +202,10 @@ export function calculateBazi(birthData: BaziBirthData): BaziData {
 
   const lunarYear = LunarYear.fromYear(lunar.getYear());
   const isLeapMonth = lunar.getMonth() === lunarYear.getLeapMonth();
-  
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const lunarAny = lunar as any;
-  
+
   const lunarDate: LunarDateInfo = {
     year: lunar.getYear(),
     month: lunar.getMonth(),
@@ -223,13 +223,13 @@ export function calculateBazi(birthData: BaziBirthData): BaziData {
   const gender = birthData.gender === 'male' ? 1 : 0;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const eightCharAny = eightChar as any;
-  
+
   let yun: YunInfo | undefined;
   try {
     const yunObj = eightCharAny.getYun(gender, 1);
     const daYunList: DaYunInfo[] = [];
     const daYunArr = yunObj.getDaYun(10);
-    
+
     for (let i = 0; i < daYunArr.length; i++) {
       const dy = daYunArr[i];
       const ganZhi = dy.getGanZhi?.() || '';
@@ -244,7 +244,7 @@ export function calculateBazi(birthData: BaziBirthData): BaziData {
           // 忽略错误，使用空字符串
         }
       }
-      
+
       // 获取流年列表
       const liuNianList: LiuNianInfo[] = [];
       try {
@@ -262,7 +262,7 @@ export function calculateBazi(birthData: BaziBirthData): BaziData {
               // 忽略错误
             }
           }
-          
+
           // 获取流月列表
           const liuYueList: LiuYueInfo[] = [];
           try {
@@ -291,7 +291,7 @@ export function calculateBazi(birthData: BaziBirthData): BaziData {
           } catch {
             // 忽略流月获取错误
           }
-          
+
           liuNianList.push({
             index: ln.getIndex?.() ?? j,
             year: ln.getYear?.() ?? 0,
@@ -305,7 +305,7 @@ export function calculateBazi(birthData: BaziBirthData): BaziData {
       } catch {
         // 忽略流年获取错误
       }
-      
+
       daYunList.push({
         index: dy.getIndex?.() ?? i,
         startAge: dy.getStartAge?.() ?? 0,
@@ -341,7 +341,7 @@ export function calculateBazi(birthData: BaziBirthData): BaziData {
   let yiJi: YiJiInfo | undefined;
   let jieQi: JieQiInfo | undefined;
   let xingXiu: XingXiuInfo | undefined;
-  
+
   try {
     shenSha = {
       year: lunarAny.getYearShenSha?.() || [],
@@ -573,6 +573,7 @@ export function calculateBazi(birthData: BaziBirthData): BaziData {
     taiYuan: eightCharAny.getTaiYuan?.() || '',
     mingGong: eightCharAny.getMingGong?.() || '',
     shenGong: eightCharAny.getShenGong?.() || '',
+    trueSolarTime: trueSolarTimeResult,
   };
 }
 
@@ -601,7 +602,7 @@ function calculateDayMaster(dayStem: HeavenlyStem, fourPillars: FourPillars): Da
     fourPillars.month.heavenlyStem,
     fourPillars.hour.heavenlyStem,
   ];
-  
+
   const allBranches = [
     fourPillars.year.earthlyBranch,
     fourPillars.month.earthlyBranch,

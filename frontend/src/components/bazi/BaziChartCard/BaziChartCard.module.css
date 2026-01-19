@@ -16,12 +16,6 @@
   border-bottom: 1px solid var(--light-90);
 }
 
-.cardTitle {
-  font-size: 12px;
-  color: var(--grey-50);
-  letter-spacing: 2px;
-  text-transform: uppercase;
-}
 
 .nameRow {
   display: flex;
@@ -96,6 +90,11 @@
 
 .infoIcon {
   color: var(--grey-50);
+}
+
+.trueSolarTime {
+  color: var(--grey-50);
+  margin-left: 4px;
 }
 
 /* ===== 六柱容器 ===== */

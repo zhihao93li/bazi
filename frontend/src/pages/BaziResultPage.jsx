@@ -285,6 +285,7 @@ export default function BaziResultPage() {
               <BaziChartCard
                 data={baziResult}
                 subject={currentSubject}
+                trueSolarTime={baziResult?.trueSolarTime}
                 isSaved={!currentSubject?.isLocal}
               />
             </m.div>

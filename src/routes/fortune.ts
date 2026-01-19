@@ -33,8 +33,8 @@ fortuneRoutes.post('/analyze', authRequired, async (c) => {
 
     // 必须提供 subjectId
     if (!subjectId) {
-      return c.json({ 
-        success: false, 
+      return c.json({
+        success: false,
         message: '请选择测算对象',
         code: 'SUBJECT_REQUIRED',
       }, 400);
@@ -43,8 +43,8 @@ fortuneRoutes.post('/analyze', authRequired, async (c) => {
     // 从数据库加载测算对象
     const subject = await getSubjectById(subjectId, userId);
     if (!subject) {
-      return c.json({ 
-        success: false, 
+      return c.json({
+        success: false,
         message: '测算对象不存在',
         code: 'SUBJECT_NOT_FOUND',
       }, 404);
@@ -52,8 +52,8 @@ fortuneRoutes.post('/analyze', authRequired, async (c) => {
 
     // 检查 baziData 是否存在
     if (!subject.baziData) {
-      return c.json({ 
-        success: false, 
+      return c.json({
+        success: false,
         message: '测算对象数据不完整，请重新排盘',
         code: 'BAZI_DATA_MISSING',
       }, 400);
@@ -68,7 +68,7 @@ fortuneRoutes.post('/analyze', authRequired, async (c) => {
       return c.json(
         {
           success: false,
-          message: `积分不足，当前余额: ${pointsCheck.currentBalance}，需要: ${pointsCheck.requiredPoints}`,
+          message: '积分不足，请先充值',
           code: 'INSUFFICIENT_POINTS',
           currentBalance: pointsCheck.currentBalance,
           requiredPoints: pointsCheck.requiredPoints,
@@ -98,7 +98,7 @@ fortuneRoutes.post('/analyze', authRequired, async (c) => {
     if (error instanceof PointsError) {
       if (error.code === PointsErrorCode.INSUFFICIENT_BALANCE) {
         return c.json(
-          { success: false, message: error.message, code: 'INSUFFICIENT_POINTS' },
+          { success: false, message: '积分不足，请先充值', code: 'INSUFFICIENT_POINTS' },
           402
         );
       }

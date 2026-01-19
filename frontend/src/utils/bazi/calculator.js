@@ -15,56 +15,18 @@ import {
   getHiddenStems,
   FIVE_ELEMENTS,
 } from './constants.js';
-import { getLongitude, DISTRICT_LONGITUDES } from './longitudes.js';
+import { getLongitude } from './geo-utils.js';
 
 /**
  * 从地点中提取经度
+ * 使用完整的城市经纬度数据库
  * @param {string|object} location - 位置字符串或对象 { province, city, district }
  * @returns {number} 经度
  */
 function getLongitudeFromLocation(location) {
-  // 如果是对象格式（三级结构）
-  if (typeof location === 'object' && location !== null) {
-    // 优先使用区县
-    if (location.district) {
-      const lng = getLongitude(location.district);
-      if (lng !== 116.4) return lng;
-    }
-    // 其次使用城市
-    if (location.city) {
-      const lng = getLongitude(location.city);
-      if (lng !== 116.4) return lng;
-    }
-    // 最后使用省份名（对于直辖市等）
-    if (location.province) {
-      const lng = getLongitude(location.province);
-      if (lng !== 116.4) return lng;
-    }
-    return 116.4; // 默认北京
-  }
-  
-  // 如果是字符串格式（如 "北京市/北京市/朝阳区"）
-  if (typeof location === 'string') {
-    // 尝试解析为三级结构
-    const parts = location.split('/');
-    if (parts.length >= 3) {
-      const lng = getLongitude(parts[2]); // 区县
-      if (lng !== 116.4) return lng;
-    }
-    if (parts.length >= 2) {
-      const lng = getLongitude(parts[1]); // 城市
-      if (lng !== 116.4) return lng;
-    }
-    // 遍历所有区县名查找
-    for (const [district, lng] of Object.entries(DISTRICT_LONGITUDES)) {
-      if (location.includes(district)) {
-        return lng;
-      }
-    }
-  }
-  
-  return 116.4; // 默认北京
+  return getLongitude(location);
 }
+
 
 /**
  * 计算时差方程（Equation of Time）
@@ -100,10 +62,10 @@ function toTrueSolarTime(
   const dayOfYear = getDayOfYear(year, month, day);
   const eot = equationOfTime(dayOfYear);
   const totalCorrection = longitudeCorrection + eot;
-  
+
   let totalMinutes = hour * 60 + minute + totalCorrection;
   let dayOffset = 0;
-  
+
   if (totalMinutes < 0) {
     totalMinutes += 24 * 60;
     dayOffset = -1;
@@ -111,11 +73,11 @@ function toTrueSolarTime(
     totalMinutes -= 24 * 60;
     dayOffset = 1;
   }
-  
-  return { 
-    hour: Math.floor(totalMinutes / 60), 
-    minute: Math.round(totalMinutes % 60), 
-    dayOffset 
+
+  return {
+    hour: Math.floor(totalMinutes / 60),
+    minute: Math.round(totalMinutes % 60),
+    dayOffset
   };
 }
 
@@ -126,20 +88,22 @@ function toTrueSolarTime(
  */
 export function calculateBazi(birthData) {
   const longitude = getLongitudeFromLocation(birthData.location);
-  
+
   let solar;
   let lunar;
+  // 保存真太阳时用于返回
+  let trueSolarTimeResult;
 
   if (birthData.calendarType === 'solar') {
     const trueSolar = toTrueSolarTime(
       birthData.year, birthData.month, birthData.day,
       birthData.hour, birthData.minute, longitude
     );
-    
+
     let adjustedDay = birthData.day + trueSolar.dayOffset;
     let adjustedMonth = birthData.month;
     let adjustedYear = birthData.year;
-    
+
     if (adjustedDay < 1) {
       adjustedMonth -= 1;
       if (adjustedMonth < 1) { adjustedMonth = 12; adjustedYear -= 1; }
@@ -149,9 +113,10 @@ export function calculateBazi(birthData) {
       adjustedMonth += 1;
       if (adjustedMonth > 12) { adjustedMonth = 1; adjustedYear += 1; }
     }
-    
+
     solar = Solar.fromYmdHms(adjustedYear, adjustedMonth, adjustedDay, trueSolar.hour, trueSolar.minute, 0);
     lunar = solar.getLunar();
+    trueSolarTimeResult = { hour: trueSolar.hour, minute: trueSolar.minute };
   } else {
     // 农历输入 - 使用 Lunar.fromYmd 处理闰月
     let lunarMonth = birthData.month;
@@ -160,17 +125,17 @@ export function calculateBazi(birthData) {
     }
     const tempLunar = Lunar.fromYmd(birthData.year, lunarMonth, birthData.day);
     const tempSolar = tempLunar.getSolar();
-    
+
     const solarYear = tempSolar.getYear();
     const solarMonth = tempSolar.getMonth();
     const solarDay = tempSolar.getDay();
-    
+
     const trueSolar = toTrueSolarTime(solarYear, solarMonth, solarDay, birthData.hour, birthData.minute, longitude);
-    
+
     let adjustedDay = solarDay + trueSolar.dayOffset;
     let adjustedMonth = solarMonth;
     let adjustedYear = solarYear;
-    
+
     if (adjustedDay < 1) {
       adjustedMonth -= 1;
       if (adjustedMonth < 1) { adjustedMonth = 12; adjustedYear -= 1; }
@@ -180,9 +145,10 @@ export function calculateBazi(birthData) {
       adjustedMonth += 1;
       if (adjustedMonth > 12) { adjustedMonth = 1; adjustedYear += 1; }
     }
-    
+
     solar = Solar.fromYmdHms(adjustedYear, adjustedMonth, adjustedDay, trueSolar.hour, trueSolar.minute, 0);
     lunar = solar.getLunar();
+    trueSolarTimeResult = { hour: trueSolar.hour, minute: trueSolar.minute };
   }
 
   const eightChar = lunar.getEightChar();
@@ -202,7 +168,7 @@ export function calculateBazi(birthData) {
 
   const lunarYear = LunarYear.fromYear(lunar.getYear());
   const isLeapMonth = lunar.getMonth() === lunarYear.getLeapMonth();
-  
+
   const lunarDate = {
     year: lunar.getYear(),
     month: lunar.getMonth(),
@@ -218,13 +184,13 @@ export function calculateBazi(birthData) {
 
   // 计算大运
   const gender = birthData.gender === 'male' ? 1 : 0;
-  
+
   let yun;
   try {
     const yunObj = eightChar.getYun(gender, 1);
     const daYunList = [];
     const daYunArr = yunObj.getDaYun(12); // 第一个是起运前，所以要 12 才能获取足够的大运
-    
+
     for (let i = 0; i < daYunArr.length; i++) {
       const dy = daYunArr[i];
       const ganZhi = dy.getGanZhi?.() || '';
@@ -239,7 +205,7 @@ export function calculateBazi(birthData) {
           // 忽略错误，使用空字符串
         }
       }
-      
+
       // 获取流年列表
       const liuNianList = [];
       try {
@@ -257,7 +223,7 @@ export function calculateBazi(birthData) {
               // 忽略错误
             }
           }
-          
+
           // 获取流月列表
           const liuYueList = [];
           try {
@@ -286,7 +252,7 @@ export function calculateBazi(birthData) {
           } catch (e) {
             // 忽略流月获取错误
           }
-          
+
           liuNianList.push({
             index: ln.getIndex?.() ?? j,
             year: ln.getYear?.() ?? 0,
@@ -300,7 +266,7 @@ export function calculateBazi(birthData) {
       } catch (e) {
         // 忽略流年获取错误
       }
-      
+
       // 只保留有效的大运（ganZhi 非空），过滤掉起运前的空元素，最多 10 步
       if (ganZhi && daYunList.length < 10) {
         daYunList.push({
@@ -339,7 +305,7 @@ export function calculateBazi(birthData) {
   let yiJi;
   let jieQi;
   let xingXiu;
-  
+
   try {
     shenSha = {
       year: lunar.getYearShenSha?.() || [],
@@ -570,6 +536,7 @@ export function calculateBazi(birthData) {
     taiYuan: eightChar.getTaiYuan?.() || '',
     mingGong: eightChar.getMingGong?.() || '',
     shenGong: eightChar.getShenGong?.() || '',
+    trueSolarTime: trueSolarTimeResult,
   };
 }
 
@@ -598,7 +565,7 @@ function calculateDayMaster(dayStem, fourPillars) {
     fourPillars.month.heavenlyStem,
     fourPillars.hour.heavenlyStem,
   ];
-  
+
   const allBranches = [
     fourPillars.year.earthlyBranch,
     fourPillars.month.earthlyBranch,

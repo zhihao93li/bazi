@@ -338,13 +338,14 @@ export async function refundPoints(params: RefundParams): Promise<PointsOperatio
       });
 
       // 创建交易记录（退款记录金额为正数，type为refund）
+      // 注意：不在 description 中包含技术性的退款原因，只记录用户友好的描述
       const transaction = await tx.pointsTransaction.create({
         data: {
           userId,
           type: "refund",
           amount: amount, // 正数，表示增加
           balance: newBalance,
-          description: `${description} [退款原因: ${reason}]`,
+          description, // 只使用传入的用户友好描述，不附加内部原因
           orderId: orderId ? `refund_${orderId}` : undefined,
         },
       });

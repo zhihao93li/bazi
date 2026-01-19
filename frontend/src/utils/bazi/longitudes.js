@@ -514,34 +514,49 @@ export const DISTRICT_LONGITUDES = {
  */
 export function getLongitude(name) {
   if (!name) return 116.4;
-  
+
   // 直接匹配
   if (DISTRICT_LONGITUDES[name]) {
     return DISTRICT_LONGITUDES[name];
   }
-  
-  // 尝试添加"市"后缀
-  if (!name.endsWith('市') && !name.endsWith('区') && !name.endsWith('县')) {
-    const withCity = name + '市';
-    if (DISTRICT_LONGITUDES[withCity]) {
-      return DISTRICT_LONGITUDES[withCity];
+
+  // 尝试添加常见后缀
+  const suffixes = ['市', '地区', '县', '区'];
+  for (const suffix of suffixes) {
+    if (!name.endsWith(suffix)) {
+      const withSuffix = name + suffix;
+      if (DISTRICT_LONGITUDES[withSuffix]) {
+        return DISTRICT_LONGITUDES[withSuffix];
+      }
     }
   }
-  
-  // 尝试移除"市"后缀
-  if (name.endsWith('市')) {
-    const withoutCity = name.slice(0, -1);
-    if (DISTRICT_LONGITUDES[withoutCity]) {
-      return DISTRICT_LONGITUDES[withoutCity];
+
+  // 尝试移除常见后缀
+  const removableSuffixes = ['市', '地区', '县', '区'];
+  for (const suffix of removableSuffixes) {
+    if (name.endsWith(suffix)) {
+      const withoutSuffix = name.slice(0, -suffix.length);
+      if (DISTRICT_LONGITUDES[withoutSuffix]) {
+        return DISTRICT_LONGITUDES[withoutSuffix];
+      }
+      // 尝试用其他后缀替换
+      for (const otherSuffix of suffixes) {
+        if (otherSuffix !== suffix) {
+          const replaced = withoutSuffix + otherSuffix;
+          if (DISTRICT_LONGITUDES[replaced]) {
+            return DISTRICT_LONGITUDES[replaced];
+          }
+        }
+      }
     }
   }
-  
+
   // 模糊匹配：查找包含该名称的条目
   for (const [key, value] of Object.entries(DISTRICT_LONGITUDES)) {
     if (key.includes(name) || name.includes(key)) {
       return value;
     }
   }
-  
+
   return 116.4; // 默认北京
 }

@@ -10,6 +10,7 @@ import { generateThemeAnalysis, generateInitialAnalysis } from '../ai/service.js
 import { refundPoints } from '../points/service.js';
 import prisma from '../prisma.js';
 import type { BaziData } from '../bazi/types.js';
+import { THEME_NAMES } from '../themes/constants.js';
 
 // 任务存储（内存）
 const tasks = new Map<string, Task>();
@@ -158,8 +159,9 @@ async function processTask(task: Task): Promise<void> {
     } catch (error) {
         console.error(`[Task Service] Task failed: ${task.id}`, error);
 
+        // 记录技术错误到日志，但不暴露给用户
         task.status = 'failed';
-        task.error = error instanceof Error ? error.message : '处理失败';
+        task.error = '处理失败，请稍后重试'; // 用户友好的错误消息
         task.completedAt = new Date();
 
         // 退还积分
@@ -167,9 +169,9 @@ async function processTask(task: Task): Promise<void> {
             await refundPoints({
                 userId,
                 amount: price,
-                description: `解锁主题解读 - ${theme}`,
+                description: `解锁主题解读 - ${THEME_NAMES[theme as keyof typeof THEME_NAMES]}`,
                 orderId: `task_${task.id}`,
-                reason: task.error,
+                reason: '生成失败，系统已自动退款', // 用户友好的退款原因
             });
             console.log(`[Task Service] Points refunded for task: ${task.id}`);
         } catch (refundError) {

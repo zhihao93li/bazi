@@ -1,10 +1,10 @@
 /**
  * HeaderSection - 顶部基础信息区
  * 
- * 展示：姓名、性别（乾造/坤造）、保存状态、出生地点、出生时间、真太阳时
+ * 展示：姓名、性别、保存状态、出生地点、出生时间、真太阳时
  */
 
-import { MapPin, Calendar, Sun, Check } from '@phosphor-icons/react';
+import { MapPin, Calendar, Check } from '@phosphor-icons/react';
 import styles from '../BaziChartCard.module.css';
 
 /**
@@ -60,7 +60,7 @@ export default function HeaderSection({
   isSaved,          // 是否已保存
   dayMasterStrength, // 日主强弱: 'strong' | 'weak' | 'balanced'
 }) {
-  const genderLabel = subject?.gender === 'male' ? '乾造(男)' : '坤造(女)';
+  const genderLabel = subject?.gender === 'male' ? '男' : '女';
   const shortLocation = getShortLocation(subject?.location);
 
   // 身强弱中文映射
@@ -69,9 +69,6 @@ export default function HeaderSection({
 
   return (
     <div className={styles.headerSection}>
-      {/* 标题行：命理天象 */}
-      <div className={styles.cardTitle}>命理天象</div>
-
       {/* 名字与性别行 */}
       <div className={styles.nameRow}>
         <span className={styles.subjectName}>{subject?.name || '未命名'}</span>
@@ -99,19 +96,16 @@ export default function HeaderSection({
           </span>
         )}
 
-        {/* 出生时间（北京时间） */}
+        {/* 出生时间（北京时间）+ 真太阳时 */}
         <span className={styles.infoItem}>
           <Calendar size={14} weight="fill" className={styles.infoIcon} />
           {formatBirthTime(subject)}
+          {trueSolarTime && (
+            <span className={styles.trueSolarTime}>
+              （真太阳时 {formatTrueSolarTime(trueSolarTime.hour, trueSolarTime.minute)}）
+            </span>
+          )}
         </span>
-
-        {/* 真太阳时 */}
-        {trueSolarTime && (
-          <span className={styles.infoItem}>
-            <Sun size={14} weight="fill" className={styles.infoIcon} />
-            真太阳时 {formatTrueSolarTime(trueSolarTime.hour, trueSolarTime.minute)}
-          </span>
-        )}
       </div>
     </div>
   );

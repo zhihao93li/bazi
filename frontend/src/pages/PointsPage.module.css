@@ -246,6 +246,10 @@
   display: flex;
   align-items: center;
   gap: 16px;
+  flex: 1;
+  min-width: 0;
+  /* 允许收缩 */
+  overflow: hidden;
 }
 
 .transactionIcon {
@@ -280,12 +284,21 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
+  flex: 1;
+  min-width: 0;
+  /* 允许 flex 子元素收缩 */
+  max-width: calc(100% - 56px);
+  /* 减去图标宽度和间距 */
 }
 
 .transactionDesc {
   font-size: 14px;
   font-weight: 500;
   color: var(--dark-7);
+  /* 单行文本截断 */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .transactionTime {

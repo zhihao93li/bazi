@@ -7,7 +7,7 @@
 import { Hono } from 'hono';
 import { streamSSE } from 'hono/streaming';
 import { authRequired, requireUserId } from '../middleware/auth.js';
-import { isValidTheme } from '../lib/themes/constants.js';
+import { isValidTheme, THEME_NAMES } from '../lib/themes/constants.js';
 import { getThemePrice, ensureInitialAnalysis } from '../lib/themes/service.js';
 import { deductPoints, refundPoints } from '../lib/points/service.js';
 import { PointsError, PointsErrorCode } from '../lib/points/types.js';
@@ -104,14 +104,14 @@ themesStreamRoutes.post('/unlock/stream', authRequired, async (c) => {
         deductResult = await deductPoints({
             userId,
             amount: price,
-            description: `解锁主题解读 - ${theme}`,
+            description: `解锁主题解读 - ${THEME_NAMES[theme as keyof typeof THEME_NAMES]}`,
             orderId,
         });
         pointsDeducted = true;
         console.log(`[Theme Stream] Points deducted: ${price}, remaining: ${deductResult.balance}`);
     } catch (error) {
         if (error instanceof PointsError && error.code === PointsErrorCode.INSUFFICIENT_BALANCE) {
-            return c.json({ success: false, message: error.message, code: 'INSUFFICIENT_POINTS' }, 402);
+            return c.json({ success: false, message: '积分不足，请先充值', code: 'INSUFFICIENT_POINTS' }, 402);
         }
         throw error;
     }
@@ -181,9 +181,9 @@ themesStreamRoutes.post('/unlock/stream', authRequired, async (c) => {
                     await refundPoints({
                         userId,
                         amount: price,
-                        description: `解锁主题解读 - ${theme}`,
+                        description: `解锁主题解读 - ${THEME_NAMES[theme as keyof typeof THEME_NAMES]}`,
                         orderId,
-                        reason: `流式生成失败: ${error instanceof Error ? error.message : 'Unknown error'}`,
+                        reason: '生成失败，系统已自动退款', // 技术细节只记录在日志中
                     });
                     console.log('[Theme Stream] Points refunded');
                 } catch (refundError) {
@@ -191,11 +191,10 @@ themesStreamRoutes.post('/unlock/stream', authRequired, async (c) => {
                 }
             }
 
-            // 发送错误事件
-            const errorMessage = error instanceof Error ? error.message : '生成失败';
+            // 发送错误事件（不暴露技术细节给用户）
             await stream.writeSSE({
                 event: 'error',
-                data: JSON.stringify({ message: errorMessage, code: 'STREAM_ERROR' }),
+                data: JSON.stringify({ message: '生成失败，请稍后重试', code: 'STREAM_ERROR' }),
             });
         }
     });

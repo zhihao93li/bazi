@@ -9,6 +9,7 @@ import { deductPoints, refundPoints } from '../points/service.js';
 import { PointsError, PointsErrorCode } from '../points/types.js';
 import type { AnalysisTheme } from '../ai/types.js';
 import type { BaziData } from '../bazi/types.js';
+import { THEME_NAMES } from './constants.js';
 
 /**
  * 主题价格信息
@@ -342,7 +343,7 @@ export async function unlockTheme(
       deductResult = await deductPoints({
         userId,
         amount: price,
-        description: `解锁主题解读 - ${theme}`,
+        description: `解锁主题解读 - ${THEME_NAMES[theme]}`,
         orderId,
       });
       pointsDeducted = true;
@@ -411,7 +412,7 @@ export async function unlockTheme(
           await refundPoints({
             userId,
             amount: price,
-            description: `解锁主题解读 - ${theme}`,
+            description: `解锁主题解读 - ${THEME_NAMES[theme]}`,
             orderId,
             reason: '并发解锁冲突，已由其他请求完成',
           });
@@ -469,7 +470,7 @@ export async function unlockTheme(
           await refundPoints({
             userId,
             amount: price,
-            description: `解锁主题解读 - ${theme}`,
+            description: `解锁主题解读 - ${THEME_NAMES[theme]}`,
             orderId,
             reason: `操作失败: ${errorMessage}`,
           });

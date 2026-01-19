@@ -438,13 +438,17 @@ export interface BaziData {
   gongNaYin?: GongNaYinInfo;
   // 其他信息
   otherInfo?: OtherLunarInfo;
-  // 基础信息
   shengXiao: string;            // 生肖
   xun: string;                  // 旬
   xunKong: string;              // 旬空
   taiYuan: string;              // 胎元
   mingGong: string;             // 命宫
   shenGong: string;             // 身宫
+  // 真太阳时
+  trueSolarTime?: {
+    hour: number;
+    minute: number;
+  };
 }
 
 // ============================================================================
