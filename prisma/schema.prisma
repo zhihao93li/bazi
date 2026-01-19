@@ -191,3 +191,17 @@ model Task {
   @@index([status])
   @@index([type, status])
 }
+
+// 管理员
+model Admin {
+  id           String    @id @default(cuid())
+  username     String    @unique
+  passwordHash String
+  role         String    @default("admin") // admin, super_admin
+  isActive     Boolean   @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@map("admins")
+}

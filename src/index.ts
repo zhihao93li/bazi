@@ -28,6 +28,7 @@ import { reportsRoutes } from './routes/reports.js';
 import { subjectsRoutes } from './routes/subjects.js';
 import { themesRoutes } from './routes/themes.js';
 import { tasksRoutes } from './routes/tasks.js';
+import { adminRoutes } from './routes/admin/index.js';
 
 const app = new Hono();
 
@@ -75,6 +76,7 @@ app.route('/api/reports', reportsRoutes);
 app.route('/api/subjects', subjectsRoutes);
 app.route('/api/themes', themesRoutes);
 app.route('/api/tasks', tasksRoutes);
+app.route('/api/admin', adminRoutes);
 
 // 404 处理
 app.notFound((c) => {

@@ -2,8 +2,10 @@ import { lazy, Suspense } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import { ToastProvider, LoadingOverlay } from './components/common'
 import { AuthProvider } from './context/AuthContext'
+import { AdminAuthProvider } from './context/AdminAuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import GuestRoute from './components/GuestRoute'
+import AdminProtectedRoute from './components/AdminProtectedRoute'
 
 // 页面级加载组件 - 使用全屏遮罩
 const LoadingFallback = () => <LoadingOverlay fixed text="加载中..." />
@@ -37,6 +39,17 @@ const ComponentsPage = lazy(() => import('./pages/dev/ComponentsPage'))
 const BirthFormPage = lazy(() => import('./pages/dev/BirthFormPage'))
 const BaziCardsPage = lazy(() => import('./pages/dev/BaziCardsPage'))
 const SwitcherPage = lazy(() => import('./pages/dev/SwitcherPage'))
+
+// Admin pages - 懒加载
+const AdminLayout = lazy(() => import('./components/admin/AdminLayout'))
+const AdminLoginPage = lazy(() => import('./pages/admin/AdminLoginPage'))
+const AdminDashboardPage = lazy(() => import('./pages/admin/AdminDashboardPage'))
+const AdminUsersPage = lazy(() => import('./pages/admin/AdminUsersPage'))
+const AdminSubjectsPage = lazy(() => import('./pages/admin/AdminSubjectsPage'))
+const AdminTasksPage = lazy(() => import('./pages/admin/AdminTasksPage'))
+const AdminThemeAnalysesPage = lazy(() => import('./pages/admin/AdminThemeAnalysesPage'))
+const AdminPaymentOrdersPage = lazy(() => import('./pages/admin/AdminPaymentOrdersPage'))
+const AdminPointsTransactionsPage = lazy(() => import('./pages/admin/AdminPointsTransactionsPage'))
 
 function App() {
   return (
@@ -127,4 +140,47 @@ function App() {
   )
 }
 
-export default App
+function AdminApp() {
+  return (
+    <AdminAuthProvider>
+      <Suspense fallback={<LoadingFallback />}>
+        <Routes>
+          {/* Admin Login - Public */}
+          <Route path="/admin/login" element={<AdminLoginPage />} />
+
+          {/* Admin Protected Routes with Layout */}
+          <Route
+            path="/admin"
+            element={
+              <AdminProtectedRoute>
+                <AdminLayout />
+              </AdminProtectedRoute>
+            }
+          >
+            <Route index element={<AdminDashboardPage />} />
+            <Route path="users" element={<AdminUsersPage />} />
+            <Route path="subjects" element={<AdminSubjectsPage />} />
+            <Route path="tasks" element={<AdminTasksPage />} />
+            <Route path="theme-analyses" element={<AdminThemeAnalysesPage />} />
+            <Route path="payment-orders" element={<AdminPaymentOrdersPage />} />
+            <Route path="points-transactions" element={<AdminPointsTransactionsPage />} />
+          </Route>
+        </Routes>
+      </Suspense>
+    </AdminAuthProvider>
+  )
+}
+
+function RootApp() {
+  const pathname = window.location.pathname
+
+  // Admin routes use AdminApp
+  if (pathname.startsWith('/admin')) {
+    return <AdminApp />
+  }
+
+  // All other routes use the regular App
+  return <App />
+}
+
+export default RootApp
