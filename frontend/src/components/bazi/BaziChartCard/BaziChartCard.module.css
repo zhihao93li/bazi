@@ -73,6 +73,20 @@
   color: var(--grey-30);
 }
 
+.patternBadge {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 2px 10px;
+  border-radius: var(--radius-sm);
+  background: rgba(212, 175, 55, 0.15);
+  color: #b8860b;
+}
+
+.patternBadge[data-category="special"] {
+  background: rgba(156, 39, 176, 0.12);
+  color: #9c27b0;
+}
+
 .birthInfoRow {
   display: flex;
   align-items: center;

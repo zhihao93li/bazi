@@ -64,6 +64,7 @@ export default function HeaderSection({
   trueSolarTime,    // 真太阳时 { hour, minute }
   isSaved,          // 是否已保存
   dayMasterStrength, // 日主强弱: 'strong' | 'weak' | 'balanced'
+  pattern,          // 格局信息: { name, category, description }
 }) {
   const genderLabel = subject?.gender === 'male' ? '男' : '女';
   const shortLocation = getShortLocation(subject?.location);
@@ -81,6 +82,11 @@ export default function HeaderSection({
         {strengthText && (
           <span className={styles.strengthBadge} data-strength={dayMasterStrength}>
             {strengthText}
+          </span>
+        )}
+        {pattern?.name && (
+          <span className={styles.patternBadge} data-category={pattern.category}>
+            {pattern.name}
           </span>
         )}
         {isSaved && (

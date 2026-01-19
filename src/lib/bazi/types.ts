@@ -112,6 +112,33 @@ export interface TenGodsAnalysis {
 }
 
 // ============================================================================
+// 格局 (Pattern/Structure)
+// ============================================================================
+
+export type PatternCategory = 'normal' | 'special';
+
+export type NormalPattern =
+  | '正官格' | '七杀格'
+  | '正财格' | '偏财格'
+  | '正印格' | '偏印格'
+  | '食神格' | '伤官格'
+  | '建禄格' | '羊刃格';
+
+export type SpecialPattern =
+  | '从财格' | '从官格' | '从儿格' | '从势格'  // 从格
+  | '曲直格' | '炎上格' | '稼穑格' | '从革格' | '润下格'  // 专旺格
+  | '化木格' | '化火格' | '化土格' | '化金格' | '化水格';  // 化气格
+
+export interface PatternInfo {
+  name: NormalPattern | SpecialPattern | string;  // 格局名称
+  category: PatternCategory;  // 正格/特殊格
+  description: string;  // 格局描述
+  monthStem?: string;  // 月令本气
+  monthStemTenGod?: string;  // 月令本气十神
+  isTransparent?: boolean;  // 是否透干
+}
+
+// ============================================================================
 // 藏干 (Hidden Stems)
 // ============================================================================
 
@@ -416,6 +443,7 @@ export interface BaziData {
   dayMaster: DayMaster;
   fiveElements: FiveElementsAnalysis;
   tenGods: TenGodsAnalysis;
+  pattern?: PatternInfo;  // 格局
   hiddenStems: HiddenStemsData;
   lunarDate: LunarDateInfo;
   // 大运信息

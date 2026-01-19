@@ -182,6 +182,7 @@ export function calculateBazi(birthData) {
   const dayMaster = calculateDayMaster(fourPillars.day.heavenlyStem, fourPillars);
   const fiveElements = calculateFiveElements(fourPillars, dayMaster);
   const tenGods = calculateTenGods(fourPillars, dayMaster.stem);
+  const pattern = calculatePattern(fourPillars, dayMaster, fiveElements);
   const hiddenStems = extractHiddenStems(fourPillars);
 
   const lunarYear = LunarYear.fromYear(lunar.getYear());
@@ -528,6 +529,7 @@ export function calculateBazi(birthData) {
     dayMaster,
     fiveElements,
     tenGods,
+    pattern,
     hiddenStems,
     lunarDate,
     yun,
@@ -945,4 +947,175 @@ function getTenGod(dayStem, otherStem) {
   if (restrictsElement(otherElement, dayElement)) return dayYinYang === otherYinYang ? '七杀' : '正官';
   if (generatesElement(otherElement, dayElement)) return dayYinYang === otherYinYang ? '偏印' : '正印';
   return null;
+}
+
+/**
+ * 计算格局
+ *
+ * 格局判断顺序：
+ * 1. 正格（八格）：以月令本气的十神定格
+ * 2. 建禄格/羊刃格：月支为日主之禄或刃
+ * 3. 特殊格局：从格、专旺格等（基于日主强弱极端情况）
+ */
+function calculatePattern(fourPillars, dayMaster, fiveElements) {
+  const dayStem = fourPillars.day.heavenlyStem;
+  const monthBranch = fourPillars.month.earthlyBranch;
+  const monthHiddenStems = fourPillars.month.hiddenStems;
+
+  // 获取四柱天干（用于检查透干）
+  const tianGan = [
+    fourPillars.year.heavenlyStem.chinese,
+    fourPillars.month.heavenlyStem.chinese,
+    fourPillars.hour.heavenlyStem.chinese,
+  ];
+
+  // 日主禄位和刃位映射
+  const luMap = {
+    '甲': '寅', '乙': '卯', '丙': '巳', '丁': '午', '戊': '巳',
+    '己': '午', '庚': '申', '辛': '酉', '壬': '亥', '癸': '子',
+  };
+  const renMap = {
+    '甲': '卯', '乙': '寅', '丙': '午', '丁': '巳', '戊': '午',
+    '己': '巳', '庚': '酉', '辛': '申', '壬': '子', '癸': '亥',
+  };
+
+  // 1. 检查建禄格
+  if (monthBranch.chinese === luMap[dayStem.chinese]) {
+    return {
+      name: '建禄格',
+      category: 'normal',
+      description: '月支为日主之禄，主身旺有根，宜见财官食伤',
+      monthStem: monthHiddenStems[0]?.chinese,
+      isTransparent: false,
+    };
+  }
+
+  // 2. 检查羊刃格
+  if (monthBranch.chinese === renMap[dayStem.chinese]) {
+    return {
+      name: '羊刃格',
+      category: 'normal',
+      description: '月支为日主之刃，主身强刚烈，宜见官杀制刃',
+      monthStem: monthHiddenStems[0]?.chinese,
+      isTransparent: false,
+    };
+  }
+
+  // 3. 检查特殊格局（基于日主强弱）
+  const dayMasterScore = dayMaster.analysis?.totalScore ?? 50;
+
+  // 从格判断：日主极弱（分数低于20）
+  if (dayMasterScore < 20) {
+    const dist = fiveElements.distribution;
+    const dayElement = dayStem.element;
+
+    // 找出最强的非我五行
+    let strongestElement = dayElement;
+    let strongestValue = 0;
+    for (const el of FIVE_ELEMENTS) {
+      if (el !== dayElement && dist[el] > strongestValue) {
+        strongestValue = dist[el];
+        strongestElement = el;
+      }
+    }
+
+    // 判断是财、官、还是食伤
+    const isWealth = restrictsElement(dayElement, strongestElement);
+    const isPower = restrictsElement(strongestElement, dayElement);
+    const isOutput = generatesElement(dayElement, strongestElement);
+
+    if (isWealth) {
+      return {
+        name: '从财格',
+        category: 'special',
+        description: '日主极弱而财星极旺，弃命从财，宜顺从财势',
+      };
+    }
+    if (isPower) {
+      return {
+        name: '从官格',
+        category: 'special',
+        description: '日主极弱而官杀极旺，弃命从官，宜顺从官势',
+      };
+    }
+    if (isOutput) {
+      return {
+        name: '从儿格',
+        category: 'special',
+        description: '日主极弱而食伤极旺，弃命从儿，宜顺从食伤之势',
+      };
+    }
+  }
+
+  // 专旺格判断：日主极强（分数高于75）
+  if (dayMasterScore > 75) {
+    const dayElement = dayStem.element;
+    const elementMap = {
+      wood: '曲直格',
+      fire: '炎上格',
+      earth: '稼穑格',
+      metal: '从革格',
+      water: '润下格',
+    };
+    const descMap = {
+      wood: '木气专旺成局，主仁慈正直，宜水木运',
+      fire: '火气炎上成局，主热情礼仪，宜木火运',
+      earth: '土气稼穑成局，主忠厚信实，宜火土运',
+      metal: '金气从革成局，主刚毅果决，宜土金运',
+      water: '水气润下成局，主聪慧灵活，宜金水运',
+    };
+
+    return {
+      name: elementMap[dayElement],
+      category: 'special',
+      description: descMap[dayElement],
+    };
+  }
+
+  // 4. 正格判断：以月令本气定格
+  if (monthHiddenStems.length > 0) {
+    // 遍历藏干，找第一个非比劫的十神
+    for (let i = 0; i < monthHiddenStems.length; i++) {
+      const hiddenStem = monthHiddenStems[i];
+      const tenGod = getTenGod(dayStem, hiddenStem);
+
+      // 比肩、劫财不成格，继续看下一个
+      if (tenGod === '比肩' || tenGod === '劫财') {
+        continue;
+      }
+
+      // 检查是否透干
+      const isTransparent = tianGan.includes(hiddenStem.chinese);
+
+      // 根据十神确定格局
+      const patternMap = {
+        '正官': { name: '正官格', desc: '月令透正官，主贵气端正，宜见财印相生' },
+        '七杀': { name: '七杀格', desc: '月令透七杀，主威严果决，宜见食伤制杀或印化杀' },
+        '正财': { name: '正财格', desc: '月令透正财，主务实勤俭，宜见官杀护财' },
+        '偏财': { name: '偏财格', desc: '月令透偏财，主豪爽大方，宜见官杀护财' },
+        '正印': { name: '正印格', desc: '月令透正印，主聪慧仁厚，宜见官杀生印' },
+        '偏印': { name: '偏印格', desc: '月令透偏印，主机敏多思，宜见财星制印' },
+        '食神': { name: '食神格', desc: '月令透食神，主温和福厚，宜见财星泄秀' },
+        '伤官': { name: '伤官格', desc: '月令透伤官，主聪明傲气，宜见财星或印星' },
+      };
+
+      if (tenGod && patternMap[tenGod]) {
+        return {
+          name: patternMap[tenGod].name,
+          category: 'normal',
+          description: patternMap[tenGod].desc,
+          monthStem: hiddenStem.chinese,
+          monthStemTenGod: tenGod,
+          isTransparent,
+        };
+      }
+    }
+  }
+
+  // 如果没有匹配到任何格局，返回杂格
+  return {
+    name: '杂格',
+    category: 'normal',
+    description: '月令无明显成格条件，需综合分析八字整体格局',
+  };
 }

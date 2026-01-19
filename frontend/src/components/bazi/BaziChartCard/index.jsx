@@ -302,7 +302,7 @@ export default function BaziChartCard({
 
   if (!data?.fourPillars) return null;
 
-  const { fourPillars, fourPillarsShiShen, fourPillarsXunKong, fiveElements, yun } = data;
+  const { fourPillars, fourPillarsShiShen, fourPillarsXunKong, fiveElements, yun, pattern } = data;
   const dayStem = fourPillars.day.heavenlyStem;
 
   const { currentDaYun, currentLiuNian } = useMemo(() => {
@@ -339,6 +339,7 @@ export default function BaziChartCard({
         trueSolarTime={trueSolarTime}
         isSaved={isSaved}
         dayMasterStrength={data.dayMaster?.strength}
+        pattern={pattern}
       />
 
       {/* 六柱区域 */}
