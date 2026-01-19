@@ -186,7 +186,7 @@ export default function PointsPage() {
               <span className={styles.balanceValue}>
                 {isLoading ? <LoadingSpinner size="large" /> : balance.toLocaleString()}
               </span>
-              <span className={styles.balanceHint}>积分可用于命理分析服务</span>
+              <span className={styles.balanceHint}>积分可用于报告解锁服务</span>
             </Card>
 
             {/* 充值套餐 */}
