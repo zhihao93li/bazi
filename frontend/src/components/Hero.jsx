@@ -38,7 +38,7 @@ export default function Hero() {
 
           <div className={styles.textContent}>
             <h1 className={styles.title}>
-              她赋｜现代女性个人洞察工具
+              她赋｜女性个人洞察工具
             </h1>
             <p className={styles.subtitle}>
               以传统命理为结构，以现代女性的视角重新解读人生

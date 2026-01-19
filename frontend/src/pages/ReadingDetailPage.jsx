@@ -59,6 +59,34 @@ const OTHER_READINGS = [
     { theme: 'yearly', name: '流年运势', Icon: CalendarBlank },
 ];
 
+// 主题加载文案配置
+const LOADING_MESSAGES = {
+    'life_color': {
+        title: '正在梳理你生命中长期不变的结构与气质。',
+        hint: '通常需要1-3分钟，可以去探索其他模块再回来查看哦~',
+    },
+    'relationship': {
+        title: '正在分析你在关系中的靠近方式与边界。',
+        hint: '通常需要1-3分钟，可以去探索其他模块再回来查看哦~',
+    },
+    'career_wealth': {
+        title: '正在识别你与现实世界之间的互动节律。',
+        hint: '通常需要1-3分钟，可以去探索其他模块再回来查看哦~',
+    },
+    'health': {
+        title: '正在观察你的能量流动与恢复方式。',
+        hint: '通常需要1-3分钟，可以去探索其他模块再回来查看哦~',
+    },
+    'life_lesson': {
+        title: '正在整理哪些关系会放大你，哪些会消耗你。',
+        hint: '通常需要1-3分钟，可以去探索其他模块再回来查看哦~',
+    },
+    'yearly_fortune': {
+        title: '正在结合大运与流年，聚焦 2026 年最重要的变化。',
+        hint: '通常需要1-3分钟，可以去探索其他模块再回来查看哦~',
+    },
+};
+
 /**
  * 简单的 Markdown 解析
  */
@@ -266,13 +294,19 @@ export default function ReadingDetailPage() {
                     {/* 内容区域 */}
                     <Card className={styles.contentCard}>
                         {/* 加载中 - 使用当前主题的独立状态 */}
-                        {currentThemeData?.isLoading || isCurrentThemeUnlocking ? (
-                            <div className={styles.loading}>
-                                <div className={styles.spinner} />
-                                <span>AI 正在解读中...</span>
-                                <span className={styles.loadingHint}>通常需要 10-30 秒</span>
-                            </div>
-                        ) : currentThemeData?.isUnlocked && currentThemeData?.content ? (
+                        {currentThemeData?.isLoading || isCurrentThemeUnlocking ? (() => {
+                            const loadingMsg = LOADING_MESSAGES[currentThemeData?.themeKey] || {
+                                title: 'AI 正在解读中...',
+                                hint: '通常需要1-3分钟，可以去探索其他模块再回来查看哦~',
+                            };
+                            return (
+                                <div className={styles.loading}>
+                                    <div className={styles.spinner} />
+                                    <span>{loadingMsg.title}</span>
+                                    <span className={styles.loadingHint}>{loadingMsg.hint}</span>
+                                </div>
+                            );
+                        })() : currentThemeData?.isUnlocked && currentThemeData?.content ? (
                             <div
                                 className={styles.content}
                                 dangerouslySetInnerHTML={{
