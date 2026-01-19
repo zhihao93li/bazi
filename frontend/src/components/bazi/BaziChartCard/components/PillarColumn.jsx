@@ -26,6 +26,8 @@ function getShiShenClass(shiShen) {
     '偏印': 'pianYin',
     '正印': 'zhengYin',
     '日元': 'riYuan',
+    '元男': 'riYuan',
+    '元女': 'riYuan',
   };
 
   return styles[shiShenMap[shiShen]] || '';

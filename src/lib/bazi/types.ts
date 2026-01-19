@@ -63,22 +63,38 @@ export interface FourPillars {
 // 日主 (Day Master)
 // ============================================================================
 
+export interface DayMasterAnalysis {
+  deLing: number;        // 得令分数（月令支持）
+  deLingDesc: string;    // 得令描述
+  deDi: number;          // 得地分数（藏干中的根）
+  deDiDesc: string;      // 得地描述
+  tianGanHelp: number;   // 天干帮扶分数
+  tianGanHelpDesc: string; // 天干帮扶描述
+  totalScore: number;    // 总分
+}
+
 export interface DayMaster {
   stem: HeavenlyStem;
   strength: 'strong' | 'weak' | 'balanced';
   characteristics: string[];
+  analysis?: DayMasterAnalysis; // 诊断信息
 }
 
 // ============================================================================
 // 五行分析 (Five Elements Analysis)
 // ============================================================================
 
+export type FiveElementState = 'wang' | 'xiang' | 'xiu' | 'qiu' | 'si';
+
 export interface FiveElementsAnalysis {
   distribution: Record<FiveElement, number>;
+  counts: Record<FiveElement, number>;  // 含藏干数（天干+本气，整数）
   strongest: FiveElement;
   weakest: FiveElement;
   favorable: FiveElement[];    // 喜用神
   unfavorable: FiveElement[];  // 忌神
+  elementStates?: Record<FiveElement, FiveElementState>;  // 五行状态（旺相休囚死）
+  monthElement?: FiveElement;  // 月令五行
 }
 
 // ============================================================================

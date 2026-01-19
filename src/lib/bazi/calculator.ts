@@ -16,7 +16,9 @@ import type {
   Pillar,
   HeavenlyStem,
   DayMaster,
+  DayMasterAnalysis,
   FiveElementsAnalysis,
+  FiveElementState,
   TenGodsAnalysis,
   HiddenStemsData,
   LunarDateInfo,
@@ -49,6 +51,12 @@ import {
   getEarthlyBranch,
   getHiddenStems,
   FIVE_ELEMENTS,
+  HIDDEN_STEM_WEIGHTS,
+  MONTH_BRANCH_ELEMENT,
+  FIVE_ELEMENT_STATE_WEIGHTS,
+  FIVE_ELEMENTS_GENERATION,
+  FIVE_ELEMENTS_GENERATED_BY,
+  FIVE_ELEMENTS_RESTRICTION,
 } from './constants.js';
 import { getLongitude } from './geo-utils.js';
 
@@ -606,77 +614,260 @@ function createPillar(ganChinese: string, zhiChinese: string, nayin: string): Pi
 
 function calculateDayMaster(dayStem: HeavenlyStem, fourPillars: FourPillars): DayMaster {
   const dayElement = dayStem.element;
-  let supportCount = 0;
-  let weakenCount = 0;
+  const monthBranch = fourPillars.month.earthlyBranch.chinese;
+  const monthElement = MONTH_BRANCH_ELEMENT[monthBranch] || 'earth';
 
-  const allStems = [
-    fourPillars.year.heavenlyStem,
-    fourPillars.month.heavenlyStem,
-    fourPillars.hour.heavenlyStem,
-  ];
+  // 1. 得令判断（月令支持）- 最高40分
+  let deLing = 0;
+  let deLingDesc = '';
 
-  const allBranches = [
-    fourPillars.year.earthlyBranch,
-    fourPillars.month.earthlyBranch,
-    fourPillars.day.earthlyBranch,
-    fourPillars.hour.earthlyBranch,
-  ];
-
-  for (const stem of allStems) {
-    if (stem.element === dayElement) supportCount += 2;
-    else if (generatesElement(stem.element, dayElement)) supportCount += 1;
-    else if (restrictsElement(stem.element, dayElement)) weakenCount += 1;
+  if (dayElement === monthElement) {
+    // 日主当令（如金日主在申酉月）
+    deLing = 40;
+    deLingDesc = '日主当令';
+  } else if (FIVE_ELEMENTS_GENERATED_BY[dayElement] === monthElement) {
+    // 月令生日主（如水日主在金月，金生水）
+    deLing = 30;
+    deLingDesc = '月令生扶';
+  } else if (FIVE_ELEMENTS_GENERATION[dayElement] === monthElement) {
+    // 日主生月令（泄气）
+    deLing = -10;
+    deLingDesc = '月令泄气';
+  } else if (FIVE_ELEMENTS_RESTRICTION[monthElement] === dayElement) {
+    // 月令克日主
+    deLing = -20;
+    deLingDesc = '月令克制';
+  } else if (FIVE_ELEMENTS_RESTRICTION[dayElement] === monthElement) {
+    // 日主克月令（耗气）
+    deLing = -5;
+    deLingDesc = '日主耗气';
   }
 
-  for (const branch of allBranches) {
-    if (branch.element === dayElement) supportCount += 1;
-    else if (generatesElement(branch.element, dayElement)) supportCount += 0.5;
-    else if (restrictsElement(branch.element, dayElement)) weakenCount += 0.5;
+  // 2. 得地判断（藏干中有根）- 最高30分
+  let deDi = 0;
+  const roots: string[] = [];
+
+  const allPillars = [
+    { pillar: fourPillars.year, name: '年支' },
+    { pillar: fourPillars.month, name: '月支' },
+    { pillar: fourPillars.day, name: '日支' },
+    { pillar: fourPillars.hour, name: '时支' },
+  ];
+
+  for (const { pillar, name } of allPillars) {
+    const branchChinese = pillar.earthlyBranch.chinese;
+    const hiddenStems = pillar.hiddenStems;
+    const weights = HIDDEN_STEM_WEIGHTS[branchChinese] || [];
+
+    for (let i = 0; i < hiddenStems.length; i++) {
+      const hiddenStem = hiddenStems[i];
+      const weight = weights[i] || 0.2;
+
+      // 比劫（同元素）
+      if (hiddenStem.element === dayElement) {
+        const score = weight * 15;
+        deDi += score;
+        roots.push(`${name}藏${hiddenStem.chinese}`);
+      }
+      // 印星（生日主的元素）
+      else if (FIVE_ELEMENTS_GENERATED_BY[dayElement] === hiddenStem.element) {
+        const score = weight * 10;
+        deDi += score;
+        roots.push(`${name}藏${hiddenStem.chinese}（印）`);
+      }
+    }
   }
 
+  deDi = Math.min(deDi, 30); // 上限30分
+  const deDiDesc = roots.length > 0 ? roots.join('、') : '无根';
+
+  // 3. 天干帮扶判断 - 最高20分
+  let tianGanHelp = 0;
+  const helpers: string[] = [];
+
+  const otherStems = [
+    { stem: fourPillars.year.heavenlyStem, name: '年干' },
+    { stem: fourPillars.month.heavenlyStem, name: '月干' },
+    { stem: fourPillars.hour.heavenlyStem, name: '时干' },
+  ];
+
+  for (const { stem, name } of otherStems) {
+    if (stem.element === dayElement) {
+      // 比劫（同元素）
+      tianGanHelp += 8;
+      helpers.push(`${name}${stem.chinese}比劫`);
+    } else if (FIVE_ELEMENTS_GENERATED_BY[dayElement] === stem.element) {
+      // 印星（生日主）
+      tianGanHelp += 6;
+      helpers.push(`${name}${stem.chinese}印星`);
+    } else if (FIVE_ELEMENTS_RESTRICTION[stem.element] === dayElement) {
+      // 官杀（克日主）
+      tianGanHelp -= 5;
+      helpers.push(`${name}${stem.chinese}官杀`);
+    } else if (FIVE_ELEMENTS_GENERATION[dayElement] === stem.element) {
+      // 食伤（泄日主）
+      tianGanHelp -= 3;
+      helpers.push(`${name}${stem.chinese}食伤`);
+    }
+  }
+
+  tianGanHelp = Math.max(Math.min(tianGanHelp, 20), -20);
+  const tianGanHelpDesc = helpers.length > 0 ? helpers.join('、') : '无帮扶';
+
+  // 总分计算
+  const totalScore = deLing + deDi + tianGanHelp;
+
+  // 判断强弱
   let strength: 'strong' | 'weak' | 'balanced';
-  if (supportCount > weakenCount + 3) strength = 'strong';
-  else if (weakenCount > supportCount + 2) strength = 'weak';
-  else strength = 'balanced';
+  if (totalScore >= 50) {
+    strength = 'strong';
+  } else if (totalScore <= 25) {
+    strength = 'weak';
+  } else {
+    strength = 'balanced';
+  }
+
+  const analysis: DayMasterAnalysis = {
+    deLing,
+    deLingDesc,
+    deDi,
+    deDiDesc,
+    tianGanHelp,
+    tianGanHelpDesc,
+    totalScore,
+  };
 
   return {
     stem: dayStem,
     strength,
     characteristics: getDayMasterCharacteristics(dayStem),
+    analysis,
   };
 }
 
 function calculateFiveElements(fourPillars: FourPillars, dayMaster: DayMaster): FiveElementsAnalysis {
   const distribution: Record<FiveElement, number> = { metal: 0, wood: 0, water: 0, fire: 0, earth: 0 };
+  const counts: Record<FiveElement, number> = { metal: 0, wood: 0, water: 0, fire: 0, earth: 0 };
 
+  // 获取月令五行
+  const monthBranch = fourPillars.month.earthlyBranch.chinese;
+  const monthElement = MONTH_BRANCH_ELEMENT[monthBranch] || 'earth';
+
+  // 计算五行状态（旺相休囚死）
+  const elementStates = getElementStates(monthElement);
+
+  // 天干权重：1.5
   const stems = [
     fourPillars.year.heavenlyStem,
     fourPillars.month.heavenlyStem,
     fourPillars.day.heavenlyStem,
     fourPillars.hour.heavenlyStem,
   ];
-  for (const stem of stems) distribution[stem.element] += 2;
+  for (const stem of stems) {
+    const stateWeight = FIVE_ELEMENT_STATE_WEIGHTS[elementStates[stem.element]];
+    distribution[stem.element] += 1.5 * stateWeight;
+    counts[stem.element] += 1;  // 天干计数
+  }
 
-  const branches = [
-    fourPillars.year.earthlyBranch,
-    fourPillars.month.earthlyBranch,
-    fourPillars.day.earthlyBranch,
-    fourPillars.hour.earthlyBranch,
+  // 地支藏干权重：根据藏干位置不同
+  const allPillars = [
+    fourPillars.year,
+    fourPillars.month,
+    fourPillars.day,
+    fourPillars.hour,
   ];
-  for (const branch of branches) distribution[branch.element] += 1;
 
+  for (const pillar of allPillars) {
+    const branchChinese = pillar.earthlyBranch.chinese;
+    const hiddenStems = pillar.hiddenStems;
+    const weights = HIDDEN_STEM_WEIGHTS[branchChinese] || [];
+
+    for (let i = 0; i < hiddenStems.length; i++) {
+      const hiddenStem = hiddenStems[i];
+      const hiddenWeight = weights[i] || 0.2;
+      const stateWeight = FIVE_ELEMENT_STATE_WEIGHTS[elementStates[hiddenStem.element]];
+      distribution[hiddenStem.element] += hiddenWeight * stateWeight;
+
+      // 只统计本气（第一个藏干）
+      if (i === 0) {
+        counts[hiddenStem.element] += 1;
+      }
+    }
+  }
+
+  // 找出最强和最弱的五行
   let strongest: FiveElement = 'wood';
   let weakest: FiveElement = 'wood';
   let maxCount = distribution.wood;
   let minCount = distribution.wood;
 
   for (const element of FIVE_ELEMENTS) {
-    if (distribution[element] > maxCount) { maxCount = distribution[element]; strongest = element; }
-    if (distribution[element] < minCount) { minCount = distribution[element]; weakest = element; }
+    if (distribution[element] > maxCount) {
+      maxCount = distribution[element];
+      strongest = element;
+    }
+    if (distribution[element] < minCount) {
+      minCount = distribution[element];
+      weakest = element;
+    }
   }
 
   const { favorable, unfavorable } = calculateFavorableElements(dayMaster, distribution);
-  return { distribution, strongest, weakest, favorable, unfavorable };
+
+  return {
+    distribution,
+    counts,
+    strongest,
+    weakest,
+    favorable,
+    unfavorable,
+    elementStates,
+    monthElement,
+  };
+}
+
+/**
+ * 根据月令计算五行的旺相休囚死状态
+ * 旺：当令之行
+ * 相：当令所生之行
+ * 休：生当令之行
+ * 囚：克当令之行
+ * 死：被当令所克之行
+ */
+function getElementStates(monthElement: FiveElement): Record<FiveElement, FiveElementState> {
+  const states: Record<FiveElement, FiveElementState> = {
+    metal: 'xiu',
+    wood: 'xiu',
+    water: 'xiu',
+    fire: 'xiu',
+    earth: 'xiu',
+  };
+
+  // 旺：当令
+  states[monthElement] = 'wang';
+
+  // 相：当令所生（如木旺则火相）
+  const generated = FIVE_ELEMENTS_GENERATION[monthElement];
+  states[generated] = 'xiang';
+
+  // 休：生当令者（如木旺则水休）
+  const generator = FIVE_ELEMENTS_GENERATED_BY[monthElement];
+  states[generator] = 'xiu';
+
+  // 囚：克当令者（如木旺则金囚）
+  // 找出克月令的元素
+  for (const element of FIVE_ELEMENTS) {
+    if (FIVE_ELEMENTS_RESTRICTION[element] === monthElement) {
+      states[element] = 'qiu';
+      break;
+    }
+  }
+
+  // 死：被当令所克（如木旺则土死）
+  const restricted = FIVE_ELEMENTS_RESTRICTION[monthElement];
+  states[restricted] = 'si';
+
+  return states;
 }
 
 function calculateTenGods(fourPillars: FourPillars, dayStem: HeavenlyStem): TenGodsAnalysis {
@@ -729,29 +920,40 @@ function calculateFavorableElements(
   const favorable: FiveElement[] = [];
   const unfavorable: FiveElement[] = [];
 
+  // 生日主的元素（印星）
+  const yinElement = FIVE_ELEMENTS_GENERATED_BY[dayElement];
+  // 日主所生的元素（食伤）
+  const shiShangElement = FIVE_ELEMENTS_GENERATION[dayElement];
+  // 日主所克的元素（财星）
+  const caiElement = FIVE_ELEMENTS_RESTRICTION[dayElement];
+  // 克日主的元素（官杀）
+  let guanShaElement: FiveElement = 'wood';
+  for (const element of FIVE_ELEMENTS) {
+    if (FIVE_ELEMENTS_RESTRICTION[element] === dayElement) {
+      guanShaElement = element;
+      break;
+    }
+  }
+
   if (dayMaster.strength === 'strong') {
-    for (const element of FIVE_ELEMENTS) {
-      if (restrictsElement(dayElement, element) || restrictsElement(element, dayElement) || generatesElement(dayElement, element)) {
-        favorable.push(element);
-      }
-    }
-    for (const element of FIVE_ELEMENTS) {
-      if (element === dayElement || generatesElement(element, dayElement)) unfavorable.push(element);
-    }
+    // 身强：喜官杀（克我）、食伤（我生）、财星（我克）
+    // 忌印星（生我）、比劫（同我）
+    favorable.push(guanShaElement, shiShangElement, caiElement);
+    unfavorable.push(yinElement, dayElement);
   } else if (dayMaster.strength === 'weak') {
-    for (const element of FIVE_ELEMENTS) {
-      if (element === dayElement || generatesElement(element, dayElement)) favorable.push(element);
-    }
-    for (const element of FIVE_ELEMENTS) {
-      if (restrictsElement(dayElement, element) || restrictsElement(element, dayElement) || generatesElement(dayElement, element)) {
-        unfavorable.push(element);
-      }
-    }
+    // 身弱：喜印星（生我）、比劫（同我）
+    // 忌官杀（克我）、食伤（我生）、财星（我克）
+    favorable.push(yinElement, dayElement);
+    unfavorable.push(guanShaElement, shiShangElement, caiElement);
   } else {
+    // 平衡：根据五行分布，补弱抑强
     const sorted = [...FIVE_ELEMENTS].sort((a, b) => distribution[a] - distribution[b]);
+    // 最弱的两个为喜
     favorable.push(sorted[0], sorted[1]);
+    // 最强的两个为忌
     unfavorable.push(sorted[4], sorted[3]);
   }
+
   return { favorable, unfavorable };
 }
 

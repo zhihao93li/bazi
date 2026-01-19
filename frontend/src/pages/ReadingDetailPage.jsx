@@ -9,7 +9,7 @@
 
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useParams, useSearchParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Lock, Sparkle, Coins, Palette, MagnifyingGlass, CalendarBlank, Heart, CurrencyCircleDollar, FirstAidKit, Users, MapPin, Calendar } from '@phosphor-icons/react';
+import { ArrowLeft, Lock, Sparkle, Coins, Palette, MagnifyingGlass, CalendarBlank, Heart, CurrencyCircleDollar, FirstAidKit, Users } from '@phosphor-icons/react';
 import { useAuth } from '../context/AuthContext';
 import { useToast, LoadingOverlay } from '../components/common';
 import Navbar from '../components/Navbar';
@@ -102,58 +102,6 @@ function parseSimpleMarkdown(text) {
         .replace(/<\/ul>\s*<ul>/g, '')
         .replace(/<\/ol>\s*<ol>/g, '')
         .replace(/\n\n/g, '<br/><br/>');
-}
-
-/**
- * 格式化出生时间
- */
-function formatBirthTime(subject) {
-    if (!subject) return '';
-
-    const year = subject.birthYear;
-    const month = subject.birthMonth;
-    const day = subject.birthDay;
-    const hour = subject.birthHour ?? 0;
-    const minute = subject.birthMinute ?? 0;
-
-    return `${year}年${month}月${day}日 ${hour}时${minute}分`;
-}
-
-/**
- * 格式化真太阳时
- */
-function formatTrueSolarTime(trueSolarTime) {
-    if (!trueSolarTime || trueSolarTime.hour === undefined || trueSolarTime.hour === null) return null;
-
-    const year = trueSolarTime.year;
-    const month = trueSolarTime.month;
-    const day = trueSolarTime.day;
-    const h = String(trueSolarTime.hour).padStart(2, '0');
-    const m = String(trueSolarTime.minute || 0).padStart(2, '0');
-
-    return `${year}年${month}月${day}日 ${h}时${m}分`;
-}
-
-/**
- * 从位置信息中提取简短地名
- */
-function getShortLocation(location) {
-    if (!location) return '';
-
-    // 如果是对象格式
-    if (typeof location === 'object') {
-        // 优先显示城市
-        return location.city || location.province || '';
-    }
-
-    // 如果是字符串格式 "省/市/区"
-    if (typeof location === 'string') {
-        const parts = location.split('/');
-        // 返回城市部分
-        return parts[1] || parts[0] || location;
-    }
-
-    return location;
 }
 
 export default function ReadingDetailPage() {
@@ -294,10 +242,6 @@ export default function ReadingDetailPage() {
         ? `${currentYear}成长建议`
         : themeConfig.name;
 
-    // 获取真太阳时信息
-    const trueSolarTime = currentSubject?.baziData?.trueSolarTime;
-    const shortLocation = getShortLocation(currentSubject?.location);
-
     return (
         <>
             <Navbar />
@@ -324,29 +268,6 @@ export default function ReadingDetailPage() {
                             {subjectName}的{displayName}
                         </h1>
 
-                        {/* 出生信息行 */}
-                        <div className={styles.birthInfoRow}>
-                            {/* 地点 */}
-                            {shortLocation && (
-                                <span className={styles.infoItem}>
-                                    <MapPin size={14} weight="fill" className={styles.infoIcon} />
-                                    {shortLocation}
-                                </span>
-                            )}
-
-                            {/* 出生时间（北京时间）+ 真太阳时 */}
-                            {currentSubject && (
-                                <span className={styles.infoItem}>
-                                    <Calendar size={14} weight="fill" className={styles.infoIcon} />
-                                    {formatBirthTime(currentSubject)}
-                                    {trueSolarTime && (
-                                        <span className={styles.trueSolarTime}>
-                                            （真太阳时 {formatTrueSolarTime(trueSolarTime)}）
-                                        </span>
-                                    )}
-                                </span>
-                            )}
-                        </div>
                     </div>
 
                     {/* 专项分析Tab */}

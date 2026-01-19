@@ -9,6 +9,7 @@ import { CaretDown } from '@phosphor-icons/react';
 import { Solar } from 'lunar-typescript';
 import Card from '../../common/Card';
 import { ELEMENT_COLORS } from '../../../mock/bazi';
+import { getHiddenStems, getNayinByGanZhi } from '../../../utils/bazi/constants';
 import HeaderSection from './components/HeaderSection';
 import PillarColumn from './components/PillarColumn';
 import styles from './BaziChartCard.module.css';
@@ -150,71 +151,23 @@ function parseGanZhi(ganZhi) {
 }
 
 /**
- * 获取地支藏干
- */
-function getHiddenStemsForBranch(branch) {
-  if (!branch) return [];
-
-  const hiddenStemsMap = {
-    '子': [{ chinese: '癸', element: 'water' }],
-    '丑': [{ chinese: '己', element: 'earth' }, { chinese: '癸', element: 'water' }, { chinese: '辛', element: 'metal' }],
-    '寅': [{ chinese: '甲', element: 'wood' }, { chinese: '丙', element: 'fire' }, { chinese: '戊', element: 'earth' }],
-    '卯': [{ chinese: '乙', element: 'wood' }],
-    '辰': [{ chinese: '戊', element: 'earth' }, { chinese: '乙', element: 'wood' }, { chinese: '癸', element: 'water' }],
-    '巳': [{ chinese: '丙', element: 'fire' }, { chinese: '庚', element: 'metal' }, { chinese: '戊', element: 'earth' }],
-    '午': [{ chinese: '丁', element: 'fire' }, { chinese: '己', element: 'earth' }],
-    '未': [{ chinese: '己', element: 'earth' }, { chinese: '丁', element: 'fire' }, { chinese: '乙', element: 'wood' }],
-    '申': [{ chinese: '庚', element: 'metal' }, { chinese: '壬', element: 'water' }, { chinese: '戊', element: 'earth' }],
-    '酉': [{ chinese: '辛', element: 'metal' }],
-    '戌': [{ chinese: '戊', element: 'earth' }, { chinese: '辛', element: 'metal' }, { chinese: '丁', element: 'fire' }],
-    '亥': [{ chinese: '壬', element: 'water' }, { chinese: '甲', element: 'wood' }],
-  };
-
-  return hiddenStemsMap[branch] || [];
-}
-
-/**
- * 计算纳音
- */
-function calculateNaYin(ganZhi) {
-  if (!ganZhi) return '';
-
-  const naYinMap = {
-    '甲子': '海中金', '乙丑': '海中金', '丙寅': '炉中火', '丁卯': '炉中火',
-    '戊辰': '大林木', '己巳': '大林木', '庚午': '路旁土', '辛未': '路旁土',
-    '壬申': '剑锋金', '癸酉': '剑锋金', '甲戌': '山头火', '乙亥': '山头火',
-    '丙子': '涧下水', '丁丑': '涧下水', '戊寅': '城头土', '己卯': '城头土',
-    '庚辰': '白蜡金', '辛巳': '白蜡金', '壬午': '杨柳木', '癸未': '杨柳木',
-    '甲申': '泉中水', '乙酉': '泉中水', '丙戌': '屋上土', '丁亥': '屋上土',
-    '戊子': '霹雳火', '己丑': '霹雳火', '庚寅': '松柏木', '辛卯': '松柏木',
-    '壬辰': '长流水', '癸巳': '长流水', '甲午': '砂中金', '乙未': '砂中金',
-    '丙申': '山下火', '丁酉': '山下火', '戊戌': '平地木', '己亥': '平地木',
-    '庚子': '壁上土', '辛丑': '壁上土', '壬寅': '金箔金', '癸卯': '金箔金',
-    '甲辰': '覆灯火', '乙巳': '覆灯火', '丙午': '天河水', '丁未': '天河水',
-    '戊申': '大驿土', '己酉': '大驿土', '庚戌': '钗钏金', '辛亥': '钗钏金',
-    '壬子': '桑柘木', '癸丑': '桑柘木', '甲寅': '大溪水', '乙卯': '大溪水',
-    '丙辰': '沙中土', '丁巳': '沙中土', '戊午': '天上火', '己未': '天上火',
-    '庚申': '石榴木', '辛酉': '石榴木', '壬戌': '大海水', '癸亥': '大海水',
-  };
-
-  return naYinMap[ganZhi] || '';
-}
-
-/**
  * 五行分布环状图组件
  */
 function FiveElementsRing({ fiveElements }) {
   if (!fiveElements) return null;
 
+  // Use distribution for chart proportions
   const distribution = fiveElements.distribution || fiveElements;
+  // Use counts for displaying integer counts (天干+本气)
+  const counts = fiveElements.counts || distribution;
   const total = Object.values(distribution).reduce((a, b) => a + b, 0);
 
   const elements = [
-    { key: 'wood', label: '木', value: distribution.wood },
-    { key: 'fire', label: '火', value: distribution.fire },
-    { key: 'earth', label: '土', value: distribution.earth },
-    { key: 'metal', label: '金', value: distribution.metal },
-    { key: 'water', label: '水', value: distribution.water },
+    { key: 'wood', label: '木', value: distribution.wood, count: counts.wood },
+    { key: 'fire', label: '火', value: distribution.fire, count: counts.fire },
+    { key: 'earth', label: '土', value: distribution.earth, count: counts.earth },
+    { key: 'metal', label: '金', value: distribution.metal, count: counts.metal },
+    { key: 'water', label: '水', value: distribution.water, count: counts.water },
   ];
 
   const size = 120;
@@ -282,7 +235,7 @@ function FiveElementsRing({ fiveElements }) {
             <div key={el.key} className={styles.legendItem}>
               <span className={styles.legendDot} style={{ backgroundColor: ELEMENT_COLORS[el.key] }} />
               <span className={styles.legendLabel}>{el.label}</span>
-              <span className={styles.legendValue}>{el.value}</span>
+              <span className={styles.legendValue}>{el.count}</span>
             </div>
           ))}
         </div>
@@ -361,8 +314,8 @@ export default function BaziChartCard({
     const { stem, branch } = parseGanZhi(currentDaYun.ganZhi);
     return {
       stem, branch,
-      hiddenStems: getHiddenStemsForBranch(branch?.chinese),
-      naYin: calculateNaYin(currentDaYun.ganZhi),
+      hiddenStems: getHiddenStems(branch?.chinese),
+      naYin: getNayinByGanZhi(currentDaYun.ganZhi),
       isKongWang: currentDaYun.xunKong?.includes(branch?.chinese),
     };
   }, [currentDaYun]);
@@ -372,8 +325,8 @@ export default function BaziChartCard({
     const { stem, branch } = parseGanZhi(currentLiuNian.ganZhi);
     return {
       stem, branch,
-      hiddenStems: getHiddenStemsForBranch(branch?.chinese),
-      naYin: calculateNaYin(currentLiuNian.ganZhi),
+      hiddenStems: getHiddenStems(branch?.chinese),
+      naYin: getNayinByGanZhi(currentLiuNian.ganZhi),
       isKongWang: currentLiuNian.xunKong?.includes(branch?.chinese),
     };
   }, [currentLiuNian]);
@@ -400,7 +353,7 @@ export default function BaziChartCard({
             hiddenStems={fourPillars.month.hiddenStems} naYin={fourPillars.month.naYin}
             isKongWang={isXunKong('month', fourPillars.month.earthlyBranch.chinese, fourPillarsXunKong)} />
           <PillarColumn title="日" stem={fourPillars.day.heavenlyStem} branch={fourPillars.day.earthlyBranch}
-            dayStem={dayStem} shiShenGan="日元" shiShenZhi={fourPillarsShiShen?.dayZhi}
+            dayStem={dayStem} shiShenGan={subject?.gender === 'male' ? '元男' : '元女'} shiShenZhi={fourPillarsShiShen?.dayZhi}
             hiddenStems={fourPillars.day.hiddenStems} naYin={fourPillars.day.naYin}
             isKongWang={false} isDayPillar />
           <PillarColumn title="时" stem={fourPillars.hour.heavenlyStem} branch={fourPillars.hour.earthlyBranch}

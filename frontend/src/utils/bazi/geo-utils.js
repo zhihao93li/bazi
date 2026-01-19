@@ -6,6 +6,7 @@
  */
 
 import cityGeoData from './city-geo-data.json';
+import { DISTRICT_LONGITUDES } from './longitudes.js';
 
 // 构建索引以加速查询
 const areaIndex = new Map();    // 区县名 -> 经度
@@ -30,6 +31,16 @@ cityGeoData.forEach(item => {
     // 区县索引
     if (item.area && !areaIndex.has(item.area)) {
         areaIndex.set(item.area, lng);
+    }
+});
+
+Object.entries(DISTRICT_LONGITUDES).forEach(([name, lngValue]) => {
+    const lng = Number(lngValue);
+    if (Number.isNaN(lng)) return;
+    if (!areaIndex.has(name)) areaIndex.set(name, lng);
+    if (!cityIndex.has(name)) cityIndex.set(name, lng);
+    if (!provinceIndex.has(name) && /省$|自治区$|特别行政区$/.test(name)) {
+        provinceIndex.set(name, lng);
     }
 });
 
@@ -205,4 +216,4 @@ function fuzzyMatch(location) {
 }
 
 // 导出旧 API 的兼容函数（保持向后兼容）
-export const DISTRICT_LONGITUDES = {};  // 保留空对象以兼容旧导入
+export { DISTRICT_LONGITUDES };

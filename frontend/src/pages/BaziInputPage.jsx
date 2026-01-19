@@ -113,7 +113,7 @@ export default function BaziInputPage() {
         hour: formData.birthHour,
         minute: formData.birthMinute,
         isLeapMonth: formData.isLeapMonth,
-        location: formData.location.district || formData.location.city,
+        location: formData.location,
       };
 
       const baziData = calculateBazi(birthData);

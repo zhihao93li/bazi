@@ -8,16 +8,18 @@ import styles from './FiveElementsChart.module.css';
 export default function FiveElementsChart({ data, className = '' }) {
   if (!data) return null;
 
-  // Use data.distribution instead of data directly
+  // Use data.distribution for chart proportions
   const distribution = data.distribution || data;
+  // Use data.counts for displaying integer counts (天干+本气)
+  const counts = data.counts || distribution;
   const total = Object.values(distribution).reduce((a, b) => a + b, 0);
-  
+
   const elements = [
-    { key: 'wood', label: '木', value: distribution.wood },
-    { key: 'fire', label: '火', value: distribution.fire },
-    { key: 'earth', label: '土', value: distribution.earth },
-    { key: 'metal', label: '金', value: distribution.metal },
-    { key: 'water', label: '水', value: distribution.water },
+    { key: 'wood', label: '木', value: distribution.wood, count: counts.wood },
+    { key: 'fire', label: '火', value: distribution.fire, count: counts.fire },
+    { key: 'earth', label: '土', value: distribution.earth, count: counts.earth },
+    { key: 'metal', label: '金', value: distribution.metal, count: counts.metal },
+    { key: 'water', label: '水', value: distribution.water, count: counts.water },
   ];
 
   // SVG 圆环参数
@@ -123,13 +125,12 @@ export default function FiveElementsChart({ data, className = '' }) {
             const percentage = total > 0 ? ((el.value / total) * 100).toFixed(0) : 0;
             return (
               <div key={el.key} className={styles.legendItem}>
-                <div 
-                  className={styles.dot} 
+                <div
+                  className={styles.dot}
                   style={{ backgroundColor: ELEMENT_COLORS[el.key] }}
                 />
                 <span className={styles.legendLabel}>{el.label}</span>
-                <span className={styles.legendValue}>{el.value}</span>
-                <span className={styles.legendPercent}>{percentage}%</span>
+                <span className={styles.legendValue}>{el.count}</span>
               </div>
             );
           })}

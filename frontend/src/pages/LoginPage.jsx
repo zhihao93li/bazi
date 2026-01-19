@@ -77,7 +77,7 @@ export default function LoginPage() {
         toast.success('登录成功！')
       } else {
         await register(formData.username, formData.password)
-        toast.success('注册成功！已赠送 100 积分')
+        toast.success('送 200 积分')
       }
 
       // 检查跳转目标
@@ -190,7 +190,7 @@ export default function LoginPage() {
                 disabled={isLoading}
                 className={styles.submitButton}
               >
-                {isLoading ? '处理中...' : (mode === 'login' ? '登录' : '注册得100积分')}
+                {isLoading ? '处理中...' : (mode === 'login' ? '登录' : '注册送 200 积分')}
               </Button>
             </form>
           </Card>
