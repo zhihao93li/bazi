@@ -30,6 +30,7 @@ const BaziInputPage = lazy(() => import('./pages/BaziInputPage'))
 const BaziResultPage = lazy(() => import('./pages/BaziResultPage'))
 const ReadingDetailPage = lazy(() => import('./pages/ReadingDetailPage'))
 const HistoryPage = lazy(() => import('./pages/HistoryPage'))
+const CustomerServicePage = lazy(() => import('./pages/CustomerServicePage'))
 
 // Dev pages - 懒加载
 const ComponentsPage = lazy(() => import('./pages/dev/ComponentsPage'))
@@ -50,6 +51,7 @@ function App() {
             <Route path="/privacy-policy" element={<PrivacyPage />} />
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/refund-policy" element={<RefundPage />} />
+            <Route path="/customer-service" element={<CustomerServicePage />} />
 
             {/* Bazi Public/Hybrid Routes */}
             <Route path="/bazi/input" element={<BaziInputPage />} />

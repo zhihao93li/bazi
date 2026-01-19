@@ -111,6 +111,28 @@
   gap: 8px;
 }
 
+.actionLink {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--dark-7);
+  background: var(--absolute-white);
+  border: 1px solid var(--light-85);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.actionLink:hover {
+  background: var(--light-96);
+  border-color: var(--grey-50);
+}
+
 .deleteButton {
   width: 100%;
   display: flex;

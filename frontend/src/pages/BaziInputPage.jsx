@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { m } from 'framer-motion';
+import { useQueryClient } from '@tanstack/react-query';
 import { useToast, Card } from '../components/common';
 import Button from '../components/Button';
 import Navbar from '../components/Navbar';
@@ -15,7 +16,7 @@ import {
   saveLocalSubject
 } from '../utils/localSubjects';
 import { useAuth } from '../context/AuthContext';
-import { useSubjects } from '../hooks';
+import { useSubjects, SUBJECTS_QUERY_KEY } from '../hooks';
 import { api } from '../services/api';
 import styles from './BaziInputPage.module.css';
 
@@ -37,6 +38,7 @@ export default function BaziInputPage() {
   const [searchParams] = useSearchParams();
   const toast = useToast();
   const { isLoggedIn } = useAuth();
+  const queryClient = useQueryClient();
 
   const [formData, setFormData] = useState(INITIAL_FORM);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -134,6 +136,9 @@ export default function BaziInputPage() {
         // 已登录：直接调用后端 API 创建命盘，等待完成后跳转
         const res = await api.post('/subjects', subjectData);
 
+        // 使命盘列表缓存失效，确保其他页面能获取最新数据
+        queryClient.invalidateQueries({ queryKey: SUBJECTS_QUERY_KEY });
+
         // 跳转到结果页（使用后端返回的真实 subjectId）
         navigate(`/bazi?subjectId=${res.subject.id}`);
       } else {
@@ -146,6 +151,9 @@ export default function BaziInputPage() {
         };
 
         saveLocalSubject(localSubject);
+
+        // 使命盘列表缓存失效，确保其他页面能获取最新数据
+        queryClient.invalidateQueries({ queryKey: SUBJECTS_QUERY_KEY });
 
         // 跳转到结果页
         navigate(`/bazi?localId=${localSubject.id}`);

@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { m } from 'framer-motion'
 import {
   SignOut,
   Trash,
   Copy,
   Check,
+  Headset,
 } from '@phosphor-icons/react'
 import { useAuth } from '../context/AuthContext'
 import { useToast, Card, LoadingOverlay } from '../components/common'
@@ -129,6 +130,11 @@ export default function ProfilePage() {
 
             {/* 操作按钮 */}
             <div className={styles.actions}>
+              <Link to="/customer-service" className={styles.actionLink}>
+                <Headset size={20} />
+                联系客服
+              </Link>
+
               <Button
                 variant="outline"
                 onClick={handleLogout}

@@ -1,11 +1,12 @@
 /**
  * BaziChartCard - 命盘卡片整合组件
- * 
+ *
  * 整合：四柱命盘 + 五行分布 + 十步大运
  */
 
 import { useMemo, useState, useEffect } from 'react';
 import { CaretDown } from '@phosphor-icons/react';
+import { Solar } from 'lunar-typescript';
 import Card from '../../common/Card';
 import { ELEMENT_COLORS } from '../../../mock/bazi';
 import HeaderSection from './components/HeaderSection';
@@ -30,6 +31,52 @@ function useIsMobile(breakpoint = 768) {
 }
 
 /**
+ * 获取当前的命理年份（以立春为界）
+ * 立春前属于上一年，立春后属于当年
+ */
+function getLiuNianYear() {
+  const now = new Date();
+  const currentYear = now.getFullYear();
+
+  // 获取今年立春的时间
+  const solar = Solar.fromYmd(currentYear, 1, 1);
+  const lunar = solar.getLunar();
+  const jieQi = lunar.getNextJie(); // 获取下一个节（不是气）
+
+  // 遍历找到立春
+  let liChunSolar = null;
+  let tempLunar = lunar;
+  for (let i = 0; i < 15; i++) {
+    const nextJie = tempLunar.getNextJie();
+    if (nextJie && nextJie.getName() === '立春') {
+      liChunSolar = nextJie.getSolar();
+      break;
+    }
+    // 移动到下一个月继续找
+    const nextSolar = Solar.fromYmd(currentYear, 1 + i + 1, 1);
+    tempLunar = nextSolar.getLunar();
+  }
+
+  // 如果找到了立春时间，比较当前日期
+  if (liChunSolar) {
+    const liChunDate = new Date(
+      liChunSolar.getYear(),
+      liChunSolar.getMonth() - 1,
+      liChunSolar.getDay(),
+      liChunSolar.getHour(),
+      liChunSolar.getMinute()
+    );
+
+    // 如果当前时间在立春之前，则流年为上一年
+    if (now < liChunDate) {
+      return currentYear - 1;
+    }
+  }
+
+  return currentYear;
+}
+
+/**
  * 计算当前大运和流年
  */
 function calculateCurrentFortune(yun, birthYear) {
@@ -37,8 +84,9 @@ function calculateCurrentFortune(yun, birthYear) {
     return { currentDaYun: null, currentLiuNian: null };
   }
 
-  const currentYear = new Date().getFullYear();
-  const currentAge = currentYear - birthYear;
+  // 使用以立春为界的命理年份
+  const liuNianYear = getLiuNianYear();
+  const currentAge = liuNianYear - birthYear;
 
   const currentDaYun = yun.daYunList.find(dy =>
     currentAge >= dy.startAge && currentAge < dy.endAge
@@ -46,7 +94,7 @@ function calculateCurrentFortune(yun, birthYear) {
 
   let currentLiuNian = null;
   if (currentDaYun?.liuNian && currentDaYun.liuNian.length > 0) {
-    currentLiuNian = currentDaYun.liuNian.find(ln => ln.year === currentYear);
+    currentLiuNian = currentDaYun.liuNian.find(ln => ln.year === liuNianYear);
   }
 
   return { currentDaYun, currentLiuNian };
@@ -259,8 +307,9 @@ function FiveElementsRing({ fiveElements }) {
 function DaYunTimelineInline({ yun, birthYear }) {
   if (!yun?.daYunList) return null;
 
-  const currentYear = new Date().getFullYear();
-  const currentAge = birthYear ? currentYear - birthYear : 0;
+  // 使用以立春为界的命理年份
+  const liuNianYear = getLiuNianYear();
+  const currentAge = birthYear ? liuNianYear - birthYear : 0;
 
   return (
     <div className={styles.daYunSection}>
