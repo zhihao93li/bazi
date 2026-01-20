@@ -17,6 +17,7 @@ let isShuttingDown = false;
 interface ShutdownResources {
   server?: Server;
   stopTasks?: () => void;
+  stopPolling?: () => void;
   disconnectDb?: () => Promise<void>;
 }
 
