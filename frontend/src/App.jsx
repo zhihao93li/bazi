@@ -27,6 +27,7 @@ const PointsPage = lazy(() => import('./pages/PointsPage'))
 const PaymentSuccessPage = lazy(() => import('./pages/PaymentSuccessPage'))
 const PaymentCancelPage = lazy(() => import('./pages/PaymentCancelPage'))
 const PaymentResultPage = lazy(() => import('./pages/PaymentResultPage'))
+const PaymentMethodPage = lazy(() => import('./pages/PaymentMethodPage'))
 const SubjectsPage = lazy(() => import('./pages/SubjectsPage'))
 const BaziInputPage = lazy(() => import('./pages/BaziInputPage'))
 const BaziResultPage = lazy(() => import('./pages/BaziResultPage'))
@@ -85,6 +86,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <PointsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payment/method"
+              element={
+                <ProtectedRoute>
+                  <PaymentMethodPage />
                 </ProtectedRoute>
               }
             />

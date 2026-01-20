@@ -19,7 +19,26 @@ function getPool(): pg.Pool {
     if (!connectionString) {
       throw new Error("DATABASE_URL environment variable is not set");
     }
-    global.__pgPool = new pg.Pool({ connectionString });
+
+    // 连接池配置（可通过环境变量覆盖）
+    const poolConfig: pg.PoolConfig = {
+      connectionString,
+      // 最大连接数（默认 20，支持 50 并发足够）
+      max: parseInt(process.env.DATABASE_POOL_MAX || '20', 10),
+      // 空闲连接超时（毫秒）
+      idleTimeoutMillis: parseInt(process.env.DATABASE_IDLE_TIMEOUT || '30000', 10),
+      // 连接超时（毫秒）
+      connectionTimeoutMillis: parseInt(process.env.DATABASE_CONNECTION_TIMEOUT || '5000', 10),
+    };
+
+    global.__pgPool = new pg.Pool(poolConfig);
+
+    // 连接池错误处理
+    global.__pgPool.on('error', (err) => {
+      console.error('[Database Pool] Unexpected error:', err.message);
+    });
+
+    console.log(`[Database Pool] Initialized with max=${poolConfig.max} connections`);
   }
   return global.__pgPool;
 }

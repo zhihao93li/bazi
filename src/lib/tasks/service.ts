@@ -17,9 +17,12 @@ const processingTasks = new Set<string>();
 let isProcessing = false;
 let pollTimer: NodeJS.Timeout | null = null;
 
-// 配置
-const POLL_INTERVAL = 1000; // 轮询间隔（毫秒）
-const MAX_CONCURRENT_TASKS = 3; // 最大并发任务数
+// 配置（可通过环境变量覆盖）
+const POLL_INTERVAL = parseInt(process.env.TASK_POLL_INTERVAL || '500', 10); // 轮询间隔（毫秒）
+const MAX_CONCURRENT_TASKS = parseInt(process.env.MAX_CONCURRENT_TASKS || '50', 10); // 最大并发任务数
+
+// 是否为 Worker 模式（只有 Worker 进程才处理任务）
+let isWorkerMode = false;
 
 /**
  * 将数据库任务转换为应用任务类型
@@ -39,6 +42,8 @@ function toTask(dbTask: PrismaTask): Task {
 
 /**
  * 创建主题解锁任务
+ * API 模式：只入队，不触发处理
+ * Worker 模式：入队后触发处理
  */
 export async function createThemeUnlockTask(payload: ThemeUnlockPayload): Promise<ThemeUnlockTask> {
     const dbTask = await prisma.task.create({
@@ -52,8 +57,10 @@ export async function createThemeUnlockTask(payload: ThemeUnlockPayload): Promis
 
     console.log(`[Task Service] Created task: ${dbTask.id}, type: theme_unlock`);
 
-    // 触发队列处理
-    triggerProcessing();
+    // 只有 Worker 模式才触发处理
+    if (isWorkerMode) {
+        triggerProcessing();
+    }
 
     return toTask(dbTask) as ThemeUnlockTask;
 }
@@ -335,6 +342,7 @@ async function processTask(task: Task): Promise<void> {
  * 恢复未完成的任务（服务启动时调用）
  *
  * 将 processing 状态的任务重置为 pending，以便重新处理
+ * 只在 Worker 模式下启动轮询
  */
 export async function recoverPendingTasks(): Promise<number> {
     // 将所有 processing 状态的任务重置为 pending
@@ -347,10 +355,34 @@ export async function recoverPendingTasks(): Promise<number> {
         console.log(`[Task Service] Recovered ${result.count} interrupted tasks`);
     }
 
-    // 启动轮询（无论是否有恢复的任务）
-    startPolling();
+    // 只在 Worker 模式下启动轮询
+    if (isWorkerMode) {
+        startPolling();
+    }
 
     return result.count;
+}
+
+/**
+ * 启动 Worker 模式
+ * 在独立 Worker 进程中调用，启动任务处理
+ */
+export async function startWorkerMode(): Promise<void> {
+    isWorkerMode = true;
+    console.log(`[Task Service] Worker mode enabled`);
+    console.log(`[Task Service] Max concurrent tasks: ${MAX_CONCURRENT_TASKS}`);
+    console.log(`[Task Service] Poll interval: ${POLL_INTERVAL}ms`);
+
+    // 恢复中断的任务并启动轮询
+    await recoverPendingTasks();
+    startPolling();
+}
+
+/**
+ * 检查是否为 Worker 模式
+ */
+export function isInWorkerMode(): boolean {
+    return isWorkerMode;
 }
 
 /**

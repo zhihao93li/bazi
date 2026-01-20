@@ -118,17 +118,28 @@ try {
   console.error('Failed to bootstrap database:', error);
 }
 
-// 恢复未完成的任务
-import { recoverPendingTasks, stopPolling } from './lib/tasks/index.js';
+// 任务处理模式：
+// - WORKER_MODE=standalone: 独立 Worker 进程处理（需要单独启动 npm run worker）
+// - WORKER_MODE=embedded: API 进程内处理（默认，和以前一样）
+import { recoverPendingTasks, startWorkerMode, stopPolling } from './lib/tasks/index.js';
+const workerMode = process.env.WORKER_MODE || 'embedded';
+
 try {
-  const recoveredCount = await recoverPendingTasks();
-  if (recoveredCount > 0) {
-    console.log(`📋 恢复了 ${recoveredCount} 个中断的任务`);
+  if (workerMode === 'embedded') {
+    // 嵌入模式：API 进程内启动 Worker
+    await startWorkerMode();
+    console.log(`📋 任务处理已启动（嵌入模式）`);
+    registerShutdownResource('stopTasks', stopPolling);
+  } else {
+    // 独立模式：只恢复任务状态，不启动轮询
+    const recoveredCount = await recoverPendingTasks();
+    if (recoveredCount > 0) {
+      console.log(`📋 恢复了 ${recoveredCount} 个中断的任务（等待 Worker 处理）`);
+    }
+    console.log(`📋 任务处理模式：独立 Worker（需单独启动 npm run worker）`);
   }
-  // 注册任务轮询停止函数
-  registerShutdownResource('stopTasks', stopPolling);
 } catch (error) {
-  console.error('Failed to recover pending tasks:', error);
+  console.error('Failed to initialize task processing:', error);
 }
 
 // 注册数据库断开连接函数

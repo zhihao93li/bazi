@@ -9,8 +9,10 @@
   "scripts": {
     "dev": "NODE_ENV=development tsx watch src/index.ts",
     "dev:prod": "NODE_ENV=production tsx watch src/index.ts",
+    "dev:worker": "NODE_ENV=development tsx watch src/worker.ts",
     "build": "prisma generate && tsc && cp -r prisma dist/prisma && cp -r config dist/config",
     "start": "NODE_ENV=production prisma db push --schema=dist/prisma/schema.prisma --accept-data-loss && node dist/index.js",
+    "worker": "NODE_ENV=production node dist/worker.js",
     "lint": "eslint",
     "test": "NODE_ENV=test vitest --run",
     "test:watch": "NODE_ENV=test vitest",

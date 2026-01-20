@@ -66,36 +66,9 @@ export default function PointsPage() {
     }
   }, [isLoggedIn, user])
 
-  const handlePurchase = async (pkg) => {
-    setPurchasing(pkg.id)
-
-    try {
-      // 调用后端创建码支付订单（统一使用扫码支付）
-      const result = await api.post('/payment/create-mazfu', {
-        packageId: pkg.id,
-      });
-
-      if (result.success) {
-        if (result.qrcode) {
-          // 统一显示二维码弹窗
-          setQrCodeUrl(result.qrcode)
-          setCurrentOrderNo(result.orderNo)
-          setCurrentAmount(pkg.price)
-          setQrModalVisible(true)
-          setPurchasing(null)
-        } else {
-          toast.error('获取支付信息失败')
-          setPurchasing(null)
-        }
-      } else {
-        toast.error(result.message || '创建支付失败');
-        setPurchasing(null);
-      }
-    } catch (e) {
-      console.error('Payment error:', e);
-      toast.error(e.message || '支付失败，请稍后重试');
-      setPurchasing(null);
-    }
+  const handlePurchase = (pkg) => {
+    // 跳转到支付方式选择页面
+    navigate(`/payment/method?packageId=${pkg.id}`)
   }
 
   // 刷新积分余额
