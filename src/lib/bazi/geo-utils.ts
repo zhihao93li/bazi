@@ -78,6 +78,109 @@ Object.entries(EXTRA_LONGITUDES).forEach(([name, lngValue]) => {
 });
 
 /**
+ * 根据地点字符串获取经纬度
+ * 支持格式: "新疆维吾尔自治区/喀什地区/喀什市" 或 "喀什市"
+ */
+export function getCoordinates(location: string): { lng: number; lat: number } {
+    if (!location) return { lng: DEFAULT_LONGITUDE, lat: 39.9 };
+
+    const parts = location.split('/');
+    const province = parts[0]?.trim();
+    const city = parts[1]?.trim();
+    const area = parts[2]?.trim();
+
+    // 优先使用完整的省/市/区进行精确匹配
+    if (province && city && area) {
+        const coord = findCoordinatesByFullPath(province, city, area);
+        if (coord) return coord;
+    }
+
+    // 回退：仅按区县名称匹配
+    if (area) {
+        const coord = findCoordinatesByName(area);
+        if (coord) return coord;
+    }
+
+    // 尝试城市
+    if (city) {
+        const coord = findCoordinatesByName(city);
+        if (coord) return coord;
+    }
+
+    // 尝试省份
+    if (province) {
+        const coord = findCoordinatesByName(province);
+        if (coord) return coord;
+    }
+
+    return { lng: DEFAULT_LONGITUDE, lat: 39.9 };
+}
+
+/**
+ * 根据完整的省/市/区路径精确查找经纬度
+ */
+function findCoordinatesByFullPath(
+    province: string,
+    city: string,
+    area: string
+): { lng: number; lat: number } | null {
+    for (const item of cityGeoData as CityGeoItem[]) {
+        const lng = parseFloat(item.lng);
+        const lat = parseFloat(item.lat);
+        if (isNaN(lng) || isNaN(lat)) continue;
+
+        // 精确匹配省/市/区
+        if (item.province === province && item.city === city && item.area === area) {
+            return { lng, lat };
+        }
+    }
+    return null;
+}
+
+/**
+ * 根据名称查找经纬度
+ */
+function findCoordinatesByName(name: string): { lng: number; lat: number } | null {
+    if (!name) return null;
+
+    // 检查额外经度（只有经度，返回默认纬度）
+    if (EXTRA_LONGITUDES[name]) {
+        return { lng: EXTRA_LONGITUDES[name], lat: 22.3 }; // 港澳台默认纬度
+    }
+
+    // 遍历数据查找精确匹配
+    for (const item of cityGeoData as CityGeoItem[]) {
+        const lng = parseFloat(item.lng);
+        const lat = parseFloat(item.lat);
+        if (isNaN(lng) || isNaN(lat)) continue;
+
+        if (item.area === name || item.city === name || item.province === name) {
+            return { lng, lat };
+        }
+    }
+
+    // 添加常见后缀尝试匹配
+    const suffixes = ['市', '区', '县', '地区', '州', '盟'];
+    for (const suffix of suffixes) {
+        const withSuffix = name.endsWith(suffix) ? name : name + suffix;
+        const withoutSuffix = name.endsWith(suffix) ? name.slice(0, -suffix.length) : name;
+
+        for (const item of cityGeoData as CityGeoItem[]) {
+            const lng = parseFloat(item.lng);
+            const lat = parseFloat(item.lat);
+            if (isNaN(lng) || isNaN(lat)) continue;
+
+            if (item.area === withSuffix || item.city === withSuffix ||
+                item.area === withoutSuffix || item.city === withoutSuffix) {
+                return { lng, lat };
+            }
+        }
+    }
+
+    return null;
+}
+
+/**
  * 根据地点字符串获取经度
  * 支持格式: "新疆维吾尔自治区/喀什地区/喀什市" 或 "喀什市"
  */
@@ -86,38 +189,52 @@ export function getLongitude(location: string): number {
 
     // 尝试按 "/" 分割（三级结构）
     const parts = location.split('/');
+    const province = parts[0]?.trim();
+    const city = parts[1]?.trim();
+    const area = parts[2]?.trim();
 
-    if (parts.length >= 3) {
-        // 优先使用区县
-        const lng = findLongitudeByName(parts[2].trim(), 'area');
+    // 优先使用完整的省/市/区进行精确匹配
+    if (province && city && area) {
+        const lng = findLongitudeByFullPath(province, city, area);
         if (lng !== DEFAULT_LONGITUDE) return lng;
     }
 
-    if (parts.length >= 2) {
-        // 尝试城市
-        const lng = findLongitudeByName(parts[1].trim(), 'city');
+    // 回退：仅按区县名称匹配
+    if (area) {
+        const lng = findLongitudeByName(area, 'area');
         if (lng !== DEFAULT_LONGITUDE) return lng;
     }
 
-    if (parts.length >= 1) {
-        // 尝试省份或直接匹配
-        const name = parts[0].trim();
-
-        // 尝试作为区县
-        let lng = findLongitudeByName(name, 'area');
+    // 尝试城市
+    if (city) {
+        const lng = findLongitudeByName(city, 'city');
         if (lng !== DEFAULT_LONGITUDE) return lng;
+    }
 
-        // 尝试作为城市
-        lng = findLongitudeByName(name, 'city');
-        if (lng !== DEFAULT_LONGITUDE) return lng;
-
-        // 尝试作为省份
-        lng = findLongitudeByName(name, 'province');
+    // 尝试省份
+    if (province) {
+        const lng = findLongitudeByName(province, 'province');
         if (lng !== DEFAULT_LONGITUDE) return lng;
     }
 
     // 最后尝试模糊匹配
     return fuzzyMatch(location);
+}
+
+/**
+ * 根据完整的省/市/区路径精确查找经度
+ */
+function findLongitudeByFullPath(province: string, city: string, area: string): number {
+    for (const item of cityGeoData as CityGeoItem[]) {
+        const lng = parseFloat(item.lng);
+        if (isNaN(lng)) continue;
+
+        // 精确匹配省/市/区
+        if (item.province === province && item.city === city && item.area === area) {
+            return lng;
+        }
+    }
+    return DEFAULT_LONGITUDE;
 }
 
 /**

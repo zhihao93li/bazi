@@ -46,24 +46,18 @@
   gap: var(--spacing-sm);
 }
 
+.coordinatesDisplay {
+  margin-top: var(--spacing-xs);
+  font-size: var(--text-small);
+  color: var(--grey-50);
+  text-align: center;
+}
+
 .sectionTitle {
   font-size: var(--text-small);
   font-weight: 500;
   color: var(--grey-50);
   margin-bottom: var(--spacing-xs);
-}
-
-/* 性别（只读展示） */
-.genderDisplay {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 12px 24px;
-  font-size: 16px;
-  font-weight: 500;
-  color: var(--absolute-white);
-  background-color: var(--dark-7);
-  border-radius: var(--radius-full);
 }
 
 /* Mobile responsive */

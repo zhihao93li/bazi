@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import FormInput from '../../common/FormInput';
 import FormSelect from '../../common/FormSelect';
 import ButtonGroup from '../../common/ButtonGroup';
-import { PROVINCES, CALENDAR_OPTIONS } from '../../../utils/constants';
+import { PROVINCES, CALENDAR_OPTIONS, GENDER_OPTIONS } from '../../../utils/constants';
 import { api } from '../../../services/api';
 import styles from './BirthInfoForm.module.css';
 
@@ -14,6 +14,8 @@ export default function BirthInfoForm({
 }) {
   // 存储当前年份的闰月信息（0 表示无闰月，1-12 表示闰几月）
   const [leapMonth, setLeapMonth] = useState(0);
+  // 存储当前地点的经纬度
+  const [coordinates, setCoordinates] = useState(null);
 
   // 获取闰月信息
   useEffect(() => {
@@ -43,6 +45,26 @@ export default function BirthInfoForm({
       });
     }
   }, [leapMonth]);
+
+  // 获取经纬度信息
+  useEffect(() => {
+    const { province, city, district } = value.location || {};
+    // 只有选择了区县才获取经纬度
+    if (province && city && district) {
+      const location = `${province}/${city}/${district}`;
+      api.get(`/bazi/coordinates?location=${encodeURIComponent(location)}`)
+        .then((res) => {
+          if (res.success) {
+            setCoordinates(res.coordinates);
+          }
+        })
+        .catch(() => {
+          setCoordinates(null);
+        });
+    } else {
+      setCoordinates(null);
+    }
+  }, [value.location?.province, value.location?.city, value.location?.district]);
 
   // Generate options
   const years = useMemo(() => {
@@ -157,11 +179,17 @@ export default function BirthInfoForm({
 
   return (
     <div className={`${styles.formGrid} ${className}`}>
-      {/* Gender (display only) & Calendar Type */}
+      {/* Gender & Calendar Type */}
       <div className={styles.row}>
         <div>
           <div className={styles.sectionTitle}>性别</div>
-          <div className={styles.genderDisplay}>女</div>
+          <ButtonGroup
+            options={GENDER_OPTIONS}
+            value={value.gender}
+            name="gender"
+            onChange={(e) => handleChange('gender', e.target.value)}
+            fullWidth
+          />
         </div>
         <div>
           <div className={styles.sectionTitle}>历法</div>
@@ -260,6 +288,11 @@ export default function BirthInfoForm({
             error={errors.district}
           />
         </div>
+        {coordinates && (
+          <div className={styles.coordinatesDisplay}>
+            经度: {coordinates.lng.toFixed(4)}° | 纬度: {coordinates.lat.toFixed(4)}°
+          </div>
+        )}
       </div>
     </div>
   );

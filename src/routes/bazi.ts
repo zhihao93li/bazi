@@ -3,11 +3,13 @@
  *
  * POST /calculate - 计算八字排盘
  * GET /leap-month/:year - 获取指定年份的闰月信息
+ * GET /coordinates - 获取地点的经纬度
  */
 
 import { Hono } from 'hono';
 import { LunarYear } from 'lunar-typescript';
 import { calculateBazi } from '../lib/bazi/index.js';
+import { getCoordinates } from '../lib/bazi/geo-utils.js';
 import type { BaziBirthData } from '../lib/bazi/types.js';
 
 export const baziRoutes = new Hono();
@@ -37,6 +39,30 @@ baziRoutes.get('/leap-month/:year', (c) => {
   } catch (error) {
     console.error('Get leap month error:', error);
     return c.json({ success: false, message: '获取闰月信息失败' }, 500);
+  }
+});
+
+/**
+ * 获取地点的经纬度
+ * GET /api/bazi/coordinates?location=省/市/区
+ */
+baziRoutes.get('/coordinates', (c) => {
+  try {
+    const location = c.req.query('location');
+
+    if (!location) {
+      return c.json({ success: false, message: '请提供地点信息' }, 400);
+    }
+
+    const coordinates = getCoordinates(location);
+
+    return c.json({
+      success: true,
+      coordinates,
+    });
+  } catch (error) {
+    console.error('Get coordinates error:', error);
+    return c.json({ success: false, message: '获取经纬度失败' }, 500);
   }
 });
 
@@ -86,6 +112,18 @@ baziRoutes.post('/calculate', async (c) => {
     // Validate minute
     if (minute < 0 || minute > 59) {
       return c.json({ success: false, message: '分钟无效（0-59）' }, 400);
+    }
+
+    // Validate leap month if lunar calendar
+    if (calendarType === 'lunar' && isLeapMonth) {
+      const lunarYear = LunarYear.fromYear(year);
+      const actualLeapMonth = lunarYear.getLeapMonth();
+      if (actualLeapMonth !== month) {
+        const errorMsg = actualLeapMonth === 0
+          ? `${year}年没有闰月`
+          : `${year}年的闰月是闰${actualLeapMonth}月，不是闰${month}月`;
+        return c.json({ success: false, message: errorMsg }, 400);
+      }
     }
 
     // Validate gender

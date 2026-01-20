@@ -241,9 +241,22 @@ function toTrueSolarTime(
     dayOffset = 1;
   }
 
+  let resultHour = Math.floor(totalMinutes / 60);
+  let resultMinute = Math.round(totalMinutes % 60);
+
+  // 处理四舍五入导致分钟为60的边界情况
+  if (resultMinute >= 60) {
+    resultMinute = 0;
+    resultHour += 1;
+    if (resultHour >= 24) {
+      resultHour = 0;
+      dayOffset += 1;
+    }
+  }
+
   return {
-    hour: Math.floor(totalMinutes / 60),
-    minute: Math.round(totalMinutes % 60),
+    hour: resultHour,
+    minute: resultMinute,
     dayOffset
   };
 }
