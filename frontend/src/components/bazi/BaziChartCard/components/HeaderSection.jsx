@@ -1,6 +1,6 @@
 /**
  * HeaderSection - 顶部基础信息区
- * 
+ *
  * 展示：姓名、性别、保存状态、出生地点、出生时间、真太阳时
  */
 
@@ -9,6 +9,7 @@ import styles from '../BaziChartCard.module.css';
 
 /**
  * 格式化出生时间
+ * 显示历法类型、闰月信息
  */
 function formatBirthTime(subject) {
   if (!subject) return '';
@@ -19,7 +20,13 @@ function formatBirthTime(subject) {
   const hour = subject.birthHour ?? 0;
   const minute = subject.birthMinute ?? 0;
 
-  return `${year}年${month}月${day}日 ${hour}时${minute}分`;
+  // 历法标识
+  const calendarLabel = subject.calendarType === 'lunar' ? '农历' : '公历';
+
+  // 月份显示（农历闰月显示"闰X月"）
+  const monthStr = subject.isLeapMonth ? `闰${month}月` : `${month}月`;
+
+  return `${calendarLabel} ${year}年${monthStr}${day}日 ${hour}时${minute}分`;
 }
 
 /**

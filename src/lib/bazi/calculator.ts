@@ -70,21 +70,146 @@ function getLongitudeFromLocation(location: string): number {
 }
 
 /**
- * 计算时差方程（Equation of Time）
+ * 计算儒略日 (Julian Day)
+ * 精确天文计算的基础
  */
-function equationOfTime(dayOfYear: number): number {
-  const B = (2 * Math.PI * (dayOfYear - 81)) / 365;
-  return 9.87 * Math.sin(2 * B) - 7.53 * Math.cos(B) - 1.5 * Math.sin(B);
+function getJulianDay(year: number, month: number, day: number, hour: number = 12, minute: number = 0): number {
+  // 如果月份是1或2，当作上一年的13或14月
+  if (month <= 2) {
+    year -= 1;
+    month += 12;
+  }
+
+  const A = Math.floor(year / 100);
+  const B = 2 - A + Math.floor(A / 4);
+
+  const dayFraction = (hour + minute / 60) / 24;
+
+  return Math.floor(365.25 * (year + 4716)) +
+         Math.floor(30.6001 * (month + 1)) +
+         day + dayFraction + B - 1524.5;
 }
 
 /**
- * 获取一年中的第几天
+ * 计算儒略世纪数 (Julian Century)
+ * 从 J2000.0 (2000年1月1日12:00 TT) 起算的世纪数
  */
-function getDayOfYear(year: number, month: number, day: number): number {
-  const date = new Date(year, month - 1, day);
-  const start = new Date(year, 0, 0);
-  const diff = date.getTime() - start.getTime();
-  return Math.floor(diff / (1000 * 60 * 60 * 24));
+function getJulianCentury(jd: number): number {
+  return (jd - 2451545.0) / 36525.0;
+}
+
+/**
+ * 计算太阳几何平黄经 (Geometric Mean Longitude of the Sun)
+ * 单位：度
+ */
+function getSunMeanLongitude(T: number): number {
+  let L0 = 280.46646 + T * (36000.76983 + T * 0.0003032);
+  // 归算到 0-360 度
+  while (L0 > 360) L0 -= 360;
+  while (L0 < 0) L0 += 360;
+  return L0;
+}
+
+/**
+ * 计算太阳平近点角 (Mean Anomaly of the Sun)
+ * 单位：度
+ */
+function getSunMeanAnomaly(T: number): number {
+  return 357.52911 + T * (35999.05029 - T * 0.0001537);
+}
+
+/**
+ * 计算地球轨道偏心率 (Eccentricity of Earth's Orbit)
+ */
+function getEarthOrbitEccentricity(T: number): number {
+  return 0.016708634 - T * (0.000042037 + T * 0.0000001267);
+}
+
+/**
+ * 计算太阳中心方程 (Sun's Equation of Center)
+ * 单位：度
+ */
+function getSunEquationOfCenter(T: number, M: number): number {
+  const Mrad = M * Math.PI / 180;
+  return Math.sin(Mrad) * (1.914602 - T * (0.004817 + T * 0.000014)) +
+         Math.sin(2 * Mrad) * (0.019993 - T * 0.000101) +
+         Math.sin(3 * Mrad) * 0.000289;
+}
+
+/**
+ * 计算太阳真黄经 (Sun's True Longitude)
+ * 单位：度
+ */
+function getSunTrueLongitude(T: number): number {
+  const L0 = getSunMeanLongitude(T);
+  const M = getSunMeanAnomaly(T);
+  const C = getSunEquationOfCenter(T, M);
+  return L0 + C;
+}
+
+/**
+ * 计算太阳视黄经 (Sun's Apparent Longitude)
+ * 考虑章动和光行差修正
+ * 单位：度
+ */
+function getSunApparentLongitude(T: number): number {
+  const trueLong = getSunTrueLongitude(T);
+  const omega = 125.04 - 1934.136 * T;
+  return trueLong - 0.00569 - 0.00478 * Math.sin(omega * Math.PI / 180);
+}
+
+/**
+ * 计算黄赤交角 (Mean Obliquity of the Ecliptic)
+ * 单位：度
+ */
+function getMeanObliquity(T: number): number {
+  const seconds = 21.448 - T * (46.8150 + T * (0.00059 - T * 0.001813));
+  return 23 + (26 + seconds / 60) / 60;
+}
+
+/**
+ * 计算修正后的黄赤交角 (Corrected Obliquity)
+ * 单位：度
+ */
+function getCorrectedObliquity(T: number): number {
+  const epsilon0 = getMeanObliquity(T);
+  const omega = 125.04 - 1934.136 * T;
+  return epsilon0 + 0.00256 * Math.cos(omega * Math.PI / 180);
+}
+
+/**
+ * 计算精确均时差 (Equation of Time)
+ * 使用 NOAA 太阳计算器算法
+ * 返回值单位：分钟
+ */
+function equationOfTime(year: number, month: number, day: number, hour: number = 12): number {
+  const jd = getJulianDay(year, month, day, hour);
+  const T = getJulianCentury(jd);
+
+  const epsilon = getCorrectedObliquity(T);
+  const L0 = getSunMeanLongitude(T);
+  const e = getEarthOrbitEccentricity(T);
+  const M = getSunMeanAnomaly(T);
+
+  // 转换为弧度
+  const epsilonRad = epsilon * Math.PI / 180;
+  const L0rad = L0 * Math.PI / 180;
+  const Mrad = M * Math.PI / 180;
+
+  let y = Math.tan(epsilonRad / 2);
+  y = y * y;
+
+  const sin2L0 = Math.sin(2 * L0rad);
+  const sinM = Math.sin(Mrad);
+  const cos2L0 = Math.cos(2 * L0rad);
+  const sin4L0 = Math.sin(4 * L0rad);
+  const sin2M = Math.sin(2 * Mrad);
+
+  const Etime = y * sin2L0 - 2 * e * sinM + 4 * e * y * sinM * cos2L0 -
+                0.5 * y * y * sin4L0 - 1.25 * e * e * sin2M;
+
+  // 转换为分钟 (弧度 -> 度 -> 分钟)
+  return Etime * 180 / Math.PI * 4;
 }
 
 /**
@@ -99,9 +224,10 @@ function toTrueSolarTime(
   longitude: number
 ): { hour: number; minute: number; dayOffset: number } {
   const BEIJING_LONGITUDE = 120;
+  // 经度修正：每度经度差4分钟
   const longitudeCorrection = (longitude - BEIJING_LONGITUDE) * 4;
-  const dayOfYear = getDayOfYear(year, month, day);
-  const eot = equationOfTime(dayOfYear);
+  // 精确均时差计算
+  const eot = equationOfTime(year, month, day, hour);
   const totalCorrection = longitudeCorrection + eot;
 
   let totalMinutes = hour * 60 + minute + totalCorrection;

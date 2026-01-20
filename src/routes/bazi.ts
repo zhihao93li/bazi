@@ -1,14 +1,44 @@
 /**
  * 八字排盘 API 路由
- * 
+ *
  * POST /calculate - 计算八字排盘
+ * GET /leap-month/:year - 获取指定年份的闰月信息
  */
 
 import { Hono } from 'hono';
+import { LunarYear } from 'lunar-typescript';
 import { calculateBazi } from '../lib/bazi/index.js';
 import type { BaziBirthData } from '../lib/bazi/types.js';
 
 export const baziRoutes = new Hono();
+
+/**
+ * 获取指定年份的闰月信息
+ * GET /api/bazi/leap-month/:year
+ * 返回闰月月份（1-12），如果没有闰月则返回 0
+ */
+baziRoutes.get('/leap-month/:year', (c) => {
+  try {
+    const yearStr = c.req.param('year');
+    const year = parseInt(yearStr, 10);
+
+    if (isNaN(year) || year < 1900 || year > 2100) {
+      return c.json({ success: false, message: '年份无效（1900-2100）' }, 400);
+    }
+
+    const lunarYear = LunarYear.fromYear(year);
+    const leapMonth = lunarYear.getLeapMonth(); // 返回闰几月，没有闰月则返回 0
+
+    return c.json({
+      success: true,
+      year,
+      leapMonth,
+    });
+  } catch (error) {
+    console.error('Get leap month error:', error);
+    return c.json({ success: false, message: '获取闰月信息失败' }, 500);
+  }
+});
 
 /**
  * 八字排盘计算

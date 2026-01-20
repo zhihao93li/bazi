@@ -99,16 +99,20 @@ export default function BaziInputPage() {
     setIsSubmitting(true);
 
     try {
+      // 处理月份：负数表示闰月
+      const isLeap = formData.birthMonth < 0;
+      const actualMonth = Math.abs(formData.birthMonth);
+
       // 调用后端 API 计算八字
       const birthData = {
         gender: formData.gender,
         calendarType: formData.calendarType,
         year: formData.birthYear,
-        month: formData.birthMonth,
+        month: actualMonth,
         day: formData.birthDay,
         hour: formData.birthHour,
         minute: formData.birthMinute,
-        isLeapMonth: formData.isLeapMonth,
+        isLeapMonth: isLeap,
         location: `${formData.location.province}/${formData.location.city}/${formData.location.district}`,
       };
 
@@ -125,11 +129,11 @@ export default function BaziInputPage() {
         gender: formData.gender,
         calendarType: formData.calendarType,
         birthYear: formData.birthYear,
-        birthMonth: formData.birthMonth,
+        birthMonth: actualMonth,
         birthDay: formData.birthDay,
         birthHour: formData.birthHour,
         birthMinute: formData.birthMinute,
-        isLeapMonth: formData.isLeapMonth,
+        isLeapMonth: isLeap,
         location: `${formData.location.province}/${formData.location.city}/${formData.location.district}`,
         baziData,
       };

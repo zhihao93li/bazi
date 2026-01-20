@@ -1,9 +1,9 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import FormInput from '../../common/FormInput';
 import FormSelect from '../../common/FormSelect';
 import ButtonGroup from '../../common/ButtonGroup';
-import Checkbox from '../../common/Checkbox';
 import { PROVINCES, CALENDAR_OPTIONS } from '../../../utils/constants';
+import { api } from '../../../services/api';
 import styles from './BirthInfoForm.module.css';
 
 export default function BirthInfoForm({
@@ -12,6 +12,38 @@ export default function BirthInfoForm({
   errors = {},
   className = ''
 }) {
+  // 存储当前年份的闰月信息（0 表示无闰月，1-12 表示闰几月）
+  const [leapMonth, setLeapMonth] = useState(0);
+
+  // 获取闰月信息
+  useEffect(() => {
+    if (value.calendarType === 'lunar' && value.birthYear) {
+      api.get(`/bazi/leap-month/${value.birthYear}`)
+        .then((res) => {
+          if (res.success) {
+            setLeapMonth(res.leapMonth);
+          }
+        })
+        .catch(() => {
+          setLeapMonth(0);
+        });
+    } else {
+      setLeapMonth(0);
+    }
+  }, [value.calendarType, value.birthYear]);
+
+  // 当闰月信息变化时，检查当前选中的月份是否仍然有效
+  useEffect(() => {
+    // 如果当前选择了闰月（负数月份），但该年实际没有这个闰月，则重置为正常月份
+    if (value.birthMonth < 0 && Math.abs(value.birthMonth) !== leapMonth) {
+      onChange({
+        ...value,
+        birthMonth: Math.abs(value.birthMonth),
+        isLeapMonth: false
+      });
+    }
+  }, [leapMonth]);
+
   // Generate options
   const years = useMemo(() => {
     const currentYear = new Date().getFullYear();
@@ -22,12 +54,18 @@ export default function BirthInfoForm({
     return result;
   }, []);
 
+  // 动态生成月份选项，农历时包含闰月
   const months = useMemo(() => {
-    return Array.from({ length: 12 }, (_, i) => ({
-      value: i + 1,
-      label: `${i + 1}月`
-    }));
-  }, []);
+    const result = [];
+    for (let i = 1; i <= 12; i++) {
+      result.push({ value: i, label: `${i}月` });
+      // 在农历模式下，如果这个月有闰月，在该月后面插入闰月选项
+      if (value.calendarType === 'lunar' && leapMonth === i) {
+        result.push({ value: -i, label: `闰${i}月` });
+      }
+    }
+    return result;
+  }, [value.calendarType, leapMonth]);
 
   const days = useMemo(() => {
     // Simple 31 days for now
@@ -56,6 +94,16 @@ export default function BirthInfoForm({
     onChange({
       ...value,
       [field]: newVal
+    });
+  };
+
+  // 处理月份变化，自动设置 isLeapMonth
+  const handleMonthChange = (e) => {
+    const monthValue = parseInt(e.target.value, 10);
+    onChange({
+      ...value,
+      birthMonth: monthValue,
+      isLeapMonth: monthValue < 0 // 负数表示闰月
     });
   };
 
@@ -144,7 +192,7 @@ export default function BirthInfoForm({
             options={months}
             value={value.birthMonth}
             name="birthMonth"
-            onChange={(e) => handleChange('birthMonth', e.target.value)}
+            onChange={handleMonthChange}
             error={errors.birthMonth}
           />
           <FormSelect
@@ -155,17 +203,6 @@ export default function BirthInfoForm({
             onChange={(e) => handleChange('birthDay', e.target.value)}
             error={errors.birthDay}
           />
-
-          {/* Lunar Leap Month Checkbox - Inside flex row */}
-          {value.calendarType === 'lunar' && (
-            <div className={styles.checkboxWrapper}>
-              <Checkbox
-                label="闰月"
-                checked={value.isLeapMonth}
-                onChange={(e) => handleChange('isLeapMonth', e.target.checked)}
-              />
-            </div>
-          )}
         </div>
       </div>
 
