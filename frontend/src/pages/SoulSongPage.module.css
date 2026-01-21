@@ -1,0 +1,415 @@
+/* SoulSongPage 样式 - 与 ReadingDetailPage 保持一致 */
+
+.main {
+    min-height: 100vh;
+    padding-top: 80px;
+    position: relative;
+}
+
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 24px 20px 60px;
+    position: relative;
+    z-index: 1;
+}
+
+/* 页头 */
+.header {
+    margin-bottom: 24px;
+}
+
+.backButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--grey-40);
+    text-decoration: none;
+    font-size: 14px;
+    margin-bottom: 16px;
+    transition: color 0.2s;
+}
+
+.backButton:hover {
+    color: var(--dark-7);
+}
+
+.title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: var(--heading-3);
+    font-weight: 600;
+    color: var(--dark-7);
+    margin: 0;
+}
+
+.title svg {
+    color: var(--primary);
+}
+
+/* 内容卡片 */
+.contentCard {
+    min-height: 400px;
+}
+
+/* 加载状态 */
+.loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 20px;
+    text-align: center;
+    gap: 16px;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--light-90);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.loading span {
+    color: var(--grey-30);
+    font-size: 16px;
+}
+
+.loadingHint {
+    color: var(--grey-50) !important;
+    font-size: 14px !important;
+}
+
+/* 锁定状态 */
+.locked {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    text-align: center;
+}
+
+.lockedIcon {
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--primary), var(--accent-purple));
+    border-radius: 50%;
+    color: white;
+    margin-bottom: 20px;
+}
+
+.lockedTitle {
+    font-size: var(--heading-4);
+    font-weight: 600;
+    color: var(--dark-7);
+    margin: 0 0 12px;
+}
+
+.lockedDesc {
+    font-size: var(--text-base);
+    color: var(--grey-30);
+    max-width: 400px;
+    line-height: 1.6;
+    margin: 0 0 24px;
+}
+
+.unlockButton {
+    display: inline-flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 28px;
+    background: linear-gradient(135deg, #8a43e1, #5e6ad2) !important;
+    color: #ffffff !important;
+    border: none;
+    border-radius: var(--radius-lg);
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 16px rgba(138, 67, 225, 0.3);
+    white-space: nowrap;
+}
+
+.unlockButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(138, 67, 225, 0.4);
+}
+
+.unlockButton:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.unlockPrice {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 4px 10px;
+    border-radius: var(--radius-full);
+    font-size: 14px;
+}
+
+/* 歌曲网格 - 单张卡片居中显示 */
+.songsGrid {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+}
+
+/* 歌曲卡片 */
+.songCard {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    width: 100%;
+    max-width: 480px;
+}
+
+.coverWrapper {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1;
+    max-width: 200px;
+    margin: 0 auto 20px;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.coverImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.coverPlaceholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--light-94), var(--light-90));
+    color: var(--grey-50);
+}
+
+.rankBadge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: linear-gradient(135deg, var(--primary), var(--accent-purple));
+    color: white;
+    padding: 6px 12px;
+    border-radius: var(--radius-full);
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(138, 67, 225, 0.4);
+}
+
+/* 歌曲信息 */
+.songInfo {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.songTitle {
+    font-size: var(--heading-4);
+    font-weight: 600;
+    color: var(--dark-7);
+    margin: 0 0 8px;
+}
+
+.songArtist {
+    font-size: var(--text-base);
+    color: var(--grey-30);
+    margin: 0 0 4px;
+}
+
+.songAlbum {
+    font-size: var(--text-small);
+    color: var(--grey-50);
+    margin: 0;
+}
+
+/* 推荐理由 */
+.reasonSection {
+    background: linear-gradient(135deg, rgba(138, 67, 225, 0.08), rgba(94, 106, 210, 0.08));
+    border-radius: var(--radius-md);
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.reasonLabel {
+    font-size: var(--text-small);
+    font-weight: 600;
+    color: var(--primary);
+    margin: 0 0 8px;
+}
+
+.reasonText {
+    font-size: var(--text-base);
+    color: var(--dark-7);
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* 歌词预览 */
+.lyricSection {
+    background: var(--light-97);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.lyricLabel {
+    font-size: var(--text-small);
+    font-weight: 600;
+    color: var(--grey-40);
+    margin: 0 0 12px;
+}
+
+.lyricText {
+    font-size: var(--text-base);
+    color: var(--grey-30);
+    line-height: 1.8;
+}
+
+.lyricText p {
+    margin: 0 0 4px;
+}
+
+/* 二维码区域 - 直接显示在卡片中 */
+.qrSection {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    background: var(--light-97);
+    border-radius: var(--radius-md);
+    margin-top: 8px;
+}
+
+.qrLink {
+    display: block;
+    transition: transform 0.2s;
+}
+
+.qrLink:hover {
+    transform: scale(1.05);
+}
+
+.qrCodeImage {
+    width: 140px;
+    height: 140px;
+    border-radius: var(--radius-md);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.qrHint {
+    font-size: var(--text-small);
+    color: var(--grey-50);
+    margin: 12px 0 0;
+}
+
+/* 错误提示 */
+.songError {
+    text-align: center;
+    padding: 12px;
+    background: rgba(255, 107, 107, 0.1);
+    border-radius: var(--radius-md);
+    margin-top: 12px;
+}
+
+.songError p {
+    margin: 0;
+    color: var(--accent-red);
+    font-size: var(--text-small);
+}
+
+/* 二维码弹窗 */
+.qrModal {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    text-align: center;
+}
+
+.qrImage {
+    width: 200px;
+    height: 200px;
+    border-radius: var(--radius-md);
+    margin-bottom: 16px;
+}
+
+.qrSongTitle {
+    font-size: var(--heading-5);
+    font-weight: 600;
+    color: var(--dark-7);
+    margin: 0 0 4px;
+}
+
+.qrSongArtist {
+    font-size: var(--text-base);
+    color: var(--grey-30);
+    margin: 0 0 12px;
+}
+
+.qrHint {
+    font-size: var(--text-small);
+    color: var(--grey-50);
+    margin: 0;
+}
+
+/* 响应式 */
+@media (min-width: 768px) {
+    .songCard {
+        max-width: 520px;
+    }
+
+    .coverWrapper {
+        max-width: 240px;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 16px 16px 40px;
+    }
+
+    .title {
+        font-size: var(--heading-4);
+    }
+
+    .songCard {
+        padding: 20px;
+    }
+
+    .songActions {
+        flex-direction: column;
+    }
+
+    .playButton,
+    .qrButton {
+        width: 100%;
+        justify-content: center;
+    }
+}

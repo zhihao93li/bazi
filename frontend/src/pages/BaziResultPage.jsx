@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useCallback, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { m } from 'framer-motion';
-import { Palette, CalendarBlank, Users } from '@phosphor-icons/react';
+import { Palette, CalendarBlank, Users, MusicNotes } from '@phosphor-icons/react';
 import { useAuth } from '../context/AuthContext';
 import { useToast, LoadingOverlay } from '../components/common';
 import Navbar from '../components/Navbar';
@@ -37,6 +37,7 @@ const READING_DESCRIPTIONS = {
   life_color: '探索你的核心性格与天生特质',
   yearly_fortune: '了解今年的机遇与挑战',
   synastry: '双人关系深度解读',
+  soul_song: '发现与你灵魂共振的音乐',
 };
 
 /**
@@ -50,6 +51,7 @@ const DEFAULT_THEMES_DATA = {
   life_lesson: { isUnlocked: false, content: null, price: 0 },
   yearly_fortune: { isUnlocked: false, content: null, price: 0 },
   synastry: { isUnlocked: false, content: null, price: 0 },
+  soul_song: { isUnlocked: false, content: null, price: 100 },
 };
 
 export default function BaziResultPage() {
@@ -326,6 +328,17 @@ export default function BaziResultPage() {
                   isUnlocked={themesDataWithPricing.yearly_fortune.isUnlocked}
                   price={themesDataWithPricing.yearly_fortune.price}
                   originalPrice={themesDataWithPricing.yearly_fortune.originalPrice}
+                  subjectId={effectiveSubjectId}
+                />
+
+                {/* 解锁灵魂歌曲入口 */}
+                <ReadingEntryCard
+                  theme="soul-song"
+                  title="解锁灵魂歌曲"
+                  icon={MusicNotes}
+                  description={READING_DESCRIPTIONS.soul_song}
+                  isUnlocked={themesDataWithPricing.soul_song?.isUnlocked}
+                  price={themesDataWithPricing.soul_song?.price || 100}
                   subjectId={effectiveSubjectId}
                 />
 

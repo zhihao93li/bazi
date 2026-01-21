@@ -32,6 +32,7 @@ const SubjectsPage = lazy(() => import('./pages/SubjectsPage'))
 const BaziInputPage = lazy(() => import('./pages/BaziInputPage'))
 const BaziResultPage = lazy(() => import('./pages/BaziResultPage'))
 const ReadingDetailPage = lazy(() => import('./pages/ReadingDetailPage'))
+const SoulSongPage = lazy(() => import('./pages/SoulSongPage'))
 const HistoryPage = lazy(() => import('./pages/HistoryPage'))
 const CustomerServicePage = lazy(() => import('./pages/CustomerServicePage'))
 
@@ -71,6 +72,7 @@ function App() {
             <Route path="/bazi/input" element={<BaziInputPage />} />
             <Route path="/bazi" element={<BaziResultPage />} />
             <Route path="/bazi/reading/:theme" element={<ReadingDetailPage />} />
+            <Route path="/bazi/soul-song" element={<SoulSongPage />} />
 
             {/* Protected Routes */}
             <Route

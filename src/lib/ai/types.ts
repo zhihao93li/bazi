@@ -16,7 +16,8 @@ export type AnalysisTheme =
   | 'health'          // 身心健康
   | 'life_lesson'     // 贵人小人
   | 'yearly_fortune'  // 流年解读
-  | 'synastry';       // 合盘分析
+  | 'synastry'        // 合盘分析
+  | 'soul_song';      // 灵魂歌曲
 
 /**
  * 主题分类
@@ -86,6 +87,13 @@ export const THEME_METADATA: Record<AnalysisTheme, ThemeMeta> = {
     description: '双人关系深度解读',
     category: 'standalone',
     icon: 'users',
+  },
+  soul_song: {
+    id: 'soul_song',
+    name: '灵魂歌曲',
+    description: '发现与你灵魂共振的音乐',
+    category: 'standalone',
+    icon: 'music',
   },
 };
 
@@ -169,6 +177,7 @@ export interface ThemePromptTemplates {
   life_lesson: PromptTemplate;
   yearly_fortune: PromptTemplate;
   synastry: PromptTemplate;
+  soul_song: PromptTemplate;
 }
 
 /**

@@ -96,6 +96,10 @@ const DEFAULT_NEW_AI_CONFIG: NewAIConfig = {
         system: '你是一位资深的命理分析师，专注于合盘分析。',
         user: '请分析双人合盘。',
       },
+      soul_song: {
+        system: '你是一位融合命理与音乐美学的灵魂歌曲推荐师。',
+        user: '请推荐3首契合此人灵魂频率的歌曲。',
+      },
     },
   },
 };

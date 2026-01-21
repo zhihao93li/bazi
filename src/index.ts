@@ -29,6 +29,7 @@ import { subjectsRoutes } from './routes/subjects.js';
 import { themesRoutes } from './routes/themes.js';
 import { tasksRoutes } from './routes/tasks.js';
 import { adminRoutes } from './routes/admin/index.js';
+import { soulSongRoutes } from './routes/soul-song.js';
 
 const app = new Hono();
 
@@ -77,6 +78,7 @@ app.route('/api/subjects', subjectsRoutes);
 app.route('/api/themes', themesRoutes);
 app.route('/api/tasks', tasksRoutes);
 app.route('/api/admin', adminRoutes);
+app.route('/api/soul-song', soulSongRoutes);
 
 // 404 处理
 app.notFound((c) => {

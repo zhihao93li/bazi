@@ -82,3 +82,28 @@ export const api = {
   put: (url, body, options = {}) => request(url, { method: 'PUT', body: JSON.stringify(body), ...options }),
   delete: (url, options = {}) => request(url, { method: 'DELETE', ...options }),
 };
+
+// ==================== 灵魂歌曲 API ====================
+
+/**
+ * 获取灵魂歌曲数据
+ * @param {string} subjectId - 测算对象 ID
+ */
+export async function getSoulSong(subjectId) {
+  return api.get(`/soul-song/${subjectId}`);
+}
+
+/**
+ * 解锁灵魂歌曲
+ * @param {string} subjectId - 测算对象 ID
+ */
+export async function unlockSoulSong(subjectId) {
+  return api.post('/soul-song/unlock', { subjectId });
+}
+
+/**
+ * 获取灵魂歌曲价格
+ */
+export async function getSoulSongPricing() {
+  return api.get('/soul-song/pricing');
+}

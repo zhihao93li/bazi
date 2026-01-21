@@ -48,7 +48,16 @@ export default function ReadingEntryCard({
     // 检查是否是本地命盘（未登录用户）
     const isLocalSubject = subjectId?.startsWith('local_');
     const isDisabled = comingSoon || isLocalSubject;
-    const linkTo = isDisabled ? '#' : `/bazi/reading/${theme}?subjectId=${subjectId}`;
+
+    // 灵魂歌曲使用专门的页面
+    const getLinkTo = () => {
+        if (isDisabled) return '#';
+        if (theme === 'soul-song') {
+            return `/bazi/soul-song?subjectId=${subjectId}`;
+        }
+        return `/bazi/reading/${theme}?subjectId=${subjectId}`;
+    };
+    const linkTo = getLinkTo();
 
     const handleClick = (e) => {
         if (comingSoon) {
