@@ -9,6 +9,7 @@ import {
   Headset,
 } from '@phosphor-icons/react'
 import { useAuth } from '../context/AuthContext'
+import { api } from '../services/api'
 import { useToast, Card, LoadingOverlay } from '../components/common'
 import Button from '../components/Button'
 import Navbar from '../components/Navbar'
@@ -53,21 +54,13 @@ export default function ProfilePage() {
   const handleDeleteAccount = async () => {
     setIsDeleting(true)
     try {
-      const response = await fetch('/api/auth/delete-account', {
-        method: 'DELETE',
-        credentials: 'include',
-      })
+      await api.delete('/auth/delete-account');
 
-      if (response.ok) {
-        logout()
-        toast.success('账户已注销')
-        navigate('/', { replace: true })
-      } else {
-        const data = await response.json()
-        toast.error(data.error || '注销失败，请稍后重试')
-      }
-    } catch {
-      toast.error('注销失败，请稍后重试')
+      logout()
+      toast.success('账户已注销')
+      navigate('/', { replace: true })
+    } catch (err) {
+      toast.error(err.message || '注销失败，请稍后重试')
     } finally {
       setIsDeleting(false)
       setShowDeleteConfirm(false)

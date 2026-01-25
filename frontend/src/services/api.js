@@ -39,38 +39,44 @@ export async function request(endpoint, options = {}) {
     ...(token && { Authorization: `Bearer ${token}` }),
     ...restOptions.headers,
   };
-  
+
   try {
-    const response = await fetch(`${API_BASE}${endpoint}`, { 
-      ...restOptions, 
+    const response = await fetch(`${API_BASE}${endpoint}`, {
+      ...restOptions,
       headers,
       signal, // 支持 AbortController 取消请求
     });
-    
+
     // Handle 204 No Content
     if (response.status === 204) return null;
 
-    const data = await response.json();
-    
+    const resData = await response.json();
+
     if (!response.ok) {
       throw new ApiError(
-        data.message || '请求失败',
-        data.code,
+        resData.message || '请求失败',
+        resData.code,
         response.status
       );
     }
-    return data;
+
+    // 后端统一格式处理：如果有 success 字段且为 true，返回 data
+    if (resData.success === true && resData.data !== undefined) {
+      return resData.data;
+    }
+
+    return resData;
   } catch (error) {
     // 如果是取消请求，直接重新抛出
     if (isAbortError(error)) {
       throw error;
     }
-    
+
     // 如果是网络错误
     if (error instanceof TypeError && error.message === 'Failed to fetch') {
       throw new ApiError('网络连接失败，请检查网络', 'NETWORK_ERROR', 0);
     }
-    
+
     // 其他错误
     throw error;
   }

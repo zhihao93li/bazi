@@ -79,7 +79,10 @@ export function useUnlockThemeStream({ onChunk, onSuccess, onError, updateUser }
             // 检查是否是非流式响应（已解锁或错误）
             const contentType = response.headers.get('content-type');
             if (contentType?.includes('application/json')) {
-                const data = await response.json();
+                const resData = await response.json();
+
+                // 兼容新旧格式：如果外层有 success=true 且有 data，则使用 inner data
+                const data = (resData.success === true && resData.data) ? resData.data : resData;
 
                 if (data.alreadyUnlocked) {
                     // 已解锁，更新缓存并返回
@@ -100,9 +103,9 @@ export function useUnlockThemeStream({ onChunk, onSuccess, onError, updateUser }
                     return;
                 }
 
-                // 错误响应
-                if (!data.success) {
-                    throw new Error(data.message || '请求失败');
+                // 错误响应 (检查原始响应的 success 字段)
+                if (resData.success === false) {
+                    throw new Error(resData.message || '请求失败');
                 }
             }
 
