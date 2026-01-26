@@ -24,29 +24,7 @@ const provinceIndex = new Map<string, number>();
 // 默认经度（北京）
 const DEFAULT_LONGITUDE = 116.4;
 
-const EXTRA_LONGITUDES: Record<string, number> = {
-    '香港特别行政区': 114.2,
-    '澳门特别行政区': 113.5,
-    '台湾省': 121.5,
-    '金门县': 118.3774,
-    '金城镇': 118.3774,
-    '金湖镇': 118.3774,
-    '金沙镇': 118.3774,
-    '金宁乡': 118.3774,
-    '烈屿乡': 118.3774,
-    '乌丘乡': 119.4667,
-    '连江县': 119.9272,
-    '南竿乡': 119.9272,
-    '北竿乡': 119.9272,
-    '莒光乡': 119.9272,
-    '东引乡': 119.9272,
-    '澳门半岛': 113.5429,
-    '澳门外岛': 113.5593,
-    '嘉模堂区（氹仔）': 113.5593,
-    '圣方济各堂区（路环）': 113.5572,
-};
-
-// 初始化索引
+// 初始化索引（city-geo-data.json 已包含全国所有省市区数据，包括港澳台）
 (cityGeoData as CityGeoItem[]).forEach(item => {
     const lng = parseFloat(item.lng);
     if (isNaN(lng)) return;
@@ -64,16 +42,6 @@ const EXTRA_LONGITUDES: Record<string, number> = {
     // 区县索引
     if (item.area && !areaIndex.has(item.area)) {
         areaIndex.set(item.area, lng);
-    }
-});
-
-Object.entries(EXTRA_LONGITUDES).forEach(([name, lngValue]) => {
-    const lng = Number(lngValue);
-    if (Number.isNaN(lng)) return;
-    if (!areaIndex.has(name)) areaIndex.set(name, lng);
-    if (!cityIndex.has(name)) cityIndex.set(name, lng);
-    if (!provinceIndex.has(name) && /省$|自治区$|特别行政区$/.test(name)) {
-        provinceIndex.set(name, lng);
     }
 });
 
@@ -142,11 +110,6 @@ function findCoordinatesByFullPath(
  */
 function findCoordinatesByName(name: string): { lng: number; lat: number } | null {
     if (!name) return null;
-
-    // 检查额外经度（只有经度，返回默认纬度）
-    if (EXTRA_LONGITUDES[name]) {
-        return { lng: EXTRA_LONGITUDES[name], lat: 22.3 }; // 港澳台默认纬度
-    }
 
     // 遍历数据查找精确匹配
     for (const item of cityGeoData as CityGeoItem[]) {
