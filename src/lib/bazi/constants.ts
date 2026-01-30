@@ -5,7 +5,7 @@
  * 复用自 https://github.com/zhihao93li/human_design2
  */
 
-import type { FiveElement, HeavenlyStem, EarthlyBranch } from './types.js';
+import type { FiveElement, HeavenlyStem, EarthlyBranch, Season, Temperature, Humidity } from './types.js';
 
 // ============================================================================
 // 天干 (Heavenly Stems) - 十天干
@@ -495,3 +495,347 @@ export function getFiveElementColor(element: FiveElement): string {
 export function getFiveElementChinese(element: FiveElement): string {
   return FIVE_ELEMENTS_CHINESE[element];
 }
+
+// ============================================================================
+// 调候系统常量 (Seasonal Adjustment Constants)
+// ============================================================================
+
+// 季节映射表 (根据月令地支判定季节)
+export const SEASON_MAP: Record<string, Season> = {
+  '寅': 'spring', '卯': 'spring', '辰': 'spring',  // 立春~立夏
+  '巳': 'summer', '午': 'summer', '未': 'summer',  // 立夏~立秋
+  '申': 'autumn', '酉': 'autumn', '戌': 'autumn',  // 立秋~立冬
+  '亥': 'winter', '子': 'winter', '丑': 'winter',  // 立冬~立春
+};
+
+// 寒暖映射表
+export const TEMPERATURE_MAP: Record<string, Temperature> = {
+  '子': 'cold',   // 仲冬(11月),最寒冷
+  '丑': 'cold',   // 季冬(12月),寒湿
+  '亥': 'cold',   // 孟冬(10月),初寒
+  '寅': 'cool',   // 孟春(1月),余寒未尽
+  '卯': 'warm',   // 仲春(2月),回暖
+  '辰': 'warm',   // 季春(3月),湿暖
+  '巳': 'warm',   // 孟夏(4月),渐热
+  '午': 'hot',    // 仲夏(5月),最热
+  '未': 'hot',    // 季夏(6月),燥热
+  '申': 'warm',   // 孟秋(7月),余热
+  '酉': 'cool',   // 仲秋(8月),凉爽
+  '戌': 'cool',   // 季秋(9月),燥凉
+};
+
+// 燥湿映射表
+export const HUMIDITY_MAP: Record<string, Humidity> = {
+  '子': 'wet',      // 水旺,湿重
+  '丑': 'wet',      // 湿土(土中含水)
+  '亥': 'wet',      // 水旺
+  '寅': 'balanced', // 春木,不燥不湿
+  '卯': 'balanced', // 仲春
+  '辰': 'wet',      // 湿土
+  '巳': 'dry',      // 火旺渐燥
+  '午': 'dry',      // 火旺极燥
+  '未': 'dry',      // 燥土(土中火气)
+  '申': 'balanced', // 秋金
+  '酉': 'dry',      // 金旺燥
+  '戌': 'dry',      // 燥土
+};
+
+// 禄位映射表 (日主天干→禄位地支)
+export const LU_MAP: Record<string, string> = {
+  '甲': '寅', '乙': '卯', '丙': '巳', '丁': '午', '戊': '巳',
+  '己': '午', '庚': '申', '辛': '酉', '壬': '亥', '癸': '子',
+};
+
+// 刃位映射表 (日主天干→刃位地支)
+export const REN_MAP: Record<string, string> = {
+  '甲': '卯', '乙': '寅', '丙': '午', '丁': '巳', '戊': '午',
+  '己': '巳', '庚': '酉', '辛': '申', '壬': '子', '癸': '亥',
+};
+
+// 季节中文名称
+export const SEASON_CHINESE: Record<Season, string> = {
+  spring: '春',
+  summer: '夏',
+  autumn: '秋',
+  winter: '冬',
+};
+
+// 寒暖中文名称
+export const TEMPERATURE_CHINESE: Record<Temperature, string> = {
+  cold: '寒',
+  cool: '凉',
+  warm: '温',
+  hot: '热',
+};
+
+// 燥湿中文名称
+export const HUMIDITY_CHINESE: Record<Humidity, string> = {
+  dry: '燥',
+  balanced: '平',
+  wet: '湿',
+};
+
+// ============================================================================
+// 地支冲克关系 (Branch Clashes)
+// ============================================================================
+
+// 地支六冲映射表 (子午冲、丑未冲、寅申冲、卯酉冲、辰戌冲、巳亥冲)
+export const BRANCH_CLASH_MAP: Record<string, string> = {
+  '子': '午',
+  '午': '子',
+  '丑': '未',
+  '未': '丑',
+  '寅': '申',
+  '申': '寅',
+  '卯': '酉',
+  '酉': '卯',
+  '辰': '戌',
+  '戌': '辰',
+  '巳': '亥',
+  '亥': '巳',
+};
+
+// 地支六害映射表 (穿害)
+export const BRANCH_HARM_MAP: Record<string, string> = {
+  '子': '未',
+  '未': '子',
+  '丑': '午',
+  '午': '丑',
+  '寅': '巳',
+  '巳': '寅',
+  '卯': '辰',
+  '辰': '卯',
+  '申': '亥',
+  '亥': '申',
+  '酉': '戌',
+  '戌': '酉',
+};
+
+// ============================================================================
+// 算法调优参数 (Algorithm Tuning Parameters)
+// ============================================================================
+
+// 坐禄基础得分
+export const LU_BASE_SCORE = 45;
+
+// 地支受冲的削减系数
+export const BRANCH_CLASH_PENALTY = 0.8;
+
+// 地支受害的削减系数
+export const BRANCH_HARM_PENALTY = 0.9;
+
+// 空亡地支的衰减系数
+export const KONG_WANG_ATTENUATION = 0.3;
+
+// 调候系数的最小值 (正常格局)
+export const MIN_ADJUSTMENT_FACTOR = 0.6;
+
+// 从格判定阈值 (日主极弱时)
+export const FOLLOW_PATTERN_THRESHOLD = 20;
+
+// ============================================================================
+// 特殊格局判定系统 (Special Pattern System)
+// ============================================================================
+
+// 三合局配置表 (San He - Three Harmony)
+export const SAN_HE_PATTERNS = {
+  water: {
+    name: '申子辰三合水局',
+    branches: ['申', '子', '辰'],
+    element: 'water' as FiveElement,
+    description: '金水相生,润下成局',
+  },
+  fire: {
+    name: '寅午戌三合火局',
+    branches: ['寅', '午', '戌'],
+    element: 'fire' as FiveElement,
+    description: '木火相生,炎上成局',
+  },
+  wood: {
+    name: '亥卯未三合木局',
+    branches: ['亥', '卯', '未'],
+    element: 'wood' as FiveElement,
+    description: '水木相生,曲直成局',
+  },
+  metal: {
+    name: '巳酉丑三合金局',
+    branches: ['巳', '酉', '丑'],
+    element: 'metal' as FiveElement,
+    description: '土金相生,从革成局',
+  },
+};
+
+// 半三合配置表 (只有两个地支的组合)
+export const BAN_SAN_HE_PATTERNS: Record<FiveElement, Array<{ name: string; branches: string[] }>> = {
+  water: [
+    { name: '申子半合水局', branches: ['申', '子'] },
+    { name: '子辰半合水局', branches: ['子', '辰'] },
+  ],
+  fire: [
+    { name: '寅午半合火局', branches: ['寅', '午'] },
+    { name: '午戌半合火局', branches: ['午', '戌'] },
+  ],
+  wood: [
+    { name: '亥卯半合木局', branches: ['亥', '卯'] },
+    { name: '卯未半合木局', branches: ['卯', '未'] },
+  ],
+  metal: [
+    { name: '巳酉半合金局', branches: ['巳', '酉'] },
+    { name: '酉丑半合金局', branches: ['酉', '丑'] },
+  ],
+  earth: [], // 土无三合局
+};
+
+// 三会局配置表 (San Hui - Three Assembly)
+export const SAN_HUI_PATTERNS = {
+  wood: {
+    name: '寅卯辰三会木局',
+    branches: ['寅', '卯', '辰'],
+    element: 'wood' as FiveElement,
+    description: '春季三会,木旺之地',
+  },
+  fire: {
+    name: '巳午未三会火局',
+    branches: ['巳', '午', '未'],
+    element: 'fire' as FiveElement,
+    description: '夏季三会,火旺之地',
+  },
+  metal: {
+    name: '申酉戌三会金局',
+    branches: ['申', '酉', '戌'],
+    element: 'metal' as FiveElement,
+    description: '秋季三会,金旺之地',
+  },
+  water: {
+    name: '亥子丑三会水局',
+    branches: ['亥', '子', '丑'],
+    element: 'water' as FiveElement,
+    description: '冬季三会,水旺之地',
+  },
+};
+
+// 专旺格配置表 (Prosperity Pattern Config)
+export const PROSPERITY_PATTERN_CONFIG: Record<string, {
+  dayElement: FiveElement;
+  forbiddenElements: FiveElement[];
+  minScore: number;
+  description: string;
+}> = {
+  曲直格: {
+    dayElement: 'wood',
+    forbiddenElements: ['metal'], // 禁忌金(庚辛申酉)
+    minScore: 75,
+    description: '木势专旺,曲直成局,主仁慈正直,宜木火运',
+  },
+  炎上格: {
+    dayElement: 'fire',
+    forbiddenElements: ['water'], // 禁忌水(壬癸亥子)
+    minScore: 75,
+    description: '火势专旺,炎上成局,主热情奔放,宜木火运',
+  },
+  稼穑格: {
+    dayElement: 'earth',
+    forbiddenElements: ['wood'], // 禁忌木(甲乙寅卯)
+    minScore: 75,
+    description: '土势专旺,稼穑成局,主忠厚稳重,宜火土运',
+  },
+  从革格: {
+    dayElement: 'metal',
+    forbiddenElements: ['fire'], // 禁忌火(丙丁巳午)
+    minScore: 75,
+    description: '金势专旺,从革成局,主刚毅果断,宜土金运',
+  },
+  润下格: {
+    dayElement: 'water',
+    forbiddenElements: ['earth'], // 禁忌土(戊己辰戌丑未)
+    minScore: 75,
+    description: '水势专旺,润下成局,主聪慧灵活,宜金水运',
+  },
+};
+
+// 从格配置表 (Follow Pattern Config)
+export const FOLLOW_PATTERN_CONFIG: Record<string, {
+  dayMasterThreshold: number;
+  targetTenGods?: string[];
+  targetElementMin?: number;
+  forbiddenTenGods: string[];
+  mixedRequired?: boolean;
+  description: string;
+}> = {
+  从财格: {
+    dayMasterThreshold: 20,
+    targetTenGods: ['正财', '偏财'],
+    targetElementMin: 65,
+    forbiddenTenGods: ['正印', '偏印', '比肩', '劫财'],
+    description: '日主极弱,弃命从财,主善于理财经商,宜财运',
+  },
+  从杀格: {
+    dayMasterThreshold: 20,
+    targetTenGods: ['正官', '七杀'],
+    targetElementMin: 65,
+    forbiddenTenGods: ['食神', '伤官', '正印', '偏印'],
+    description: '日主极弱,弃命从官,主顺从权威,宜官运',
+  },
+  从儿格: {
+    dayMasterThreshold: 20,
+    targetTenGods: ['食神', '伤官'],
+    targetElementMin: 65,
+    forbiddenTenGods: ['正印', '偏印'], // 【修正3】仅禁印,不怕比劫
+    description: '日主极弱,从儿不管身强弱,主才华外露,宜食伤运',
+  },
+  从势格: {
+    dayMasterThreshold: 20,
+    mixedRequired: true, // 需要财官伤混旺
+    forbiddenTenGods: ['正印', '偏印', '比肩', '劫财'],
+    description: '财官伤混旺,日主弃命从势,主多才多艺,宜顺势而为',
+  },
+};
+
+// 化气格配置表 (Transformation Pattern Config)
+export const HUA_QI_PATTERN_CONFIG: Record<string, {
+  stemPair: [string, string];
+  requiredMonths: string[];
+  transformTo: FiveElement;
+  description: string;
+}> = {
+  甲己化土格: {
+    stemPair: ['甲', '己'],
+    requiredMonths: ['辰', '戌', '丑', '未'], // 需土月
+    transformTo: 'earth',
+    description: '甲己化土,中正之合,主忠厚守信,宜火土运',
+  },
+  乙庚化金格: {
+    stemPair: ['乙', '庚'],
+    requiredMonths: ['巳', '酉', '丑', '申'], // 需金月
+    transformTo: 'metal',
+    description: '乙庚化金,仁义之合,主刚柔并济,宜土金运',
+  },
+  丙辛化水格: {
+    stemPair: ['丙', '辛'],
+    requiredMonths: ['亥', '子', '丑', '申'], // 需水月
+    transformTo: 'water',
+    description: '丙辛化水,威制之合,主智慧权谋,宜金水运',
+  },
+  丁壬化木格: {
+    stemPair: ['丁', '壬'],
+    requiredMonths: ['寅', '卯', '辰', '亥'], // 需木月
+    transformTo: 'wood',
+    description: '丁壬化木,淫匿之合,主仁慈柔顺,宜水木运',
+  },
+  戊癸化火格: {
+    stemPair: ['戊', '癸'],
+    requiredMonths: ['巳', '午', '未', '寅'], // 需火月
+    transformTo: 'fire',
+    description: '戊癸化火,无情之合,主热情激烈,宜木火运',
+  },
+};
+
+// 专旺格判定的纯度阈值
+export const PROSPERITY_PURITY_THRESHOLD = 0.9;
+
+// 专旺格判定的禁忌元素权重上限 (地支藏干容忍度)
+// 注: 实际八字中很难完全避免藏干中的禁忌元素，适当放宽至15%
+export const PROSPERITY_FORBIDDEN_WEIGHT_LIMIT = 0.15;
+
+// 核心地支空亡时的合局转化率衰减
+export const HARMONY_VOID_CONVERSION_RATE = 0.6;

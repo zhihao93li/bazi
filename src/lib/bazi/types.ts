@@ -71,6 +71,7 @@ export interface DayMasterAnalysis {
   tianGanHelp: number;   // 天干帮扶分数
   tianGanHelpDesc: string; // 天干帮扶描述
   totalScore: number;    // 总分
+  seasonalAdjustment?: SeasonalAdjustment; // 调候分析
 }
 
 export interface DayMaster {
@@ -95,6 +96,31 @@ export interface FiveElementsAnalysis {
   unfavorable: FiveElement[];  // 忌神
   elementStates?: Record<FiveElement, FiveElementState>;  // 五行状态（旺相休囚死）
   monthElement?: FiveElement;  // 月令五行
+}
+
+// ============================================================================
+// 调候系统 (Seasonal Adjustment System)
+// ============================================================================
+
+// 季节类型
+export type Season = 'spring' | 'summer' | 'autumn' | 'winter';
+
+// 寒暖类型
+export type Temperature = 'cold' | 'cool' | 'warm' | 'hot';
+
+// 燥湿类型
+export type Humidity = 'dry' | 'balanced' | 'wet';
+
+// 调候分析结果
+export interface SeasonalAdjustment {
+  season: Season;                     // 季节
+  temperature: Temperature;           // 寒暖
+  humidity: Humidity;                 // 燥湿
+  urgentNeed: FiveElement | null;     // 调候急需五行
+  urgentAvoid: FiveElement | null;    // 调候忌讳五行
+  adjustmentFactor: number;           // 调候系数(0.6-1.0)
+  hasAdjustmentElement: boolean;      // 是否有调候用神
+  description: string;                // 调候说明
 }
 
 // ============================================================================
@@ -136,6 +162,11 @@ export interface PatternInfo {
   monthStem?: string;  // 月令本气
   monthStemTenGod?: string;  // 月令本气十神
   isTransparent?: boolean;  // 是否透干
+  transparentStems?: string[];  // 透出的藏干列表
+  transparentTenGods?: string[];  // 透出藏干对应的十神
+  congInfo?: CongInfo;  // 从格信息
+  harmonyInfo?: HarmonyCheck;  // 三合局/三会局信息
+}
 }
 
 // ============================================================================
@@ -527,4 +558,60 @@ export interface BaziInterpretation {
   health: string;             // 健康提示
   favorableElements: string;  // 喜用神建议
   yearlyFortune?: string;     // 流年运势
+}
+
+// ============================================================================
+// 特殊格局系统类型 (Special Pattern System Types)
+// ============================================================================
+
+/**
+ * 三合局/三会局检测结果
+ */
+export interface HarmonyCheck {
+  type: 'full' | 'half' | 'hui' | 'none';  // 全三合/半三合/三会/无
+  element?: FiveElement;                   // 合化后的五行
+  branches: string[];                      // 参与的地支
+  name: string;                            // 名称(如"申子辰三合水局")
+  conversionRate: number;                  // 转化率: 1.0(全三合/三会), 0.6(核心空亡), 0.5(半三合), 0(无)
+  isVoid?: boolean;                        // 【修正2】核心地支是否空亡
+  voidBranch?: string;                     // 【修正2】空亡的地支
+}
+
+/**
+ * 合化重算后的五行分布
+ */
+export interface RecalculatedDistribution extends Record<FiveElement, number> {
+  originalDistribution?: Record<FiveElement, number>; // 原始分布(用于对比)
+}
+
+/**
+ * 从格信息
+ */
+export interface CongInfo {
+  type: string;    // 从财/从杀/从儿/从势
+  reason: string;  // 成格原因(如"财星旺,无印比")
+}
+
+/**
+ * 格局检测上下文 (PatternDetector 使用)
+ */
+export interface DetectionContext {
+  fourPillars: FourPillars;
+  dayMaster: DayMaster;
+  fiveElements: FiveElementsAnalysis;
+  xunKong?: string;
+  
+  // 结构层输出
+  harmony?: HarmonyCheck;
+  
+  // 能量层输出
+  recalculatedDistribution?: RecalculatedDistribution;
+  
+  // 冲突层输出
+  clashPenalty?: number;
+  seasonalAdjustment?: number;
+  
+  // 动态状态
+  graveOpened?: boolean;
+  blockingLinks?: Array<{ branch1: string; branch2: string }>;
 }
