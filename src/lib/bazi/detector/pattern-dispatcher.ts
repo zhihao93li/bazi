@@ -12,11 +12,11 @@
  * 6. 杂格 (兜底)
  */
 
-import type { PatternInfo, DetectionContext } from '../types.js';
+import type { PatternInfo, DetectionContext, HeavenlyStem } from '../types.js';
 import { checkHuaQiPattern } from '../transformation-pattern.js';
 import { checkProsperityPattern } from '../prosperity-pattern.js';
 import { checkCongPattern } from '../follow-pattern.js';
-import { LU_MAP, REN_MAP } from '../constants.js';
+import { LU_MAP, REN_MAP, getHeavenlyStem } from '../constants.js';
 import { getTenGod } from '../calculator.js';
 
 export class PatternDispatcher {
@@ -132,7 +132,7 @@ export class PatternDispatcher {
             category: 'normal',
             description: patternName.desc,
             monthStem: hiddenStem.chinese,
-            monthStemTenGod: tenGod,
+            monthStemTenGod: tenGod ?? undefined,
             isTransparent: true,
           };
         }
@@ -154,7 +154,7 @@ export class PatternDispatcher {
           category: 'normal',
           description: patternName.desc,
           monthStem: hiddenStem.chinese,
-          monthStemTenGod: tenGod,
+          monthStemTenGod: tenGod ?? undefined,
           isTransparent: false,
         };
       }
@@ -189,15 +189,7 @@ export class PatternDispatcher {
   /**
    * 根据天干名获取天干对象
    */
-  private getStemByName(stemChinese: string): { chinese: string; element: any } | null {
-    const elementMap: Record<string, any> = {
-      '甲': 'wood', '乙': 'wood',
-      '丙': 'fire', '丁': 'fire',
-      '戊': 'earth', '己': 'earth',
-      '庚': 'metal', '辛': 'metal',
-      '壬': 'water', '癸': 'water',
-    };
-    const element = elementMap[stemChinese];
-    return element ? { chinese: stemChinese, element } : null;
+  private getStemByName(stemChinese: string): HeavenlyStem | null {
+    return getHeavenlyStem(stemChinese) || null;
   }
 }

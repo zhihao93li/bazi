@@ -11,11 +11,11 @@ export { ScoreRecalculator } from './score-recalculator.js';
 export { PurityChecker } from './purity-checker.js';
 export { PatternDispatcher } from './pattern-dispatcher.js';
 export { ConflictEngine } from './conflict-engine.js';
+export type { PurityResult } from './purity-checker.js';
 
 // 类型导出（从types.js重新导出）
 export type {
   DetectionContext,
   HarmonyCheck,
   RecalculatedDistribution,
-  PurityResult,
 } from '../types.js';

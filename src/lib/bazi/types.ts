@@ -167,7 +167,6 @@ export interface PatternInfo {
   congInfo?: CongInfo;  // 从格信息
   harmonyInfo?: HarmonyCheck;  // 三合局/三会局信息
 }
-}
 
 // ============================================================================
 // 藏干 (Hidden Stems)

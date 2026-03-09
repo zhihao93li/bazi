@@ -55,7 +55,7 @@ export function checkProsperityPattern(
   }
 
   // 1. 检查是否有合局
-  if (harmony.type === 'none' || !harmony.element) {
+  if (!harmony.element) {
     if (DEBUG) console.log('  ❌ 无合局,退出');
     return null;
   }

@@ -13,11 +13,9 @@ import type {
   DayMaster,
   FiveElementsAnalysis,
   FiveElement,
-  PatternCategory,
-  NormalPattern,
-  SpecialPattern
+  HeavenlyStem,
 } from './types.js';
-import { FIVE_ELEMENTS, LU_MAP, REN_MAP } from './constants.js';
+import { LU_MAP, REN_MAP, getHeavenlyStem } from './constants.js';
 import { getTenGod } from './calculator.js';
 import { 
   StructuralAnalyzer, 
@@ -69,7 +67,7 @@ export function checkTransparentStems(
  */
 export function determinePatternByTransparency(
   transparentStems: Array<{ chinese: string; element: FiveElement; index: number }>,
-  dayStem: { chinese: string; element: FiveElement },
+  dayStem: HeavenlyStem,
   monthBranch: string
 ): PatternInfo | null {
   if (transparentStems.length === 0) {
@@ -81,10 +79,10 @@ export function determinePatternByTransparency(
   
   // 遍历透出的藏干,找第一个非比劫的十神
   for (const transparentStem of sortedStems) {
-    const hiddenStem = {
-      chinese: transparentStem.chinese,
-      element: transparentStem.element,
-    };
+    const hiddenStem = getHeavenlyStem(transparentStem.chinese);
+    if (!hiddenStem) {
+      continue;
+    }
     const tenGod = getTenGod(dayStem, hiddenStem);
     
     // 比肩、劫财不成格,继续看下一个
@@ -124,7 +122,8 @@ export function determinePatternByTransparency(
         isTransparent: true,
         transparentStems: transparentStems.map(s => s.chinese),
         transparentTenGods: transparentStems.map(s => {
-          const tg = getTenGod(dayStem, { chinese: s.chinese, element: s.element });
+          const targetStem = getHeavenlyStem(s.chinese);
+          const tg = targetStem ? getTenGod(dayStem, targetStem) : null;
           return tg || '';
         }),
       };
@@ -239,9 +238,9 @@ export function calculatePatternOptimized(
     fiveElements.distribution,
     (dayStemChinese, targetStemChinese) => {
       // 传入getTenGod函数的wrapper
-      const dayStemObj = { chinese: dayStemChinese, element: dayStem.element };
+      const dayStemObj = getHeavenlyStem(dayStemChinese);
       const targetStemObj = getStemByName(targetStemChinese);
-      if (!targetStemObj) return null;
+      if (!dayStemObj || !targetStemObj) return null;
       return getTenGod(dayStemObj, targetStemObj);
     }
   );
@@ -319,15 +318,6 @@ export function calculatePatternOptimized(
  * @param stemChinese 天干中文名
  * @returns 天干对象
  */
-function getStemByName(stemChinese: string): { chinese: string; element: FiveElement } | null {
-  const elementMap: Record<string, FiveElement> = {
-    '甲': 'wood', '乙': 'wood',
-    '丙': 'fire', '丁': 'fire',
-    '戊': 'earth', '己': 'earth',
-    '庚': 'metal', '辛': 'metal',
-    '壬': 'water', '癸': 'water',
-  };
-  const element = elementMap[stemChinese];
-  if (!element) return null;
-  return { chinese: stemChinese, element };
+function getStemByName(stemChinese: string): HeavenlyStem | null {
+  return getHeavenlyStem(stemChinese) || null;
 }
